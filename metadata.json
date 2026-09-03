@@ -1,0 +1,8 @@
+{
+  "name": "UPRSA Official State Portal",
+  "description": "Official State Portal for Uttar Pradesh Roller Sports Association (UPRSA) — Complete federation platform with Skater Registration, Verification, Digital ID, Tournament & Race Management, Scoring, Certificates, Payments, Results, Rankings, and AI Assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
