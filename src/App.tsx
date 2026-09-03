@@ -138,7 +138,7 @@ const MainApp: React.FC = () => {
           <AthleteVerification initialRegNo={selectedVerifyCode} />
         )}
 
-        {currentPage === 'news_gallery' && <NewsGallery />}
+        {(currentPage === 'news_gallery' || currentPage === 'news' || currentPage === 'gallery') && <NewsGallery />}
 
         {currentPage === 'contact' && <Contact />}
 

@@ -442,6 +442,30 @@
   ],
   "certificates": [
     {
+      "type": "Merit",
+      "recipientName": "Rohan Chaudhary",
+      "recipientRegNo": "UPRSA/2026/GZB/00103",
+      "fatherName": "Virendra Chaudhary",
+      "district": "Ghaziabad",
+      "club": "Indirapuram Speed Skating Club",
+      "tournamentName": "37th UP State Roller Sports Championship 2026",
+      "eventName": "500m + D Speed Race",
+      "discipline": "Speed Skating (Quad)",
+      "ageCategory": "Junior (14 to 17)",
+      "gender": "Male",
+      "position": "1st (Gold Medal)",
+      "issueDate": "2026-09-03",
+      "signatoryPresident": "Dr. Akhilesh Chandra Sharma",
+      "signatorySecretary": "Rajesh Kumar Singh",
+      "isRevoked": false,
+      "id": "cert-1788430837232",
+      "certificateNumber": "UPRSA/CERT/2026/00104",
+      "verificationCode": "saxmkxcv",
+      "qrVerificationUrl": "/certificate/verify/saxmkxcv",
+      "status": "valid",
+      "created_at": "2026-09-03T10:20:37.232Z"
+    },
+    {
       "id": "cert-001",
       "certificateNumber": "UPRSA/CERT/2026/00101",
       "verificationCode": "7f89a101",
@@ -707,35 +731,46 @@
   "heroSlides": [
     {
       "id": "slide-01",
-      "title": "36th UP State Roller Skating Championship 2026",
-      "subtitle": "Official State Championship & National Trials • Lucknow • Oct 15-19, 2026",
-      "badge": "ENTRIES OPEN NOW",
-      "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80",
-      "actionText": "Register for Championship",
-      "actionLink": "tournaments",
+      "title": "UTTAR PRADESH ROLLER SPORTS ASSOCIATION",
+      "subtitle": "Promoting Roller Sports Across Uttar Pradesh • Building Champions, Building Nation. State Governing Body Affiliated with Roller Skating Federation of India (RSFI).",
+      "badge": "WELCOME TO UPRSA",
+      "imageUrl": "/images/hero-speed-skating-1.jpg",
+      "actionText": "EXPLORE MORE",
+      "actionLink": "about",
       "order": 1,
       "isActive": true
     },
     {
       "id": "slide-02",
-      "title": "Official Annual Skater Registration 2026",
-      "subtitle": "Mandatory Affiliation for all District, State & RSFI National Competitions",
-      "badge": "AFFILIATION PORTAL",
-      "imageUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1600&q=80",
-      "actionText": "Register Skater Online",
+      "title": "OFFICIAL SKATER REGISTRATION & DIGITAL ID",
+      "subtitle": "Register with Uttar Pradesh Roller Sports Association (UPRSA) and receive your official digital Skater ID card with verified QR authentication.",
+      "badge": "OFFICIAL SKATER REGISTRATION 2026–27",
+      "imageUrl": "/images/hero-speed-skating-2.jpg",
+      "actionText": "REGISTER AS SKATER",
       "actionLink": "register",
       "order": 2,
       "isActive": true
     },
     {
       "id": "slide-03",
-      "title": "Instant Digital Certificate & ID Card Verification",
-      "subtitle": "Secure QR-Code backed authentic verification for Athletes, Schools & Authorities",
-      "badge": "GOVERNMENT RECOGNIZED",
-      "imageUrl": "https://images.unsplash.com/photo-1547447134-cd3f5c716030?w=1600&q=80",
-      "actionText": "Verify Certificate",
-      "actionLink": "verify-certificate",
+      "title": "36th UP State Roller Skating Championship 2026",
+      "subtitle": "Official Selection Trials for the 63rd RSFI Nationals. Speed banked track heats, inline freestyle slalom & roller hockey competitions in Lucknow.",
+      "badge": "STATE CHAMPIONSHIPS & NATIONAL TRIALS",
+      "imageUrl": "/images/hero-speed-skating-3.jpg",
+      "actionText": "EXPLORE CHAMPIONSHIPS",
+      "actionLink": "tournaments",
       "order": 3,
+      "isActive": true
+    },
+    {
+      "id": "slide-04",
+      "title": "OFFICIAL ELECTRONIC PHOTO-FINISH RESULTS",
+      "subtitle": "Track official electronic photo-finish lap timings, heat progressions, medal tallies, and district leaderboards in real-time.",
+      "badge": "LIVE RACE SCORING & STATE RANKINGS",
+      "imageUrl": "/images/hero-speed-skating-4.jpg",
+      "actionText": "VIEW LIVE RESULTS",
+      "actionLink": "results",
+      "order": 4,
       "isActive": true
     }
   ],
@@ -1026,5 +1061,68 @@
       "details": "UPRSA State Portal MySQL Database and Hostinger storage structure initialized.",
       "timestamp": "2026-09-03T00:11:42.754Z"
     }
-  ]
+  ],
+  "tickerItems": [
+    {
+      "id": "tick-1",
+      "tag": "LIVE NOW",
+      "title": "36th UP State Championship: Heat 3 Sub-Junior 500m Speed — Abhishek Verma leads with 00:48.32",
+      "link": "live_score",
+      "isActive": true,
+      "priority": 1,
+      "created_at": "2026-09-03T10:16:53.087Z"
+    },
+    {
+      "id": "tick-2",
+      "tag": "REGISTRATION",
+      "title": "Official RSFI Skater Affiliation & Digital Athlete ID registration for 2026–27 season is now OPEN across all 75 Districts.",
+      "link": "register",
+      "isActive": true,
+      "priority": 2,
+      "created_at": "2026-09-03T10:16:53.087Z"
+    },
+    {
+      "id": "tick-3",
+      "tag": "STATE TRIALS",
+      "title": "Selection Trials for 63rd RSFI Nationals: Banked Track Speed & Freestyle Slalom at LDA Banked Track Arena, Lucknow.",
+      "link": "tournaments",
+      "isActive": true,
+      "priority": 3,
+      "created_at": "2026-09-03T10:16:53.087Z"
+    },
+    {
+      "id": "tick-4",
+      "tag": "CIRCULAR",
+      "title": "RSFI Age Cut-off 2026 Mandate: District associations must authenticate birth certificates per official age brackets.",
+      "link": "news_gallery",
+      "isActive": true,
+      "priority": 4,
+      "created_at": "2026-09-03T10:16:53.087Z"
+    }
+  ],
+  "siteSettings": {
+    "organizationName": "Uttar Pradesh Roller Sports Association",
+    "shortName": "UPRSA",
+    "tagline": "STATE GOVERNING BODY FOR ROLLER SPORTS IN UTTAR PRADESH",
+    "affiliationNotice": "Affiliated to Roller Skating Federation of India (RSFI) & UP Olympic Association (UPOA)",
+    "logoUrl": "",
+    "contactEmail": "sec.uprsa@gmail.com",
+    "contactPhone": "+91 94150 23456",
+    "officialAddress": "UPRSA State Secretariat, K.D. Singh Babu Stadium Complex, Hazratganj, Lucknow, UP - 226001",
+    "registrationOpen": true,
+    "liveStreamingActive": true,
+    "headerNotice": "OFFICIAL RSFI RECOGNIZED STATE GOVERNING BODY",
+    "socialLinks": {
+      "facebook": "https://facebook.com/uprsa.official",
+      "instagram": "https://instagram.com/uprsa_official",
+      "youtube": "https://youtube.com/@uprollersports",
+      "twitter": "https://twitter.com/uprsa_sports"
+    },
+    "stats": {
+      "registeredSkaters": 1248,
+      "affiliatedDistricts": 75,
+      "stateChampionships": 36,
+      "recognizedClubs": 84
+    }
+  }
 }

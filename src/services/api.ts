@@ -46,14 +46,32 @@ export const api = {
   },
 
   // Skaters
-  async getSkaters(params?: { district?: string; discipline?: string; ageCategory?: string; status?: string; search?: string }): Promise<{ success: boolean; data: Skater[]; total: number }> {
-    const query = new URLSearchParams(params as any).toString();
-    const res = await fetch(`${API_BASE}/skaters?${query}`);
+  async getSkaters(params?: { 
+    district?: string; 
+    discipline?: string; 
+    ageCategory?: string; 
+    status?: string; 
+    search?: string;
+    club?: string;
+    includeDeleted?: boolean;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Promise<{ success: boolean; data: Skater[]; total: number }> {
+    const cleanParams: Record<string, string> = {};
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') {
+          cleanParams[k] = String(v);
+        }
+      });
+    }
+    const query = new URLSearchParams(cleanParams).toString();
+    const res = await fetch(`${API_BASE}/skaters${query ? `?${query}` : ''}`);
     return res.json();
   },
 
   async getSkater(id: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
-    const res = await fetch(`${API_BASE}/skaters/${id}`);
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(id)}`);
     return res.json();
   },
 
@@ -66,26 +84,96 @@ export const api = {
     return res.json();
   },
 
-  async updateSkater(id: string, updates: Partial<Skater>): Promise<{ success: boolean; data?: Skater; message?: string }> {
-    const res = await fetch(`${API_BASE}/skaters/${id}`, {
+  async updateSkater(id: string, updates: Partial<Skater>, adminUser?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(updates)
     });
     return res.json();
   },
 
-  async updateSkaterStatus(id: string, status: string, rejectionReason?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
-    const res = await fetch(`${API_BASE}/skaters/${id}/status`, {
+  async updateSkaterStatus(
+    id: string, 
+    status: string, 
+    rejectionReason?: string, 
+    adminRemarks?: string,
+    licenseNumber?: string,
+    adminUser?: string
+  ): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(id)}/status`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, rejectionReason })
+      headers,
+      body: JSON.stringify({ status, rejectionReason, adminRemarks, licenseNumber })
     });
     return res.json();
   },
 
-  async verifySkater(id: string, status: string, reason?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
-    return this.updateSkaterStatus(id, status, reason);
+  async verifySkater(id: string, status: string, reason?: string, adminRemarks?: string, licenseNumber?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    return this.updateSkaterStatus(id, status, reason, adminRemarks, licenseNumber);
+  },
+
+  async deleteSkater(id: string, permanent: boolean = false, adminUser?: string): Promise<{ success: boolean; message?: string }> {
+    const headers: Record<string, string> = {};
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(id)}?permanent=${permanent}`, {
+      method: 'DELETE',
+      headers
+    });
+    return res.json();
+  },
+
+  async restoreSkater(id: string, adminUser?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    const headers: Record<string, string> = {};
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(id)}/restore`, {
+      method: 'POST',
+      headers
+    });
+    return res.json();
+  },
+
+  async replaceDocument(
+    skaterId: string, 
+    payload: { 
+      docType: string; 
+      fileName: string; 
+      fileData?: string; 
+      fileUrl?: string; 
+      fileSize?: string; 
+      fileType?: string; 
+      remarks?: string;
+    },
+    adminUser?: string
+  ): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(skaterId)}/documents/replace`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  },
+
+  async deleteDocument(skaterId: string, docType: string, adminUser?: string): Promise<{ success: boolean; data?: Skater; message?: string }> {
+    const headers: Record<string, string> = {};
+    if (adminUser) headers['x-admin-user'] = adminUser;
+
+    const res = await fetch(`${API_BASE}/skaters/${encodeURIComponent(skaterId)}/documents/${encodeURIComponent(docType)}`, {
+      method: 'DELETE',
+      headers
+    });
+    return res.json();
   },
 
   async verifySkaterPublic(id: string): Promise<{ success: boolean; data?: any; message?: string }> {
@@ -98,6 +186,18 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, remarks })
+    });
+    return res.json();
+  },
+
+  async updateSkaterPassword(
+    skaterId: string, 
+    payload: { password?: string; autoGenerate?: boolean; adminEmail?: string }
+  ): Promise<{ success: boolean; data?: { loginId: string; temporaryPassword?: string }; message?: string }> {
+    const res = await fetch(`${API_BASE}/admin/skaters/${encodeURIComponent(skaterId)}/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
     return res.json();
   },

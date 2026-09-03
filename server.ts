@@ -4,7 +4,7 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import { getMandalForDistrict } from './src/data/mandals';
-import { generateRegistrationNumber, getDistrictCode } from './src/utils/districtCodes';
+import { generateRegistrationNumber, generateLicenseNumber, getDistrictCode } from './src/utils/districtCodes';
 import { CURRENT_SEASON_CODE, CURRENT_SEASON_DISPLAY, OFFICIAL_SEASON_LABELS } from './src/config/season';
 import { calculate2026AgeCategory } from './src/data/uprsaKnowledge';
 
@@ -789,35 +789,46 @@ function getInitialDBState(): DBState {
     heroSlides: [
       {
         id: 'slide-01',
-        title: '36th UP State Roller Skating Championship 2026',
-        subtitle: 'Official State Championship & National Trials • Lucknow • Oct 15-19, 2026',
-        badge: 'ENTRIES OPEN NOW',
-        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80',
-        actionText: 'Register for Championship',
-        actionLink: 'tournaments',
+        title: 'UTTAR PRADESH ROLLER SPORTS ASSOCIATION',
+        subtitle: 'Promoting Roller Sports Across Uttar Pradesh • Building Champions, Building Nation. State Governing Body Affiliated with Roller Skating Federation of India (RSFI).',
+        badge: 'WELCOME TO UPRSA',
+        imageUrl: '/images/hero-speed-skating-1.jpg',
+        actionText: 'EXPLORE MORE',
+        actionLink: 'about',
         order: 1,
         isActive: true
       },
       {
         id: 'slide-02',
-        title: 'Official Annual Skater Registration 2026',
-        subtitle: 'Mandatory Affiliation for all District, State & RSFI National Competitions',
-        badge: 'AFFILIATION PORTAL',
-        imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1600&q=80',
-        actionText: 'Register Skater Online',
+        title: 'OFFICIAL SKATER REGISTRATION & DIGITAL ID',
+        subtitle: 'Register with Uttar Pradesh Roller Sports Association (UPRSA) and receive your official digital Skater ID card with verified QR authentication.',
+        badge: 'OFFICIAL SKATER REGISTRATION 2026–27',
+        imageUrl: '/images/hero-speed-skating-2.jpg',
+        actionText: 'REGISTER AS SKATER',
         actionLink: 'register',
         order: 2,
         isActive: true
       },
       {
         id: 'slide-03',
-        title: 'Instant Digital Certificate & ID Card Verification',
-        subtitle: 'Secure QR-Code backed authentic verification for Athletes, Schools & Authorities',
-        badge: 'GOVERNMENT RECOGNIZED',
-        imageUrl: 'https://images.unsplash.com/photo-1547447134-cd3f5c716030?w=1600&q=80',
-        actionText: 'Verify Certificate',
-        actionLink: 'verify-certificate',
+        title: '36th UP State Roller Skating Championship 2026',
+        subtitle: 'Official Selection Trials for the 63rd RSFI Nationals. Speed banked track heats, inline freestyle slalom & roller hockey competitions in Lucknow.',
+        badge: 'STATE CHAMPIONSHIPS & NATIONAL TRIALS',
+        imageUrl: '/images/hero-speed-skating-3.jpg',
+        actionText: 'EXPLORE CHAMPIONSHIPS',
+        actionLink: 'tournaments',
         order: 3,
+        isActive: true
+      },
+      {
+        id: 'slide-04',
+        title: 'OFFICIAL ELECTRONIC PHOTO-FINISH RESULTS',
+        subtitle: 'Track official electronic photo-finish lap timings, heat progressions, medal tallies, and district leaderboards in real-time.',
+        badge: 'LIVE RACE SCORING & STATE RANKINGS',
+        imageUrl: '/images/hero-speed-skating-4.jpg',
+        actionText: 'VIEW LIVE RESULTS',
+        actionLink: 'results',
+        order: 4,
         isActive: true
       }
     ],
@@ -1461,27 +1472,73 @@ app.post('/api/auth/activate', (req, res) => {
 
 // Skaters CRUD & Management
 app.get('/api/skaters', (req, res) => {
-  const { district, discipline, ageCategory, status, search } = req.query;
+  const { district, club, discipline, ageCategory, status, search, includeDeleted, dateFrom, dateTo } = req.query;
   let filtered = [...db.skaters];
 
-  if (district) filtered = filtered.filter(s => s.district === district);
-  if (discipline) filtered = filtered.filter(s => s.discipline === discipline);
-  if (ageCategory) filtered = filtered.filter(s => s.ageCategory === ageCategory);
-  if (status && status !== 'All') {
-    const sTerm = (status as string).toLowerCase();
-    filtered = filtered.filter(s => (s.status || '').toLowerCase() === sTerm);
+  // Trash / Soft delete handling
+  if (status === 'trash' || status === 'deleted') {
+    filtered = filtered.filter(s => s.isDeleted === true);
+  } else if (includeDeleted !== 'true') {
+    filtered = filtered.filter(s => !s.isDeleted);
   }
+
+  if (district && district !== 'All') filtered = filtered.filter(s => s.district === district);
+  if (club && club !== 'All') filtered = filtered.filter(s => s.club === club);
+  if (discipline && discipline !== 'All') filtered = filtered.filter(s => s.discipline === discipline);
+  if (ageCategory && ageCategory !== 'All') filtered = filtered.filter(s => s.ageCategory === ageCategory);
+  
+  if (status && status !== 'All' && status !== 'trash' && status !== 'deleted') {
+    const sTerm = (status as string).toLowerCase();
+    filtered = filtered.filter(s => {
+      const currentStatus = (s.status || '').toLowerCase();
+      if (sTerm === 'pending') return currentStatus === 'pending' || currentStatus === 'under_scrutiny';
+      if (sTerm === 'approved' || sTerm === 'verified') return currentStatus === 'approved' || currentStatus === 'verified';
+      if (sTerm === 'rejected') return currentStatus === 'rejected';
+      return currentStatus === sTerm;
+    });
+  }
+
+  if (dateFrom) {
+    filtered = filtered.filter(s => {
+      const regDate = s.created_at ? s.created_at.split('T')[0] : '';
+      return regDate >= (dateFrom as string);
+    });
+  }
+
+  if (dateTo) {
+    filtered = filtered.filter(s => {
+      const regDate = s.created_at ? s.created_at.split('T')[0] : '';
+      return regDate <= (dateTo as string);
+    });
+  }
+
   if (search) {
-    const q = (search as string).toLowerCase();
+    const q = (search as string).toLowerCase().trim();
     filtered = filtered.filter(s => 
       s.firstName.toLowerCase().includes(q) || 
       s.lastName.toLowerCase().includes(q) || 
-      s.registrationNumber.toLowerCase().includes(q) ||
-      s.district.toLowerCase().includes(q) ||
-      s.club.toLowerCase().includes(q) ||
-      (s.phone && s.phone.includes(q))
+      (s.registrationNumber && s.registrationNumber.toLowerCase().includes(q)) ||
+      (s.applicationNumber && s.applicationNumber.toLowerCase().includes(q)) ||
+      (s.licenseNumber && s.licenseNumber.toLowerCase().includes(q)) ||
+      (s.loginId && s.loginId.toLowerCase().includes(q)) ||
+      (s.email && s.email.toLowerCase().includes(q)) ||
+      (s.district && s.district.toLowerCase().includes(q)) ||
+      (s.club && s.club.toLowerCase().includes(q)) ||
+      (s.phone && s.phone.includes(q)) ||
+      (s.emergencyPhone && s.emergencyPhone.includes(q)) ||
+      (s.coachName && s.coachName.toLowerCase().includes(q))
     );
   }
+
+  // Ensure licenseNumber is always formatted as UPRSA/[DIST]/[NUM]
+  filtered = filtered.map(s => {
+    if (!s.licenseNumber || !s.licenseNumber.startsWith('UPRSA/')) {
+      const distCode = getDistrictCode(s.district || 'Lucknow');
+      const seq = (s.registrationNumber || '').replace(/[^0-9]/g, '').slice(-5) || '00101';
+      s.licenseNumber = `UPRSA/${distCode}/${seq}`;
+    }
+    return s;
+  });
 
   res.json({ success: true, data: filtered, total: filtered.length });
 });
@@ -1639,6 +1696,7 @@ app.post('/api/skaters', (req, res) => {
     ...body,
     id: 'skater-' + Date.now(),
     registrationNumber: regNo,
+    licenseNumber: generateLicenseNumber(district, nextSeq),
     mandal,
     ageCategory,
     season: CURRENT_SEASON_CODE,
@@ -1714,14 +1772,238 @@ app.put('/api/skaters/:id', (req, res) => {
   const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
   if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
 
+  const oldSkater = { ...db.skaters[index] };
+  const updates = { ...req.body };
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+
+  // Keep critical identifiers unless explicitly provided
+  if (!updates.registrationNumber) {
+    updates.registrationNumber = oldSkater.registrationNumber;
+  }
+
+  // Calculate changed keys for audit trail
+  const changedKeys: string[] = [];
+  Object.keys(updates).forEach(key => {
+    if (key !== 'updated_at' && updates[key] !== undefined && JSON.stringify(updates[key]) !== JSON.stringify((oldSkater as any)[key])) {
+      changedKeys.push(key);
+    }
+  });
+
   db.skaters[index] = {
-    ...db.skaters[index],
-    ...req.body,
+    ...oldSkater,
+    ...updates,
     updated_at: new Date().toISOString()
   };
 
+  // Add audit log entry
+  if (changedKeys.length > 0) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Skater Details Updated',
+      user: adminUser,
+      details: `Updated skater ${db.skaters[index].firstName} ${db.skaters[index].lastName} (${db.skaters[index].registrationNumber}). Fields modified: ${changedKeys.join(', ')}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
   saveDB(db);
   res.json({ success: true, data: db.skaters[index], message: 'Skater details updated successfully' });
+});
+
+// Delete Skater (Soft delete by default, permanent purge if requested)
+app.delete('/api/skaters/:id', (req, res) => {
+  const queryId = (req.params.id || '').trim();
+  const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
+  if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
+
+  const skater = db.skaters[index];
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+  const isPermanent = req.query.permanent === 'true';
+
+  if (isPermanent) {
+    // Hard delete
+    db.skaters.splice(index, 1);
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Skater Permanently Deleted',
+      user: adminUser,
+      details: `Permanently purged skater application: ${skater.firstName} ${skater.lastName} (${skater.registrationNumber})`,
+      timestamp: new Date().toISOString()
+    });
+    saveDB(db);
+    return res.json({ success: true, message: 'Skater application has been permanently removed.' });
+  } else {
+    // Safe soft delete
+    db.skaters[index].isDeleted = true;
+    db.skaters[index].deletedAt = new Date().toISOString();
+    db.skaters[index].deletedBy = adminUser;
+    db.skaters[index].updated_at = new Date().toISOString();
+
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Skater Soft Deleted',
+      user: adminUser,
+      details: `Skater application moved to trash: ${skater.firstName} ${skater.lastName} (${skater.registrationNumber}) by ${adminUser}`,
+      timestamp: new Date().toISOString()
+    });
+    saveDB(db);
+    return res.json({ success: true, message: 'Skater application has been safely moved to trash.' });
+  }
+});
+
+// Restore soft-deleted skater
+app.post('/api/skaters/:id/restore', (req, res) => {
+  const queryId = (req.params.id || '').trim();
+  const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
+  if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
+
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+  db.skaters[index].isDeleted = false;
+  delete db.skaters[index].deletedAt;
+  delete db.skaters[index].deletedBy;
+  db.skaters[index].updated_at = new Date().toISOString();
+
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Skater Restored',
+    user: adminUser,
+    details: `Restored skater application: ${db.skaters[index].firstName} ${db.skaters[index].lastName} (${db.skaters[index].registrationNumber}) from trash`,
+    timestamp: new Date().toISOString()
+  });
+
+  saveDB(db);
+  res.json({ success: true, data: db.skaters[index], message: 'Skater application successfully restored from trash.' });
+});
+
+// Replace Skater Document (Upload new document file)
+app.post('/api/skaters/:id/documents/replace', (req, res) => {
+  const queryId = (req.params.id || '').trim();
+  const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
+  if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
+
+  const { docType, fileName, fileData, fileUrl: directUrl, fileSize, fileType, remarks } = req.body;
+  if (!docType) return res.status(400).json({ success: false, message: 'Document type is required' });
+
+  let finalUrl = directUrl || '';
+  const now = new Date().toISOString();
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+
+  // If base64 file data is sent, save to storage
+  if (fileData) {
+    const ext = path.extname(fileName || '') || (fileType?.includes('pdf') ? '.pdf' : '.png');
+    const cleanFileName = `doc_${docType}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}${ext}`;
+    const targetDir = docType === 'photo' ? PUBLIC_STORAGE : PRIVATE_STORAGE;
+    const targetPath = path.join(targetDir, cleanFileName);
+
+    try {
+      const base64Clean = fileData.replace(/^data:([A-Za-z-+/]+);base64,/, '');
+      fs.writeFileSync(targetPath, base64Clean, 'base64');
+      finalUrl = docType === 'photo' ? `/storage/public/${cleanFileName}` : `/api/files/private/${cleanFileName}`;
+    } catch (err: any) {
+      console.error('Failed to write replaced file:', err);
+      return res.status(500).json({ success: false, message: 'Failed to save replaced document file' });
+    }
+  }
+
+  const skater = db.skaters[index];
+  const oldUrl = 
+    docType === 'photo' ? skater.photoUrl :
+    (docType === 'dob_proof' || docType === 'birth_certificate') ? skater.dobProofUrl :
+    (docType === 'aadhaar' || docType === 'identity') ? skater.aadhaarDocUrl :
+    docType === 'medical' ? skater.medicalCertUrl :
+    (docType === 'school_id' || docType === 'address_proof') ? skater.schoolIdDocUrl :
+    skater.otherDocUrl;
+
+  // Update specific url property
+  if (docType === 'photo') skater.photoUrl = finalUrl;
+  else if (docType === 'dob_proof' || docType === 'birth_certificate') skater.dobProofUrl = finalUrl;
+  else if (docType === 'aadhaar' || docType === 'identity') skater.aadhaarDocUrl = finalUrl;
+  else if (docType === 'medical') skater.medicalCertUrl = finalUrl;
+  else if (docType === 'school_id' || docType === 'address_proof') skater.schoolIdDocUrl = finalUrl;
+  else skater.otherDocUrl = finalUrl;
+
+  // Maintain structured documents array
+  if (!skater.documents || !Array.isArray(skater.documents)) {
+    skater.documents = [];
+  }
+
+  const normalizedDocType = 
+    (docType === 'birth_certificate' || docType === 'dob_proof') ? 'dob_proof' :
+    (docType === 'aadhaar' || docType === 'identity') ? 'aadhaar' :
+    docType === 'medical' ? 'medical' :
+    docType === 'photo' ? 'photo' :
+    (docType === 'school_id' || docType === 'address_proof') ? 'school_id' : 'other';
+
+  const docIdx = skater.documents.findIndex((d: any) => d.type === normalizedDocType || d.type === docType);
+  const docMeta = {
+    id: 'doc-' + Date.now(),
+    name: fileName || `${docType.toUpperCase()} Document`,
+    url: finalUrl,
+    type: normalizedDocType as any,
+    status: 'UPLOADED' as const,
+    uploadedAt: now,
+    remarks: remarks || `Replaced by admin ${adminUser}`,
+    fileSize: fileSize || '350 KB',
+    fileType: fileType || (finalUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg')
+  };
+
+  if (docIdx !== -1) {
+    skater.documents[docIdx] = { ...skater.documents[docIdx], ...docMeta };
+  } else {
+    skater.documents.push(docMeta);
+  }
+
+  skater.updated_at = now;
+
+  // Audit log
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Document Replaced',
+    user: adminUser,
+    details: `Replaced document [${docType}] for skater ${skater.firstName} ${skater.lastName} (${skater.registrationNumber}). File: ${fileName || 'Updated file'}`,
+    timestamp: now
+  });
+
+  saveDB(db);
+  res.json({ success: true, data: skater, message: `Document ${docType} has been successfully updated.` });
+});
+
+// Delete specific skater document
+app.delete('/api/skaters/:id/documents/:docType', (req, res) => {
+  const queryId = (req.params.id || '').trim();
+  const { docType } = req.params;
+  const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
+  if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
+
+  const skater = db.skaters[index];
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+  const now = new Date().toISOString();
+
+  // Clear specific property
+  if (docType === 'photo') skater.photoUrl = '';
+  else if (docType === 'dob_proof' || docType === 'birth_certificate') skater.dobProofUrl = '';
+  else if (docType === 'aadhaar' || docType === 'identity') skater.aadhaarDocUrl = '';
+  else if (docType === 'medical') skater.medicalCertUrl = '';
+  else if (docType === 'school_id' || docType === 'address_proof') skater.schoolIdDocUrl = '';
+  else if (docType === 'other') skater.otherDocUrl = '';
+
+  // Remove from documents array
+  if (skater.documents && Array.isArray(skater.documents)) {
+    skater.documents = skater.documents.filter((d: any) => d.type !== docType);
+  }
+
+  skater.updated_at = now;
+
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Document Deleted',
+    user: adminUser,
+    details: `Deleted document [${docType}] for skater ${skater.firstName} ${skater.lastName} (${skater.registrationNumber})`,
+    timestamp: now
+  });
+
+  saveDB(db);
+  res.json({ success: true, data: skater, message: `Document [${docType}] deleted successfully.` });
 });
 
 // Update specific document verification status (Admin Scrutiny)
@@ -1733,6 +2015,7 @@ app.post('/api/skaters/:id/documents/:docType/status', (req, res) => {
   if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
 
   const skater = db.skaters[index];
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
   if (skater.documents && Array.isArray(skater.documents)) {
     const docIndex = skater.documents.findIndex((d: any) => d.type === docType);
     if (docIndex !== -1) {
@@ -1742,18 +2025,30 @@ app.post('/api/skaters/:id/documents/:docType/status', (req, res) => {
   }
 
   skater.updated_at = new Date().toISOString();
+
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Document Scrutiny Updated',
+    user: adminUser,
+    details: `Document [${docType}] status set to ${status} for ${skater.firstName} ${skater.lastName} (${skater.registrationNumber}). Remarks: ${remarks || 'None'}`,
+    timestamp: new Date().toISOString()
+  });
+
   saveDB(db);
   res.json({ success: true, data: skater, message: `Document ${docType} status updated to ${status}` });
 });
 
 app.post('/api/skaters/:id/status', (req, res) => {
-  const { status, rejectionReason, adminRemarks } = req.body;
+  const { status, rejectionReason, adminRemarks, licenseNumber } = req.body;
   const queryId = (req.params.id || '').trim();
   const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
   if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
 
   const now = new Date().toISOString();
   const normalizedStatus = status.toUpperCase();
+  const oldStatus = db.skaters[index].status;
+  const adminUser = (req.headers['x-admin-user'] as string) || 'admin@uprsa.org';
+
   db.skaters[index].status = normalizedStatus;
   
   if (rejectionReason) db.skaters[index].rejectionReason = rejectionReason;
@@ -1764,7 +2059,17 @@ app.post('/api/skaters/:id/status', (req, res) => {
     db.skaters[index].annualFeePaid = true;
     db.skaters[index].paymentStatus = 'verified';
     db.skaters[index].verifiedAt = now.split('T')[0];
-    db.skaters[index].verifiedBy = 'UPRSA Scrutiny Board';
+    db.skaters[index].approvalDate = now.split('T')[0];
+    db.skaters[index].verifiedBy = adminUser || 'UPRSA Scrutiny Board';
+
+    // Assign license number if not already present or if custom provided
+    if (licenseNumber) {
+      db.skaters[index].licenseNumber = licenseNumber;
+    } else if (!db.skaters[index].licenseNumber || !db.skaters[index].licenseNumber.startsWith('UPRSA/')) {
+      const distCode = getDistrictCode(db.skaters[index].district || 'Lucknow');
+      const seq = (db.skaters[index].registrationNumber || '').replace(/[^0-9]/g, '').slice(-5) || '00101';
+      db.skaters[index].licenseNumber = `UPRSA/${distCode}/${seq}`;
+    }
 
     // Update matching payment record if any
     const payIndex = db.payments.findIndex(p => p.skaterId === db.skaters[index].id);
@@ -1801,6 +2106,30 @@ app.post('/api/skaters/:id/status', (req, res) => {
         created_at: now
       });
     }
+
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Skater Approved',
+      user: adminUser,
+      details: `Approved skater ${skater.firstName} ${skater.lastName} (${skater.registrationNumber}). License: ${skater.licenseNumber}. Status transitioned from ${oldStatus} to ${normalizedStatus}.`,
+      timestamp: now
+    });
+  } else if (normalizedStatus === 'REJECTED') {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Skater Rejected',
+      user: adminUser,
+      details: `Rejected skater ${db.skaters[index].firstName} ${db.skaters[index].lastName} (${db.skaters[index].registrationNumber}). Reason: ${rejectionReason || 'Documents non-compliant'}`,
+      timestamp: now
+    });
+  } else if (normalizedStatus === 'UNDER_SCRUTINY') {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      action: 'Correction Requested',
+      user: adminUser,
+      details: `Requested document/info correction for ${db.skaters[index].firstName} ${db.skaters[index].lastName} (${db.skaters[index].registrationNumber}). Remarks: ${adminRemarks || rejectionReason || 'Resubmission requested'}`,
+      timestamp: now
+    });
   }
 
   saveDB(db);

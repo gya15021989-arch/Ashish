@@ -226,146 +226,119 @@ export const Home: React.FC<HomeProps> = ({
       />
 
       {/* ========================================================================= */}
-      {/* 2. OFFICIAL STATISTICS CARDS (Section 9: 4 Clean Premium Cards) */}
+      {/* 2. TICKER / NOTICES BANNER                                                */}
       {/* ========================================================================= */}
-      <section className="w-full relative z-20 -mt-7 sm:-mt-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-            
-            {/* Stat 1: 75 AFFILIATED DISTRICTS */}
-            <div 
-              onClick={() => navigate('districts')}
-              className="bg-[#0b1329] hover:bg-[#0f1b3b] border border-blue-900/50 hover:border-amber-500/50 p-5 sm:p-6 rounded-2xl shadow-xl transition-all cursor-pointer group backdrop-blur-md"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl sm:text-4xl font-black text-amber-400 font-sans tracking-tight">75</span>
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <MapPin className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider group-hover:text-amber-300 transition-colors">
-                AFFILIATED DISTRICTS
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                Statewide mandal coverage in UP
-              </div>
-            </div>
-
-            {/* Stat 2: 120+ AFFILIATED CLUBS */}
-            <div 
-              onClick={() => navigate('clubs')}
-              className="bg-[#0b1329] hover:bg-[#0f1b3b] border border-blue-900/50 hover:border-indigo-500/50 p-5 sm:p-6 rounded-2xl shadow-xl transition-all cursor-pointer group backdrop-blur-md"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl sm:text-4xl font-black text-indigo-400 font-sans tracking-tight">120+</span>
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Building2 className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider group-hover:text-indigo-300 transition-colors">
-                AFFILIATED CLUBS
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                Certified coaching academies & rinks
-              </div>
-            </div>
-
-            {/* Stat 3: 2,800+ REGISTERED ATHLETES */}
-            <div 
-              onClick={() => navigate('rankings')}
-              className="bg-[#0b1329] hover:bg-[#0f1b3b] border border-blue-900/50 hover:border-emerald-500/50 p-5 sm:p-6 rounded-2xl shadow-xl transition-all cursor-pointer group backdrop-blur-md"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl sm:text-4xl font-black text-emerald-400 font-sans tracking-tight">2,800+</span>
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Users className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">
-                REGISTERED ATHLETES
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                Speed, Freestyle & Roller Hockey
-              </div>
-            </div>
-
-            {/* Stat 4: 75+ ANNUAL CHAMPIONSHIPS */}
-            <div 
-              onClick={() => navigate('tournaments')}
-              className="bg-[#0b1329] hover:bg-[#0f1b3b] border border-blue-900/50 hover:border-purple-500/50 p-5 sm:p-6 rounded-2xl shadow-xl transition-all cursor-pointer group backdrop-blur-md"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl sm:text-4xl font-black text-purple-400 font-sans tracking-tight">75+</span>
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Trophy className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider group-hover:text-purple-300 transition-colors">
-                ANNUAL CHAMPIONSHIPS
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                District, state & selection trials
-              </div>
-            </div>
-
+      <section className="w-full bg-[#0b1329] border-y border-amber-500/20 py-2.5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex items-center gap-2 bg-amber-500 text-slate-950 px-3 py-1 rounded-md text-xs font-bold shrink-0">
+            <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
+            <span>OFFICIAL NOTICES</span>
           </div>
+          <div className="flex-1 overflow-x-auto flex items-center gap-6 no-scrollbar text-xs">
+            {announcements.length > 0 ? (
+              announcements.map((item) => (
+                <div 
+                  key={item.id} 
+                  onClick={() => navigate('news_gallery')}
+                  className="cursor-pointer flex items-center gap-2 text-slate-300 hover:text-amber-400 whitespace-nowrap transition-colors"
+                >
+                  <span className="text-[10px] bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded font-mono">
+                    {item.date}
+                  </span>
+                  <span>{item.title}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-amber-500/60" />
+                </div>
+              ))
+            ) : (
+              <div 
+                onClick={() => navigate('tournaments')}
+                className="cursor-pointer flex items-center gap-2 text-slate-300 hover:text-amber-400 whitespace-nowrap transition-colors"
+              >
+                <span className="text-[10px] bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded font-mono">
+                  {CURRENT_SEASON}
+                </span>
+                <span>36th UP State Championship Selection trials entry portal is currently active.</span>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-500/60" />
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => navigate('news_gallery')}
+            className="text-xs text-amber-400 hover:text-amber-300 font-semibold shrink-0 cursor-pointer flex items-center gap-1"
+          >
+            <span>View All</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. CIRCULAR / NEWS TICKER (Section 10: Professional narrow ticker) */}
+      {/* 3. KEY METRICS STATS BAR (4 CARDS)                                        */}
       {/* ========================================================================= */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-[#0b1329] border border-blue-900/50 rounded-2xl p-2.5 sm:p-3 flex flex-col md:flex-row items-center gap-3 shadow-lg">
-            
-            {/* Left Ticker Badge */}
-            <div className="flex items-center gap-2 text-xs font-black text-amber-400 uppercase tracking-wider shrink-0 bg-slate-950 px-3 py-1.5 rounded-xl border border-amber-500/30">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+      <section className="w-full -mt-8 relative z-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div 
+            onClick={() => navigate('districts')}
+            className="bg-[#0b1329]/95 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 p-4 sm:p-5 rounded-2xl shadow-xl transition-all cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-400 transition-colors">
+                25+
               </span>
-              <span>OFFICIAL CIRCULARS & NOTICES</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <MapPin className="w-4 h-4" />
+              </div>
             </div>
+            <p className="text-xs sm:text-sm font-semibold text-slate-300 mt-1">Affiliated Districts</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Across Uttar Pradesh</p>
+          </div>
 
-            {/* Middle Marquee / List */}
-            <div className="flex-1 overflow-x-auto flex gap-6 no-scrollbar text-xs py-1 w-full md:w-auto">
-              {announcements.length > 0 ? (
-                announcements.map((item) => (
-                  <div 
-                    key={item.id} 
-                    onClick={() => navigate('news_gallery')}
-                    className="cursor-pointer flex items-center gap-2 text-slate-300 hover:text-amber-400 whitespace-nowrap transition-colors"
-                  >
-                    <span className="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded font-mono border border-blue-800/60 font-bold">
-                      {item.date}
-                    </span>
-                    <span className="font-semibold text-slate-200">{item.title}</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-                  </div>
-                ))
-              ) : (
-                <div 
-                  onClick={() => navigate('tournaments')}
-                  className="cursor-pointer flex items-center gap-2 text-slate-300 hover:text-amber-400 whitespace-nowrap transition-colors"
-                >
-                  <span className="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded font-mono border border-blue-800/60 font-bold">
-                    {CURRENT_SEASON}
-                  </span>
-                  <span className="font-semibold text-slate-200">36th UP State Championship Selection trials entry portal is currently active.</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-                </div>
-              )}
+          <div 
+            onClick={() => navigate('clubs')}
+            className="bg-[#0b1329]/95 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 p-4 sm:p-5 rounded-2xl shadow-xl transition-all cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-400 transition-colors">
+                120+
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <Building2 className="w-4 h-4" />
+              </div>
             </div>
+            <p className="text-xs sm:text-sm font-semibold text-slate-300 mt-1">Registered Clubs</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Official coaching centers</p>
+          </div>
 
-            {/* Right: VIEW ALL → */}
-            <button
-              onClick={() => navigate('news_gallery')}
-              className="text-xs text-amber-400 hover:text-amber-300 font-extrabold shrink-0 cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-lg hover:bg-slate-900 transition-colors uppercase"
-            >
-              <span>VIEW ALL</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          <div 
+            onClick={() => navigate('rankings')}
+            className="bg-[#0b1329]/95 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 p-4 sm:p-5 rounded-2xl shadow-xl transition-all cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-400 transition-colors">
+                5,000+
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-xs sm:text-sm font-semibold text-slate-300 mt-1">Active Skaters</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Grassroots to National</p>
+          </div>
+
+          <div 
+            onClick={() => navigate('tournaments')}
+            className="bg-[#0b1329]/95 backdrop-blur-md border border-slate-800 hover:border-amber-500/50 p-4 sm:p-5 rounded-2xl shadow-xl transition-all cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-amber-400 transition-colors">
+                150+
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <Trophy className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-xs sm:text-sm font-semibold text-slate-300 mt-1">State Championships</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Organized since 1988</p>
           </div>
         </div>
       </section>

@@ -20,7 +20,8 @@ import {
   Key,
   ArrowRight,
   Phone,
-  FileText
+  FileText,
+  Newspaper
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -48,9 +49,14 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSkaterLogin
 }) => {
   const active = activePage || currentView || 'home';
+  
   const navigate = (view: string) => {
-    if (onNavigate) onNavigate(view);
-    if (setCurrentView) setCurrentView(view);
+    let target = view;
+    if (view === 'live') target = 'live_score';
+    if (view === 'disciplines') target = 'activities';
+    if (view === 'news') target = 'news_gallery';
+    if (onNavigate) onNavigate(target);
+    if (setCurrentView) setCurrentView(target);
   };
 
   const handleOpenLogin = () => {
@@ -77,24 +83,26 @@ export const Header: React.FC<HeaderProps> = ({
   interface NavItem {
     id: string;
     label: string;
+    targetView: string;
     icon: React.ElementType;
-    alias?: string;
-    badge?: string;
+    alias?: string[];
+    isLive?: boolean;
+    isRegistration?: boolean;
   }
 
+  // Primary Navigation Items for UPRSA Official Header (excluding LIVE as requested)
   const navItems: NavItem[] = [
-    { id: 'home', label: 'HOME', icon: Shield },
-    { id: 'about', label: 'ABOUT US', icon: Award },
-    { id: 'activities', label: 'DISCIPLINES', icon: Activity },
-    { id: 'districts', label: 'DISTRICTS', icon: MapPin },
-    { id: 'clubs', label: 'CLUBS', icon: Users },
-    { id: 'tournaments', label: 'TOURNAMENTS', icon: Calendar },
-    { id: 'results', label: 'RESULTS & LIVE', icon: Trophy },
-    { id: 'rankings', label: 'RANKINGS', icon: Award },
-    { id: 'register', label: 'REGISTRATION', icon: Shield, badge: '2026–27' },
-    { id: 'skater_portal', label: 'SKATER PORTAL', icon: User },
-    { id: 'news_gallery', alias: 'news-gallery', label: 'NEWS', icon: Sparkles },
-    { id: 'contact', label: 'CONTACT', icon: Phone }
+    { id: 'home', label: 'HOME', targetView: 'home', icon: Shield },
+    { id: 'about', label: 'ABOUT', targetView: 'about', icon: Award },
+    { id: 'disciplines', label: 'DISCIPLINES', targetView: 'activities', alias: ['activities', 'disciplines'], icon: Activity },
+    { id: 'districts', label: 'DISTRICTS', targetView: 'districts', icon: MapPin },
+    { id: 'clubs', label: 'CLUBS', targetView: 'clubs', icon: Users },
+    { id: 'tournaments', label: 'TOURNAMENTS', targetView: 'tournaments', alias: ['tournaments', 'tournament_entry'], icon: Calendar },
+    { id: 'results', label: 'RESULTS', targetView: 'results', icon: Trophy },
+    { id: 'rankings', label: 'RANKINGS', targetView: 'rankings', icon: Award },
+    { id: 'news', label: 'NEWS', targetView: 'news_gallery', alias: ['news_gallery', 'news', 'gallery'], icon: Newspaper },
+    { id: 'contact', label: 'CONTACT', targetView: 'contact', icon: Phone },
+    { id: 'register', label: 'REGISTRATION', targetView: 'register', isRegistration: true, icon: Sparkles }
   ];
 
   return (
@@ -105,8 +113,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* ========================================================================= */}
       {/* 1. TOP BRANDING BAR (Organization Identity + RSFI Tag + Quick Actions) */}
       {/* ========================================================================= */}
-      <div className="w-full bg-[#040811] border-b border-slate-800/90 py-2.5 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+      <div className="w-full bg-[#040811] border-b border-slate-800/90 py-2 sm:py-2.5 px-3 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
           
           {/* Left: Organization Authority Brand */}
           <div 
@@ -135,9 +143,10 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Mobile quick menu button right inside top bar */}
-            <div className="flex xl:hidden items-center gap-2">
+            {/* Mobile / Tablet Menu Button (Shown strictly on < lg) */}
+            <div className="flex lg:hidden items-center gap-2">
               <button
+                id="header-mobile-menu-toggle"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-xl bg-slate-800/80 text-slate-200 hover:text-white hover:bg-slate-700 focus:outline-none cursor-pointer border border-slate-700"
                 aria-label="Toggle navigation menu"
@@ -148,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right: Quick Action Controls */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-2.5 xl:gap-3 shrink-0">
             {/* Verify Athlete ID */}
             <button
               onClick={() => navigate('verify_athlete')}
@@ -167,6 +176,17 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>Verify Certificate</span>
+            </button>
+
+            <span className="text-slate-700">|</span>
+
+            {/* Contact Quick Link */}
+            <button
+              onClick={() => navigate('contact')}
+              className="text-slate-300 hover:text-amber-400 flex items-center gap-1.5 transition-colors text-xs font-semibold px-2.5 py-1.5 rounded-lg hover:bg-slate-900 cursor-pointer"
+            >
+              <Phone className="w-3.5 h-3.5 text-amber-400" />
+              <span>Contact</span>
             </button>
 
             <span className="text-slate-700">|</span>
@@ -198,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="header-user-account-btn"
                   onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                  className="bg-[#0b1329] hover:bg-[#0f1b3b] text-white font-bold px-3 py-1.5 rounded-xl text-xs border border-amber-500/40 hover:border-amber-500 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700/80 hover:border-amber-500/50 text-xs font-semibold text-white transition-all cursor-pointer"
                 >
                   <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px] font-black">
                     <User className="w-3 h-3" />
@@ -208,7 +228,6 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                   <ChevronDown className={`w-3 h-3 text-amber-400 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
-
                 <AccountDropdown
                   isOpen={accountDropdownOpen}
                   onClose={() => setAccountDropdownOpen(false)}
@@ -232,99 +251,81 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. SECOND NAVIGATION BAR (All 12 Major State Routes + Register CTA) */}
+      {/* 2. MAIN NAVIGATION BAR (All 12 Navigation Items Visible Together) */}
       {/* ========================================================================= */}
-      <div className="w-full bg-[#070d18] border-b border-slate-800/80 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
+      <div className="w-full bg-[#070d18] border-b border-slate-800/80 px-2 sm:px-4 lg:px-5 xl:px-8">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between h-14">
           
-          {/* Main Desktop Navigation Items */}
-          <nav className="hidden xl:flex items-center gap-1.5 flex-1 overflow-x-auto no-scrollbar py-1">
+          {/* Main Desktop Navigation: ALL 12 ITEMS DIRECTLY & VISIBLY RENDERED */}
+          <nav 
+            id="desktop-main-navigation"
+            className="hidden lg:flex items-center justify-between w-full select-none gap-0.5 xl:gap-1.5"
+          >
             {navItems.map((item) => {
-              const isCurrent = active === item.id || (item.alias && active === item.alias);
+              const isCurrent = 
+                active === item.targetView || 
+                (item.alias && item.alias.includes(active));
+
+              if (item.isRegistration) {
+                return (
+                  <button
+                    key={item.id}
+                    id={`header-nav-${item.id}`}
+                    onClick={() => navigate(item.targetView)}
+                    className={`relative px-3 xl:px-4 2xl:px-5 py-2 rounded-xl text-xs xl:text-[13px] 2xl:text-sm font-black tracking-wide transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-md shrink-0 ${
+                      isCurrent
+                        ? 'bg-amber-400 text-slate-950 font-black shadow-amber-500/30 ring-2 ring-amber-300'
+                        : 'bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.id}
-                  onClick={() => navigate(item.id)}
-                  className={`relative px-3 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  id={`header-nav-${item.id}`}
+                  onClick={() => navigate(item.targetView)}
+                  className={`relative px-2 xl:px-3.5 2xl:px-4 py-2 rounded-lg text-[13px] xl:text-[14px] 2xl:text-[15px] font-bold tracking-wide transition-all flex items-center cursor-pointer whitespace-nowrap ${
                     isCurrent 
-                      ? 'text-amber-400 bg-amber-500/10 border-b-2 border-amber-500 font-extrabold' 
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'text-amber-400 bg-amber-500/15 border-b-2 border-amber-400 font-extrabold' 
+                      : 'text-slate-200 hover:text-white hover:bg-slate-800/70'
                   }`}
                 >
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.2 rounded-full uppercase leading-none">
-                      {item.badge}
-                    </span>
+                  {item.isLive && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1.5" />
                   )}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
-
-          {/* Compact Nav for Large Screens (1024px to 1279px) */}
-          <nav className="hidden lg:flex xl:hidden items-center gap-1 flex-1 overflow-x-auto no-scrollbar py-1">
-            {[
-              { id: 'home', label: 'HOME' },
-              { id: 'about', label: 'ABOUT' },
-              { id: 'activities', label: 'DISCIPLINES' },
-              { id: 'districts', label: 'DISTRICTS' },
-              { id: 'tournaments', label: 'TOURNAMENTS' },
-              { id: 'results', label: 'RESULTS' },
-              { id: 'rankings', label: 'RANKINGS' },
-              { id: 'register', label: 'REGISTRATION' },
-              { id: 'skater_portal', label: 'PORTAL' },
-              { id: 'news_gallery', label: 'NEWS' }
-            ].map((item) => {
-              const isCurrent = active === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => navigate(item.id)}
-                  className={`relative px-2.5 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
-                    isCurrent 
-                      ? 'text-amber-400 bg-amber-500/10 border-b-2 border-amber-500' 
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right Action CTA: REGISTER SKATER */}
-          <div className="flex items-center gap-2.5 shrink-0 pl-3">
-            <button
-              id="header-register-skater-btn"
-              onClick={() => navigate('register')}
-              className="bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-4 sm:px-5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>REGISTER AS SKATER</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. MOBILE DRAWER MENU */}
+      {/* 3. MOBILE / TABLET DRAWER MENU (< lg screens) */}
       {/* ========================================================================= */}
       {mobileMenuOpen && (
-        <div className="xl:hidden w-full bg-[#070d18] border-b border-amber-500/30 px-4 pt-3 pb-6 space-y-4 shadow-2xl animate-in slide-in-from-top duration-200">
+        <div className="lg:hidden w-full bg-[#070d18] border-b border-amber-500/30 px-4 pt-3 pb-6 space-y-4 shadow-2xl animate-in slide-in-from-top duration-200">
           
-          {/* Fast Navigation Grid */}
+          {/* Fast Navigation Grid - ALL 10 ITEMS DIRECTLY ACCESSIBLE */}
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-800">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isCurrent = active === item.id || (item.alias && active === item.alias);
+              const isCurrent = 
+                active === item.id || 
+                active === item.targetView || 
+                (item.alias && item.alias.includes(active));
+
               return (
                 <button
                   key={item.id}
                   onClick={() => {
-                    navigate(item.id);
+                    navigate(item.targetView);
                     setMobileMenuOpen(false);
                   }}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
@@ -333,7 +334,14 @@ export const Header: React.FC<HeaderProps> = ({
                       : 'text-slate-300 hover:bg-slate-900'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  {item.isLive ? (
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                  ) : (
+                    <Icon className="w-3.5 h-3.5 text-amber-400" />
+                  )}
                   <span>{item.label}</span>
                 </button>
               );
@@ -353,7 +361,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>REGISTER AS SKATER (2026–27)</span>
             </button>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => {
                   navigate('verify_athlete');
@@ -362,7 +370,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="bg-[#0b1329] text-slate-200 border border-amber-500/30 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5 text-amber-400" />
-                <span>Verify Athlete</span>
+                <span>Verify ID</span>
               </button>
 
               <button
@@ -374,6 +382,17 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Verify Cert</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('contact');
+                  setMobileMenuOpen(false);
+                }}
+                className="bg-[#0b1329] text-slate-200 border border-amber-500/30 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5 text-amber-400" />
+                <span>Contact</span>
               </button>
             </div>
 

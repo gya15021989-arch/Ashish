@@ -103,6 +103,31 @@ export function generateRegistrationNumber(districtName: string, sequenceNumber:
   return `UPRSA-${code}-2026-${paddedSeq}`;
 }
 
+export function generateLicenseNumber(districtName: string, sequenceNumberOrSeed: number | string): string {
+  const code = getDistrictCode(districtName);
+  let numStr = '00101';
+  if (typeof sequenceNumberOrSeed === 'number') {
+    numStr = sequenceNumberOrSeed.toString().padStart(5, '0');
+  } else if (typeof sequenceNumberOrSeed === 'string') {
+    const digits = sequenceNumberOrSeed.replace(/[^0-9]/g, '');
+    if (digits.length >= 3) {
+      numStr = digits.slice(-5).padStart(5, '0');
+    } else {
+      numStr = '00101';
+    }
+  }
+  return `UPRSA/${code}/${numStr}`;
+}
+
+export function getSkaterLicenseNumber(skater: { district?: string; licenseNumber?: string; registrationNumber?: string; id?: string }): string {
+  if (skater.licenseNumber && skater.licenseNumber.startsWith('UPRSA/')) {
+    return skater.licenseNumber;
+  }
+  const district = skater.district || 'Lucknow';
+  const seed = skater.licenseNumber || skater.registrationNumber || skater.id || '101';
+  return generateLicenseNumber(district, seed);
+}
+
 export function getMandalForDistrict(districtName: string): string {
   const clean = districtName.replace(/\s*\(.*?\)\s*/g, '').trim();
   const mandalMap: Record<string, string> = {

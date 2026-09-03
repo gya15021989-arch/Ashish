@@ -1,18 +1,73 @@
-import React, { useRef } from 'react';
-import { Printer, Download, QrCode, CheckCircle2, Copy, Check } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { 
+  Printer, 
+  Download, 
+  QrCode, 
+  CheckCircle2, 
+  Copy, 
+  Check, 
+  FileDown, 
+  Loader2 
+} from 'lucide-react';
 import { Skater } from '../../types';
 import { CURRENT_SEASON_CODE, CURRENT_SEASON_DISPLAY } from '../../config/season';
 import { calculate2026AgeCategory } from '../../data/uprsaKnowledge';
+import { printDocketElement, downloadDocketPDF } from '../../utils/printDocket';
+import { getSkaterLicenseNumber } from '../../utils/districtCodes';
 
 interface AnnualRegistrationPDFProps {
   skater: Skater;
+  onDownloadRequested?: () => void;
+  onPrintRequested?: () => void;
+  isDownloading?: boolean;
 }
 
-export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ skater }) => {
-  const [copied, setCopied] = React.useState(false);
+export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ 
+  skater,
+  onDownloadRequested,
+  onPrintRequested,
+  isDownloading: externalDownloading = false
+}) => {
+  const [copied, setCopied] = useState(false);
+  const [localDownloading, setLocalDownloading] = useState(false);
+  const [localPrinting, setLocalPrinting] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
+  const safeRegNo = skater.registrationNumber || skater.id || 'REG';
+  const skaterName = `${skater.firstName || ''}_${skater.lastName || ''}`.trim() || 'Skater';
+  const filePrefix = `UPRSA_Registration_Slip_${safeRegNo}_${skaterName}`;
+
+  const isDownloading = externalDownloading || localDownloading;
+
+  const handlePrint = async () => {
+    if (onPrintRequested) {
+      onPrintRequested();
+      return;
+    }
+    try {
+      setLocalPrinting(true);
+      await printDocketElement('annual-reg-docket');
+    } catch (e) {
+      console.error('Print failed', e);
+      window.print();
+    } finally {
+      setLocalPrinting(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (onDownloadRequested) {
+      onDownloadRequested();
+      return;
+    }
+    try {
+      setLocalDownloading(true);
+      await downloadDocketPDF('annual-reg-docket', filePrefix);
+    } catch (e) {
+      console.error('Download failed', e);
+      alert('Could not download PDF. You can use the Print button to save as PDF.');
+    } finally {
+      setLocalDownloading(false);
+    }
   };
 
   const copyRegNo = () => {
@@ -85,6 +140,10 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
   const trackingId = skater.annualFeeUtr || (skater as any).trackingId || `11364${(skater.id || '987654').slice(-7)}`;
   const isPaid = skater.annualFeePaid || !!skater.annualFeeUtr;
 
+  const licenseNo = skater.licenseNumber && skater.licenseNumber.startsWith('UPRSA/')
+    ? skater.licenseNumber
+    : getSkaterLicenseNumber(skater);
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       {/* Top Action Toolbar (Hidden during print) */}
@@ -104,12 +163,34 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Download PDF Button */}
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105"
+            title="Download official PDF docket"
+          >
+            {isDownloading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <FileDown className="w-3.5 h-3.5" />
+            )}
+            <span>{isDownloading ? 'Saving PDF...' : 'Download PDF'}</span>
+          </button>
+
+          {/* Print Button */}
           <button
             onClick={handlePrint}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer transition-all hover:scale-105"
+            disabled={localPrinting}
+            className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 text-xs font-black px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer transition-all hover:scale-105"
+            title="Print docket directly on A4 paper"
           >
-            <Printer className="w-4 h-4" />
-            <span>Print Official Docket (A4)</span>
+            {localPrinting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Printer className="w-4 h-4" />
+            )}
+            <span>{localPrinting ? 'Preparing...' : 'Print Docket (A4)'}</span>
           </button>
         </div>
       </div>
@@ -117,142 +198,44 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
       {/* Official A4 Registration Docket Container */}
       <div 
         id="annual-reg-docket" 
-        className="bg-white text-black p-6 sm:p-8 border border-slate-300 shadow-2xl rounded-sm print:p-0 print:border-none print:shadow-none print:m-0 select-text font-sans"
-        style={{ minHeight: '297mm', color: '#000000' }}
+        className="bg-white text-black p-5 sm:p-6 border border-slate-300 shadow-2xl rounded-sm print:p-0 print:border-none print:shadow-none print:m-0 select-text font-sans"
+        style={{ color: '#000000' }}
       >
         {/* ========================================================================= */}
-        {/* HEADER SECTION: Logos, Federation Name, Recognition, Address */}
+        {/* HEADER SECTION: Federation Name, Recognition, Form Title (Logos Removed) */}
         {/* ========================================================================= */}
-        <div className="border-b border-black pb-2">
-          <div className="flex items-center justify-between gap-2">
-            {/* Left: RSFI / Roller Skating Federation of India circular logo */}
-            <div className="w-18 h-18 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#c2410c" strokeWidth="3" />
-                <circle cx="50" cy="50" r="41" fill="#fff7ed" stroke="#15803d" strokeWidth="1.5" />
-                {/* Ribbon accents */}
-                <path d="M 25 80 Q 50 92 75 80 L 70 94 Q 50 98 30 94 Z" fill="#c2410c" />
-                {/* Skate silhouette */}
-                <circle cx="36" cy="62" r="5" fill="#1e3a8a" />
-                <circle cx="64" cy="62" r="5" fill="#1e3a8a" />
-                <rect x="33" y="54" width="34" height="4" rx="2" fill="#64748b" />
-                <path d="M 35 54 L 40 38 L 52 38 L 58 46 L 66 48 L 66 54 Z" fill="#b91c1c" />
-                {/* Circular Text */}
-                <path id="rsfiCurve" d="M 18,50 A 32,32 0 1,1 82,50" fill="none" />
-                <text className="text-[6.5px] font-black fill-red-800 tracking-wider">
-                  <textPath href="#rsfiCurve" startOffset="50%" textAnchor="middle">
-                    ROLLER SKATING FEDERATION OF INDIA
-                  </textPath>
-                </text>
-                <text x="50" y="73" textAnchor="middle" className="text-[6px] font-black fill-emerald-800">
-                  ESTD. 1955
-                </text>
-              </svg>
-            </div>
-
-            {/* Center: Federation Title & Recognition Details */}
-            <div className="text-center flex-1 px-1">
-              <div className="flex items-center justify-center gap-1">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-orange-600 uppercase font-sans">
-                  INDIA
-                </span>
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-emerald-700 uppercase font-sans">
-                  SKATE
-                </span>
-              </div>
-              <div className="text-xs sm:text-sm font-black text-red-700 tracking-wide uppercase leading-tight mt-0.5">
-                ROLLER SKATING FEDERATION OF INDIA ®
-              </div>
-              <div className="text-[11px] sm:text-xs font-bold text-red-600 leading-tight">
-                भारतीय रोलर स्केटिंग महासंघ
-              </div>
-              <div className="text-[8px] sm:text-[9px] font-bold text-slate-800 mt-0.5 leading-tight">
-                भारत सरकार द्वारा मान्यता प्राप्त | RECOGNISED BY THE GOVERNMENT OF INDIA &amp; IOA
-              </div>
-              <div className="text-[7.5px] sm:text-[8px] text-slate-600 mt-0.5">
-                A 695, Shastri Nagar, New Delhi-110052 | www.indiaskate.com
-              </div>
-              <div className="text-[8px] font-bold text-blue-900 uppercase tracking-wider mt-0.5">
-                UTTAR PRADESH ROLLER SPORTS ASSOCIATION (UPRSA STATE AFFILIATE UNIT)
-              </div>
-            </div>
-
-            {/* Right: Partner & Affiliation Logos (MYAS, SAI, IOA, World Skate) */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* MYAS Emblem */}
-              <div className="flex flex-col items-center">
-                <div className="w-7 h-7 flex items-center justify-center">
-                  <svg viewBox="0 0 40 40" className="w-full h-full text-slate-800">
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#334155" strokeWidth="1.5" />
-                    <circle cx="20" cy="20" r="4" fill="#334155" />
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <line
-                        key={i}
-                        x1="20"
-                        y1="20"
-                        x2={20 + 13 * Math.cos((i * 30 * Math.PI) / 180)}
-                        y2={20 + 13 * Math.sin((i * 30 * Math.PI) / 180)}
-                        stroke="#334155"
-                        strokeWidth="1"
-                      />
-                    ))}
-                  </svg>
-                </div>
-                <span className="text-[6px] font-bold text-slate-700 leading-tight text-center">MYAS</span>
-              </div>
-
-              {/* SAI Logo */}
-              <div className="flex flex-col items-center">
-                <div className="w-7 h-7 bg-orange-600 rounded-full flex items-center justify-center text-white font-black text-[9px]">
-                  SAI
-                </div>
-                <span className="text-[6px] font-bold text-slate-700 leading-tight text-center">SAI</span>
-              </div>
-
-              {/* IOA Rings */}
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-4 flex items-center justify-center">
-                  <svg viewBox="0 0 60 30" className="w-full h-full">
-                    <circle cx="12" cy="12" r="7" fill="none" stroke="#0284c7" strokeWidth="2.5" />
-                    <circle cx="30" cy="12" r="7" fill="none" stroke="#0f172a" strokeWidth="2.5" />
-                    <circle cx="48" cy="12" r="7" fill="none" stroke="#dc2626" strokeWidth="2.5" />
-                    <circle cx="21" cy="18" r="7" fill="none" stroke="#eab308" strokeWidth="2.5" />
-                    <circle cx="39" cy="18" r="7" fill="none" stroke="#16a34a" strokeWidth="2.5" />
-                  </svg>
-                </div>
-                <span className="text-[6px] font-bold text-slate-700 leading-tight text-center">INDIA IOA</span>
-              </div>
-
-              {/* World Skate */}
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-7 flex items-center justify-center border border-slate-700 rounded px-0.5">
-                  <span className="text-[6.5px] font-black text-slate-900 leading-none text-center">
-                    WORLD<br />SKATE
-                  </span>
-                </div>
-                <span className="text-[6px] font-bold text-slate-700 leading-tight text-center">AFFILIATED</span>
-              </div>
-            </div>
+        <div className="border-b border-black pb-2 text-center">
+          <div className="text-xs font-black text-amber-800 tracking-widest uppercase font-sans">
+            UPRSA
+          </div>
+          <div className="text-base sm:text-lg md:text-xl font-black tracking-wide text-black uppercase font-sans leading-tight mt-0.5">
+            UTTAR PRADESH ROLLER SPORTS ASSOCIATION
+          </div>
+          <div className="text-[10px] sm:text-[11px] font-black text-amber-900 uppercase tracking-wider mt-0.5">
+            STATE GOVERNING BODY OF ROLLER SPORTS IN UTTAR PRADESH
+          </div>
+          <div className="text-[9px] sm:text-[10px] font-bold text-slate-800 uppercase tracking-widest mt-0.5">
+            AFFILIATED TO ROLLER SKATING FEDERATION OF INDIA
           </div>
 
           {/* Form Main Title Bar */}
-          <div className="text-center mt-2 pt-1 border-t border-slate-300">
+          <div className="text-center mt-2 pt-1.5 border-t border-black">
             <h1 className="text-sm sm:text-base font-black uppercase tracking-wider text-black">
-              SKATER ANNUAL REGISTRATION {skater.season || CURRENT_SEASON_DISPLAY}
+              SKATER ANNUAL REGISTRATION 2026–27
             </h1>
-            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-slate-900">
+            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-black mt-0.5">
               SKATER REGISTRATION FORM
             </h2>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* TOP METADATA ROW: District, State, Club, Discipline, Application No, Date */}
+        {/* TOP METADATA ROW: District, State, Club, Discipline, Numbers & Date */}
         {/* ========================================================================= */}
-        <div className="py-2 border-b border-black text-[10px] sm:text-[11px] leading-relaxed">
+        <div className="py-2.5 border-b border-black text-[10px] sm:text-[11px] leading-relaxed">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-            {/* Left Column (8 cols): Registering District, Residing District, Club, Discipline */}
-            <div className="md:col-span-8 space-y-1">
+            {/* Left Column (7 cols): Registering District, Residing District, Club, Discipline */}
+            <div className="md:col-span-7 space-y-1">
               <div className="grid grid-cols-12">
                 <span className="col-span-5 font-bold text-black">Registering District &amp; State</span>
                 <span className="col-span-1 text-center font-bold">:</span>
@@ -286,17 +269,29 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
               </div>
             </div>
 
-            {/* Right Column (4 cols): Application No & Date */}
-            <div className="md:col-span-4 space-y-1 md:text-right">
-              <div>
-                <span className="font-bold text-black">Application No : </span>
-                <span className="font-mono font-bold text-black">
-                  {skater.registrationNumber || orderId}
+            {/* Right Column (5 cols): Registration Number, Official License Number, Application No & Date */}
+            <div className="md:col-span-5 space-y-1 md:text-right bg-slate-50 p-2 rounded border border-black/20">
+              <div className="flex justify-between md:justify-end gap-2">
+                <span className="font-bold text-black">Registration Number:</span>
+                <span className="font-mono font-black text-black text-xs">
+                  {skater.registrationNumber}
                 </span>
               </div>
-              <div>
-                <span className="font-bold text-black">Date : </span>
-                <span className="font-mono text-black">
+              <div className="flex justify-between md:justify-end gap-2">
+                <span className="font-bold text-black">Official License Number:</span>
+                <span className="font-mono font-black text-black text-xs">
+                  {skater.licenseNumber || 'PENDING APPROVAL'}
+                </span>
+              </div>
+              <div className="flex justify-between md:justify-end gap-2 text-[9.5px]">
+                <span className="font-semibold text-slate-700">Application Number:</span>
+                <span className="font-mono font-bold text-slate-800">
+                  {skater.applicationNumber || orderId}
+                </span>
+              </div>
+              <div className="flex justify-between md:justify-end gap-2 text-[9.5px]">
+                <span className="font-semibold text-slate-700">Registration Date:</span>
+                <span className="font-mono text-slate-800">
                   {formatDateTime(skater.created_at)}
                 </span>
               </div>
@@ -382,7 +377,13 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
               <div className="flex items-center gap-2">
                 {/* Scannable QR Code */}
                 <div className="w-16 h-16 border border-black p-0.5 flex flex-col items-center justify-center bg-white shrink-0">
-                  <img src={qrCodeUrl} alt="Verify QR" className="w-12 h-12 object-contain" />
+                  <img 
+                    src={qrCodeUrl} 
+                    alt="Verify QR" 
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
+                    className="w-12 h-12 object-contain" 
+                  />
                   <span className="text-[6px] font-mono font-black uppercase text-black leading-none">SCAN VERIFY</span>
                 </div>
 
@@ -392,6 +393,8 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
                     <img
                       src={skater.photoUrl}
                       alt={`${skater.firstName} ${skater.lastName}`}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -541,15 +544,15 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
         {/* ========================================================================= */}
         {/* SIGNATURES & OFFICIAL SEALS BLOCK */}
         {/* ========================================================================= */}
-        <div className="pt-4 border-t border-black space-y-6 text-[10px] text-black font-semibold">
+        <div className="pt-3 border-t border-black space-y-4 text-[10px] text-black font-semibold break-inside-avoid print:break-inside-avoid">
           {/* Row 1: Signature of Skater & Signature of Parent/Guardian */}
           <div className="flex justify-between items-end px-4">
             <div className="text-center">
-              <div className="h-7 w-48 border-b border-black mb-1" />
+              <div className="h-6 w-44 border-b border-black mb-1" />
               <span className="font-bold">Signature of Skater</span>
             </div>
             <div className="text-center">
-              <div className="h-7 w-48 border-b border-black mb-1" />
+              <div className="h-6 w-44 border-b border-black mb-1" />
               <span className="font-bold">Signature of Parent/Guardian</span>
             </div>
           </div>
@@ -557,11 +560,11 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
           {/* Row 2: Seal & Signature of Club & District Association */}
           <div className="flex justify-between items-end px-4">
             <div className="text-center">
-              <div className="h-9 w-52 border-b border-black mb-1" />
+              <div className="h-7 w-48 border-b border-black mb-1" />
               <span className="font-bold">Seal &amp; Signature of the Club</span>
             </div>
             <div className="text-center">
-              <div className="h-9 w-52 border-b border-black mb-1" />
+              <div className="h-7 w-48 border-b border-black mb-1" />
               <span className="font-bold">Seal &amp; Signature of the District Association</span>
             </div>
           </div>
@@ -569,7 +572,7 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({ sk
           {/* Row 3: Seal & Signature of the State Association */}
           <div className="flex justify-start items-end px-4">
             <div className="text-center">
-              <div className="h-9 w-60 border-b border-black mb-1" />
+              <div className="h-7 w-56 border-b border-black mb-1" />
               <span className="font-bold">Seal &amp; Signature of the State Association</span>
             </div>
           </div>

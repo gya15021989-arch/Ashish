@@ -59,12 +59,15 @@ export type RegistrationStatus =
   | 'active';
 
 export interface DocumentAttachment {
+  id?: string;
   name: string;
   url: string;
   type: 'aadhaar' | 'dob_proof' | 'medical' | 'school_id' | 'other' | 'photo';
   status: 'EMPTY' | 'UPLOADING' | 'UPLOADED' | 'VALIDATING' | 'VERIFIED' | 'REJECTED';
   uploadedAt: string;
   remarks?: string;
+  fileSize?: string;
+  fileType?: string;
 }
 
 export interface SkaterDocument {
@@ -76,17 +79,24 @@ export interface SkaterDocument {
   uploaded_at: string;
   status?: string;
   remarks?: string;
+  fileSize?: string;
+  fileType?: string;
 }
 
 export interface Skater {
   id: string;
+  applicationNumber?: string;
   registrationNumber: string; // e.g. UPRSA-GBN-2026-00008 or UPRSA/2026/LKO/00142
+  loginId?: string;
+  licenseNumber?: string;
+  approvalDate?: string;
   userId?: string;
   firstName: string;
   lastName: string;
   fatherName: string;
   motherName: string;
   dateOfBirth: string;
+  age?: number;
   gender: Gender;
   bloodGroup: BloodGroup;
   aadhaarNumberMasked: string; // e.g. ****-****-1234
@@ -98,6 +108,7 @@ export interface Skater {
   mandal?: string;
   club: string;
   coachName: string;
+  coachPhone?: string;
   discipline: DisciplineType;
   ageCategory: AgeCategory;
   skateModel?: string;
@@ -121,6 +132,9 @@ export interface Skater {
   validUntil: string; // e.g. 2027-12-31
   verifiedAt?: string;
   verifiedBy?: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  deletedBy?: string;
   created_at: string;
   updated_at: string;
 }

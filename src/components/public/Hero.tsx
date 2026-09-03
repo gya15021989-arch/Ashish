@@ -35,43 +35,43 @@ interface HeroProps {
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: 'slide-01',
-    badge: 'OFFICIAL ATHLETE AFFILIATION • SEASON 2026–27',
-    title: 'OFFICIAL SKATER REGISTRATION 2026–27',
-    subtitle: 'Register with Uttar Pradesh Roller Sports Association (UPRSA) and receive your official Registration ID and Digital Athlete ID with secure QR verification.',
-    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=2400&q=85',
-    actionText: 'REGISTER AS SKATER',
-    actionLink: 'register',
+    badge: 'WELCOME TO UPRSA',
+    title: 'UTTAR PRADESH ROLLER SPORTS ASSOCIATION',
+    subtitle: 'Promoting Roller Sports Across Uttar Pradesh • Building Champions, Building Nation. State Governing Body Affiliated with Roller Skating Federation of India (RSFI).',
+    imageUrl: '/images/hero-speed-skating-1.jpg',
+    actionText: 'EXPLORE MORE',
+    actionLink: 'about',
     order: 1,
     isActive: true
   },
   {
     id: 'slide-02',
-    badge: 'STATE CHAMPIONSHIPS & NATIONAL SELECTION TRIALS',
-    title: '36th UP STATE ROLLER SKATING CHAMPIONSHIP 2026',
-    subtitle: 'Official State Championship & Selection Trials for the 63rd RSFI Nationals. Banked track speed heats, freestyle slalom & roller hockey competitions in Lucknow.',
-    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=2400&q=85',
-    actionText: 'EXPLORE CHAMPIONSHIPS',
-    actionLink: 'tournaments',
+    badge: 'OFFICIAL SKATER REGISTRATION 2026–27',
+    title: 'OFFICIAL SKATER REGISTRATION & DIGITAL ID',
+    subtitle: 'Register with Uttar Pradesh Roller Sports Association (UPRSA) and receive your official digital Skater ID card with verified QR authentication.',
+    imageUrl: '/images/hero-speed-skating-2.jpg',
+    actionText: 'REGISTER AS SKATER',
+    actionLink: 'register',
     order: 2,
     isActive: true
   },
   {
     id: 'slide-03',
-    badge: 'INSTANT QR-CODE AUTHENTICATION',
-    title: 'DIGITAL ATHLETE ID & CERTIFICATE VERIFICATION',
-    subtitle: 'Instant tamper-proof verification for athletes, schools, colleges & government sports bodies across all 75 affiliated districts in Uttar Pradesh.',
-    imageUrl: 'https://images.unsplash.com/photo-1547447134-cd3f5c716030?auto=format&fit=crop&w=2400&q=85',
-    actionText: 'VERIFY ATHLETE ID',
-    actionLink: 'verify_athlete',
+    badge: 'STATE CHAMPIONSHIPS & NATIONAL TRIALS',
+    title: '36th UP STATE ROLLER SKATING CHAMPIONSHIP 2026',
+    subtitle: 'Official Selection Trials for the 63rd RSFI Nationals. Speed banked track heats, inline freestyle slalom & roller hockey competitions in Lucknow.',
+    imageUrl: '/images/hero-speed-skating-3.jpg',
+    actionText: 'EXPLORE CHAMPIONSHIPS',
+    actionLink: 'tournaments',
     order: 3,
     isActive: true
   },
   {
     id: 'slide-04',
-    badge: 'LIVE TIMING & STATE LEADERBOARD',
-    title: 'LIVE RACE SCORING & STATE RANKINGS',
+    badge: 'LIVE RACE SCORING & STATE RANKINGS',
+    title: 'OFFICIAL ELECTRONIC PHOTO-FINISH RESULTS',
     subtitle: 'Track official electronic photo-finish lap timings, heat progressions, medal tallies, and district leaderboards in real-time.',
-    imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=2400&q=85',
+    imageUrl: '/images/hero-speed-skating-4.jpg',
     actionText: 'VIEW LIVE RESULTS',
     actionLink: 'results',
     order: 4,
@@ -191,7 +191,7 @@ export const Hero: React.FC<HeroProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Background Slides with Smooth Cinematic Crossfade & Depth Gradients */}
+      {/* Background Slides with High Clarity & Cinematic Vivid Sports Imagery */}
       <div className="absolute inset-0 z-0 overflow-hidden w-full h-full pointer-events-none">
         {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
@@ -207,7 +207,7 @@ export const Hero: React.FC<HeroProps> = ({
                 src={slide.imageUrl || DEFAULT_SLIDES[0].imageUrl}
                 alt={slide.title}
                 referrerPolicy="no-referrer"
-                className={`w-full h-full object-cover object-center brightness-[0.38] contrast-[1.2] saturate-[1.25] transition-transform duration-[6000ms] ease-out ${
+                className={`w-full h-full object-cover object-center brightness-[0.92] contrast-[1.06] saturate-[1.12] transition-transform duration-[7000ms] ease-out ${
                   isActive ? 'scale-105' : 'scale-100'
                 }`}
               />
@@ -215,56 +215,50 @@ export const Hero: React.FC<HeroProps> = ({
           );
         })}
 
-        {/* Multi-Layer Deep Navy & Vignette Overlays for Maximum Text Legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070d18] via-[#070d18]/90 to-[#070d18]/70" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070d18] via-transparent to-[#070d18]/60" />
-        
-        {/* Subtle Warm Accent Flares */}
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-20 right-10 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px]" />
+        {/* Directional Overlay: Dark navy on the left behind text, transparent on middle & right so skaters are 100% visible */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050914]/95 via-[#050914]/75 via-35% md:via-[#050914]/30 md:via-55% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070d18] via-transparent via-15% to-[#070d18]/40" />
       </div>
 
       {/* Main Hero Content Container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           
           {/* Left Column (7 cols): Main Title, Subtitle, Dynamic CTAs & Trust Strip */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-5">
             
             {/* Season Badge */}
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/40 text-amber-300 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase shadow-md shadow-amber-500/10 backdrop-blur-md transition-all">
-              <Shield className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>{activeSlide.badge || 'OFFICIAL ATHLETE AFFILIATION • SEASON 2026–27'}</span>
+            <div className="inline-flex items-center gap-2 bg-amber-500 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-black tracking-wider uppercase shadow-lg shadow-amber-500/20 transition-all">
+              <Shield className="w-4 h-4 shrink-0 fill-current" />
+              <span>{activeSlide.badge || 'WELCOME TO UPRSA'}</span>
             </div>
 
             {/* Main Heading with Key Transition Effect */}
-            <div key={`title-${currentIndex}`} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
-                {activeSlide.title.includes('REGISTRATION') ? (
+            <div key={`title-${currentIndex}`} className="space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
+                {activeSlide.title.includes('ROLLER SPORTS') ? (
+                  <>
+                    UTTAR PRADESH <br />
+                    ROLLER SPORTS <br />
+                    <span className="text-amber-400">ASSOCIATION</span>
+                  </>
+                ) : activeSlide.title.includes('REGISTRATION') ? (
                   <>
                     OFFICIAL SKATER <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500">
-                      REGISTRATION 2026–27
-                    </span>
+                    <span className="text-amber-400">REGISTRATION 2026–27</span>
                   </>
                 ) : activeSlide.title.includes('36th') ? (
                   <>
                     36th UP STATE <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500">
-                      CHAMPIONSHIP 2026
-                    </span>
+                    <span className="text-amber-400">CHAMPIONSHIP 2026</span>
                   </>
-                ) : activeSlide.title.includes('DIGITAL') ? (
+                ) : activeSlide.title.includes('RESULTS') ? (
                   <>
-                    DIGITAL ATHLETE ID <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500">
-                      & VERIFICATION
-                    </span>
+                    ELECTRONIC PHOTO-FINISH <br />
+                    <span className="text-amber-400">LIVE RACE SCORING</span>
                   </>
                 ) : (
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500">
-                    {activeSlide.title}
-                  </span>
+                  <span className="text-amber-400">{activeSlide.title}</span>
                 )}
               </h1>
             </div>
@@ -272,48 +266,48 @@ export const Hero: React.FC<HeroProps> = ({
             {/* Supporting Text */}
             <p 
               key={`sub-${currentIndex}`} 
-              className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl animate-in fade-in slide-in-from-bottom-3 duration-500"
+              className="text-base sm:text-lg text-slate-200 leading-relaxed font-normal max-w-2xl animate-in fade-in slide-in-from-bottom-3 duration-500 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]"
             >
               {activeSlide.subtitle}
             </p>
 
-            {/* Action Buttons Row: Primary CTA, Secondary CTA, Third CTA */}
+            {/* Action Buttons Row: Primary Golden CTA, Skater Registration, Verification */}
             <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
               
               {/* Primary CTA (Driven by Active Slide) */}
               <button
                 id="hero-register-btn"
-                onClick={() => navigate(activeSlide.actionLink || 'register')}
-                className="bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-7 py-4 rounded-xl text-sm uppercase tracking-wider flex items-center gap-2.5 shadow-xl shadow-amber-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                onClick={() => navigate(activeSlide.actionLink || 'about')}
+                className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-8 py-4 rounded-xl text-sm uppercase tracking-wider flex items-center gap-2.5 shadow-xl shadow-amber-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
-                <span>{activeSlide.actionText || 'REGISTER AS SKATER'}</span>
+                <span>{activeSlide.actionText || 'EXPLORE MORE'}</span>
                 <ArrowRight className="w-4 h-4 text-slate-950 stroke-[3]" />
               </button>
 
-              {/* Secondary CTA: VERIFY ATHLETE ID */}
+              {/* Secondary CTA: SKATER REGISTRATION */}
+              <button
+                id="hero-skater-reg-btn"
+                onClick={() => navigate('register')}
+                className="bg-[#0b1329]/90 hover:bg-[#0f1b3b] text-white font-bold px-6 py-4 rounded-xl text-sm border border-amber-500/40 hover:border-amber-400 transition-all flex items-center gap-2 backdrop-blur-md shadow-lg shadow-black/50 cursor-pointer"
+              >
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span>SKATER REGISTRATION</span>
+              </button>
+
+              {/* Third CTA: VERIFY ATHLETE ID */}
               <button
                 id="hero-verify-athlete-btn"
                 onClick={() => navigate('verify_athlete')}
-                className="bg-[#0b1329]/90 hover:bg-[#0f1b3b] text-white font-bold px-6 py-4 rounded-xl text-sm border border-amber-500/40 hover:border-amber-500 transition-all flex items-center gap-2 backdrop-blur-md shadow-lg shadow-black/40 cursor-pointer"
-              >
-                <Shield className="w-4 h-4 text-amber-400" />
-                <span>VERIFY ATHLETE ID</span>
-              </button>
-
-              {/* Third CTA: SKATER PORTAL */}
-              <button
-                id="hero-skater-portal-btn"
-                onClick={() => navigate('skater_portal')}
-                className="bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white font-bold px-5 py-4 rounded-xl text-sm border border-slate-700/80 transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                className="bg-slate-900/85 hover:bg-slate-800 text-slate-200 hover:text-white font-bold px-5 py-4 rounded-xl text-sm border border-slate-700/80 transition-all flex items-center gap-2 cursor-pointer shadow-md backdrop-blur-md"
               >
                 <Lock className="w-4 h-4 text-amber-400" />
-                <span>SKATER PORTAL</span>
+                <span>VERIFY ID</span>
               </button>
 
             </div>
 
             {/* Official Trust Strip */}
-            <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-y-2 gap-x-5 text-xs text-slate-300">
+            <div className="pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-200 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] border-t border-slate-800/80">
               <div className="flex items-center gap-1.5 font-medium">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>Official UPRSA Portal</span>
@@ -328,111 +322,14 @@ export const Hero: React.FC<HeroProps> = ({
               </div>
               <div className="flex items-center gap-1.5 font-medium">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>State Registration</span>
-              </div>
-              <div className="flex items-center gap-1.5 font-medium">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Secure Athlete Portal</span>
+                <span>75 Affiliated Districts</span>
               </div>
             </div>
 
           </div>
 
-          {/* Right Column (5 cols): Elegant Glass-style Dark Status Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-[#0b1329]/95 border border-blue-500/30 hover:border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl backdrop-blur-xl transition-all relative overflow-hidden group">
-              
-              {/* Card Title */}
-              <div className="flex items-center justify-between pb-5 border-b border-slate-800/90">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                    UPRSA PORTAL STATUS
-                  </h3>
-                </div>
-                <span className="text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase">
-                  RSFI VERIFIED
-                </span>
-              </div>
-
-              {/* Status List Items */}
-              <div className="py-5 space-y-3">
-                {/* 1. Registration & Renewal */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <div>
-                      <div className="text-xs font-bold text-white">Registration & Renewal</div>
-                      <div className="text-[11px] text-slate-400">All 75 UP Districts</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                    OPEN
-                  </span>
-                </div>
-
-                {/* 2. State Championships */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <div>
-                      <div className="text-xs font-bold text-white">State Championships</div>
-                      <div className="text-[11px] text-slate-400">36th State Selection Trials</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                    ACTIVE
-                  </span>
-                </div>
-
-                {/* 3. Results & Rankings */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <div>
-                      <div className="text-xs font-bold text-white">Results & Rankings</div>
-                      <div className="text-[11px] text-slate-400">Official Heats & Points</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                    LIVE
-                  </span>
-                </div>
-
-                {/* 4. Digital ID Verification */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <div>
-                      <div className="text-xs font-bold text-white">Digital ID Verification</div>
-                      <div className="text-[11px] text-slate-400">Instant QR Authenticator</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-                    AVAILABLE
-                  </span>
-                </div>
-              </div>
-
-              {/* Card Bottom Season Info */}
-              <div className="pt-4 border-t border-slate-800/90 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-medium">SEASON</span>
-                  <span className="font-extrabold text-amber-400 font-mono bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">
-                    2026–27
-                  </span>
-                </div>
-                <button
-                  onClick={() => navigate('tournaments')}
-                  className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>Events Calendar</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-            </div>
-          </div>
+          {/* Right Column (5 cols): Completely unobstructed view of skaters and background */}
+          <div className="hidden lg:block lg:col-span-5 min-h-[300px] pointer-events-none" />
 
         </div>
 
