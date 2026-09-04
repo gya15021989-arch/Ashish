@@ -843,7 +843,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5 text-amber-400" />
-                      1. Athlete Headshot / Photo *
+                      1. Athlete Headshot / Photo (JPG / JPEG / PNG) *
                     </span>
                     {(uploadStatus.photoUrl.status === 'UPLOADED' || formData.photoUrl) && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/40">
@@ -851,10 +851,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">Used on official UPRSA State Digital ID Card.</p>
+                  <p className="text-[11px] text-slate-400">Passport photo (JPG / JPEG / PNG) used on official UPRSA State Digital ID Card.</p>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*"
                     onChange={handleFileUpload('photoUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />
@@ -872,7 +872,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                      2. Municipal Birth Certificate *
+                      2. Municipal Birth Certificate (JPG / PDF) *
                     </span>
                     {(uploadStatus.dobProofUrl.status === 'UPLOADED' || formData.dobProofUrl) && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/40">
@@ -880,10 +880,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">Birth proof issued by Municipal Corp or Gazette.</p>
+                  <p className="text-[11px] text-slate-400">Birth proof issued by Municipal Corp or Gazette (JPG, JPEG, PNG, or PDF).</p>
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
                     onChange={handleFileUpload('dobProofUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />
@@ -901,7 +901,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Heart className="w-3.5 h-3.5 text-amber-400" />
-                      3. MBBS Medical Fitness *
+                      3. MBBS Medical Fitness (JPG / PDF) *
                     </span>
                     {(uploadStatus.medicalCertUrl.status === 'UPLOADED' || formData.medicalCertUrl) && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/40">
@@ -909,10 +909,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">Fitness certificate signed by registered MBBS doctor.</p>
+                  <p className="text-[11px] text-slate-400">Fitness certificate signed by registered MBBS doctor (JPG, JPEG, PNG, or PDF).</p>
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
                     onChange={handleFileUpload('medicalCertUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />
@@ -930,7 +930,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5 text-amber-400" />
-                      4. Aadhaar Card / ID Proof *
+                      4. Aadhaar Card / ID Proof (JPG / PDF) *
                     </span>
                     {(uploadStatus.aadhaarDocUrl.status === 'UPLOADED' || formData.aadhaarDocUrl) && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-500/40">
@@ -938,10 +938,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">UP domicile identity verification proof.</p>
+                  <p className="text-[11px] text-slate-400">UP domicile identity verification proof (JPG, JPEG, PNG, or PDF).</p>
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
                     onChange={handleFileUpload('aadhaarDocUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />
@@ -956,7 +956,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">
-                      5. School ID Card (Optional)
+                      5. School ID Card (JPG / PDF, Optional)
                     </span>
                     {formData.schoolIdDocUrl && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded">
@@ -964,10 +964,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">Student ID from registered UP academic institution.</p>
+                  <p className="text-[11px] text-slate-400">Student ID from registered UP academic institution (JPG, JPEG, PNG, or PDF).</p>
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
                     onChange={handleFileUpload('schoolIdDocUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />
@@ -977,7 +977,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">
-                      6. Other Supporting Document (Optional)
+                      6. Other Supporting Document (JPG / PDF, Optional)
                     </span>
                     {formData.otherDocUrl && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded">
@@ -985,10 +985,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400">State / National participation certificates or approvals.</p>
+                  <p className="text-[11px] text-slate-400">State / National participation certificates or approvals (JPG, JPEG, PNG, or PDF).</p>
                   <input
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
                     onChange={handleFileUpload('otherDocUrl')}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
                   />

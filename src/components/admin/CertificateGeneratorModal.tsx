@@ -46,6 +46,19 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (prefillSkater) {
+      setRecipientName(`${prefillSkater.firstName || ''} ${prefillSkater.lastName || ''}`.trim());
+      setRecipientRegNo(prefillSkater.registrationNumber || '');
+      setFatherName(prefillSkater.fatherName || '');
+      setDistrict(prefillSkater.district || 'Lucknow');
+      setClub(prefillSkater.club || '');
+      setDiscipline(prefillSkater.discipline || 'Speed Skating (Quad)');
+      setAgeCategory(prefillSkater.ageCategory || 'Junior (15 to 18)');
+      setGender(prefillSkater.gender || 'Male');
+    }
+  }, [prefillSkater]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipientName.trim() || !tournamentName.trim()) {
@@ -139,7 +152,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               <input
                 type="text"
                 required
-                value={recipientName}
+                value={recipientName || ''}
                 onChange={(e) => setRecipientName(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -154,7 +167,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               <input
                 type="text"
                 placeholder="e.g. UPRSA-2026-SK-1001"
-                value={recipientRegNo}
+                value={recipientRegNo || ''}
                 onChange={(e) => setRecipientRegNo(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase focus:outline-none focus:border-amber-500"
               />
@@ -166,7 +179,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               </label>
               <input
                 type="text"
-                value={fatherName}
+                value={fatherName || ''}
                 onChange={(e) => setFatherName(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -181,7 +194,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               <input
                 type="text"
                 required
-                value={district}
+                value={district || ''}
                 onChange={(e) => setDistrict(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -193,7 +206,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               </label>
               <input
                 type="text"
-                value={club}
+                value={club || ''}
                 onChange={(e) => setClub(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -207,7 +220,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
             <input
               type="text"
               required
-              value={tournamentName}
+              value={tournamentName || ''}
               onChange={(e) => setTournamentName(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
             />
@@ -220,7 +233,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               </label>
               <input
                 type="text"
-                value={discipline}
+                value={discipline || ''}
                 onChange={(e) => setDiscipline(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -232,7 +245,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
               </label>
               <input
                 type="text"
-                value={ageCategory}
+                value={ageCategory || ''}
                 onChange={(e) => setAgeCategory(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -244,7 +257,7 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
                   Position / Standing *
                 </label>
                 <select
-                  value={position}
+                  value={position || '1st (Gold Medal)'}
                   onChange={(e) => setPosition(e.target.value)}
                   className="w-full bg-slate-950 border border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
                 >

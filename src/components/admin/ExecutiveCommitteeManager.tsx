@@ -390,18 +390,19 @@ export const ExecutiveCommitteeManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Portrait Photo URL</label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                    type="text"
                     value={formData.photoUrl}
                     onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="https://images.unsplash.com/... or /storage/..."
                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
                   />
                   <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                    <span>Upload JPG / Image</span>
+                    <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*" className="hidden" onChange={handlePhotoUpload} />
                   </label>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">Supports JPG, JPEG, PNG or WebP portrait photos</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

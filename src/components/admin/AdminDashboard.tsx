@@ -38,14 +38,17 @@ import { ContactInquiriesManager } from './ContactInquiriesManager';
 import { AuditBackupManager } from './AuditBackupManager';
 import { TickerManager } from './TickerManager';
 import { SiteSettingsManager } from './SiteSettingsManager';
+import { AboutCMSManager } from './AboutCMSManager';
+import { DisciplinesManager } from './DisciplinesManager';
+import { ResultsRankingsManager } from './ResultsRankingsManager';
 import { Certificate } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    'skaters' | 'tournaments' | 'race_console' | 'certificates' | 'finance' | 'cms' | 'inquiries' | 'backup'
+    'skaters' | 'tournaments' | 'race_console' | 'results_rankings' | 'certificates' | 'finance' | 'cms' | 'inquiries' | 'backup'
   >('skaters');
-  const [cmsSubTab, setCmsSubTab] = useState<'hero' | 'news' | 'media' | 'districts' | 'committee' | 'ticker' | 'settings'>('hero');
+  const [cmsSubTab, setCmsSubTab] = useState<'hero' | 'about' | 'disciplines' | 'news' | 'media' | 'districts' | 'committee' | 'ticker' | 'settings'>('hero');
   const [stats, setStats] = useState<any>(null);
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [issuedCerts, setIssuedCerts] = useState<Certificate[]>([]);
@@ -206,6 +209,18 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('results_rankings')}
+            className={`flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'results_rankings'
+                ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Trophy className="w-4 h-4" />
+            <span>Results & Rankings</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('certificates')}
             className={`flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'certificates'
@@ -279,6 +294,11 @@ export const AdminDashboard: React.FC = () => {
         {/* Tab 3: Chief Referee Desk */}
         {activeTab === 'race_console' && (
           <LiveRaceConsole />
+        )}
+
+        {/* Tab: Results & Rankings Manager */}
+        {activeTab === 'results_rankings' && (
+          <ResultsRankingsManager />
         )}
 
         {/* Tab 4: Certificate Registry */}
@@ -361,6 +381,30 @@ export const AdminDashboard: React.FC = () => {
               </button>
 
               <button
+                onClick={() => setCmsSubTab('about')}
+                className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  cmsSubTab === 'about'
+                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>About Page CMS</span>
+              </button>
+
+              <button
+                onClick={() => setCmsSubTab('disciplines')}
+                className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  cmsSubTab === 'disciplines'
+                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Trophy className="w-3.5 h-3.5" />
+                <span>Disciplines CMS</span>
+              </button>
+
+              <button
                 onClick={() => setCmsSubTab('news')}
                 className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   cmsSubTab === 'news'
@@ -435,6 +479,8 @@ export const AdminDashboard: React.FC = () => {
 
             {/* CMS Sub-views */}
             {cmsSubTab === 'hero' && <HeroSlidesManager />}
+            {cmsSubTab === 'about' && <AboutCMSManager />}
+            {cmsSubTab === 'disciplines' && <DisciplinesManager />}
             {cmsSubTab === 'news' && <NewsAnnouncementsManager />}
             {cmsSubTab === 'media' && <MediaGalleryManager />}
             {cmsSubTab === 'districts' && <DistrictsClubsManager />}

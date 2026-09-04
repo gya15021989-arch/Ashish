@@ -76,7 +76,17 @@ export const HeroSlidesManager: React.FC = () => {
 
   const handleOpenEdit = (slide: HeroSlide) => {
     setEditingSlide(slide);
-    setFormData(slide);
+    setFormData({
+      ...slide,
+      title: slide.title || '',
+      subtitle: slide.subtitle || '',
+      badge: slide.badge || 'OFFICIAL RSFI AFFILIATED STATE BODY',
+      imageUrl: slide.imageUrl || '',
+      actionText: slide.actionText || 'Register as Skater',
+      actionLink: slide.actionLink || '#register',
+      order: slide.order ?? 1,
+      isActive: slide.isActive ?? true
+    });
     setIsModalOpen(true);
   };
 
@@ -318,7 +328,7 @@ export const HeroSlidesManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Top Eyebrow Badge</label>
                   <input
                     type="text"
-                    value={formData.badge}
+                    value={formData.badge || ''}
                     onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
                     placeholder="e.g. OFFICIAL RSFI AFFILIATED STATE BODY"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -329,7 +339,7 @@ export const HeroSlidesManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Slide Order / Priority</label>
                   <input
                     type="number"
-                    value={formData.order}
+                    value={formData.order ?? 1}
                     onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
                     min="1"
@@ -342,7 +352,7 @@ export const HeroSlidesManager: React.FC = () => {
                 <input
                   type="text"
                   required
-                  value={formData.title}
+                  value={formData.title || ''}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. 36th UP State Roller Skating Championship 2026"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -353,7 +363,7 @@ export const HeroSlidesManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Subtitle / Description</label>
                 <textarea
                   rows={3}
-                  value={formData.subtitle}
+                  value={formData.subtitle || ''}
                   onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                   placeholder="Official state selection trials for the 63rd National Championship..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none resize-none"
@@ -364,19 +374,20 @@ export const HeroSlidesManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Banner Background Image URL *</label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                    type="text"
                     required
-                    value={formData.imageUrl}
+                    value={formData.imageUrl || ''}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="https://images.unsplash.com/... or /storage/..."
                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
                   />
                   <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    <span>Upload JPG / Image</span>
+                    <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*" className="hidden" onChange={handleImageUpload} />
                   </label>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">Accepts JPG, JPEG, PNG or WebP images</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -384,7 +395,7 @@ export const HeroSlidesManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Button Action Text</label>
                   <input
                     type="text"
-                    value={formData.actionText}
+                    value={formData.actionText || ''}
                     onChange={(e) => setFormData({ ...formData, actionText: e.target.value })}
                     placeholder="e.g. Register as Skater"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -395,7 +406,7 @@ export const HeroSlidesManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Button Target Link</label>
                   <input
                     type="text"
-                    value={formData.actionLink}
+                    value={formData.actionLink || ''}
                     onChange={(e) => setFormData({ ...formData, actionLink: e.target.value })}
                     placeholder="e.g. #register, #tournaments"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"

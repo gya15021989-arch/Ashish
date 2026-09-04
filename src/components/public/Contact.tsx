@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   MapPin, 
@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { UPRSA_INFO } from '../../data/uprsaKnowledge';
 import { api } from '../../services/api';
+import { SiteSettings } from '../../types';
 
 export const Contact: React.FC = () => {
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,6 +28,20 @@ export const Contact: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.getSiteSettings();
+        if (res.success && res.data) {
+          setSiteSettings(res.data);
+        }
+      } catch (err) {
+        // silent fallback to UPRSA_INFO
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +102,7 @@ export const Contact: React.FC = () => {
                   <div>
                     <span className="font-bold text-white block">Postal Address:</span>
                     <p className="text-slate-400 mt-0.5 leading-relaxed">
-                      {UPRSA_INFO.headOffice}
+                      {siteSettings?.officialAddress || UPRSA_INFO.headOffice}
                     </p>
                   </div>
                 </div>
@@ -97,7 +113,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-bold text-white block">Secretariat Hotline:</span>
-                    <span className="text-slate-400">{UPRSA_INFO.phone}</span>
+                    <span className="text-slate-400">{siteSettings?.contactPhone || UPRSA_INFO.phone}</span>
                   </div>
                 </div>
 
@@ -107,7 +123,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-bold text-white block">Official Email:</span>
-                    <span className="text-slate-400">{UPRSA_INFO.email}</span>
+                    <span className="text-slate-400">{siteSettings?.contactEmail || UPRSA_INFO.email}</span>
                   </div>
                 </div>
 
@@ -117,7 +133,7 @@ export const Contact: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-bold text-white block">Office Working Hours:</span>
-                    <span className="text-slate-400">Mon – Sat: 10:00 AM – 06:00 PM (IST)</span>
+                    <span className="text-slate-400">{(siteSettings as any)?.officeHours || 'Mon – Sat: 10:00 AM – 06:00 PM (IST)'}</span>
                   </div>
                 </div>
               </div>
@@ -127,9 +143,9 @@ export const Contact: React.FC = () => {
                   Athlete Grievance & Disciplinary Officer:
                 </h4>
                 <p className="text-xs text-slate-400">
-                  Adv. Rajesh Sharma (Chairman, Legal & Technical Disciplinary Board)
+                  {(siteSettings as any)?.grievanceOfficer || 'Adv. Rajesh Sharma (Chairman, Legal & Technical Disciplinary Board)'}
                   <br />
-                  Direct Email: <span className="text-amber-400">grievance@uprsa.org</span>
+                  Direct Email: <span className="text-amber-400">{(siteSettings as any)?.grievanceEmail || 'grievance@uprsa.org'}</span>
                 </p>
               </div>
             </div>

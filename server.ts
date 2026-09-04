@@ -7,6 +7,7 @@ import { getMandalForDistrict } from './src/data/mandals';
 import { generateRegistrationNumber, generateLicenseNumber, getDistrictCode } from './src/utils/districtCodes';
 import { CURRENT_SEASON_CODE, CURRENT_SEASON_DISPLAY, OFFICIAL_SEASON_LABELS } from './src/config/season';
 import { calculate2026AgeCategory } from './src/data/uprsaKnowledge';
+import { ALL_14_OFFICIAL_DISCIPLINES } from './src/data/all14Disciplines';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -96,6 +97,11 @@ interface DBState {
   auditLogs: any[];
   tickerItems: any[];
   siteSettings: any;
+  aboutInfo: any;
+  aboutSections: any[];
+  aboutPolicies: any[];
+  disciplines: any[];
+  customRankings?: any[];
 }
 
 // Initial Seed Data Generator
@@ -669,10 +675,17 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-lko',
         name: 'Lucknow',
+        hindiName: 'लखनऊ',
         zone: 'Central',
+        presidentName: 'Dr. Akhilesh Chandra Sharma',
+        presidentPhone: '+91 94150 21989',
+        presidentEmail: 'president.lko@uprsa.co',
         secretaryName: 'R. K. Srivastava',
         secretaryPhone: '+91 94150 11223',
         secretaryEmail: 'lucknow.roller@gmail.com',
+        treasurerName: 'Shri Vivek Srivastava',
+        treasurerPhone: '+91 94501 88990',
+        treasurerEmail: 'treasurer.lko@uprsa.co',
         officeAddress: 'K.D. Singh Babu Stadium, Hazratganj, Lucknow',
         affiliatedYear: 1988,
         clubsCount: 14,
@@ -682,10 +695,17 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-gbn',
         name: 'Gautam Buddha Nagar (Noida)',
+        hindiName: 'गौतम बुद्ध नगर (नोएडा)',
         zone: 'Western',
+        presidentName: 'Rakesh Goel',
+        presidentPhone: '+91 98110 22334',
+        presidentEmail: 'president.gbn@uprsa.co',
         secretaryName: 'Amitabh Saxena',
         secretaryPhone: '+91 98180 54321',
         secretaryEmail: 'noida.skating@gmail.com',
+        treasurerName: 'Kunal Singhal',
+        treasurerPhone: '+91 98180 77889',
+        treasurerEmail: 'treasurer.gbn@uprsa.co',
         officeAddress: 'Noida Stadium, Sector 21-A, Noida',
         affiliatedYear: 1998,
         clubsCount: 18,
@@ -695,10 +715,16 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-gzb',
         name: 'Ghaziabad',
+        hindiName: 'गाजियाबाद',
         zone: 'Western',
+        presidentName: 'Sanjay Tyagi',
+        presidentPhone: '+91 98110 44556',
         secretaryName: 'Manish Tyagi',
         secretaryPhone: '+91 98112 33445',
         secretaryEmail: 'ghaziabad.rollersports@gmail.com',
+        treasurerName: 'Praveen Garg',
+        treasurerPhone: '+91 98112 99001',
+        treasurerEmail: 'treasurer.gzb@uprsa.co',
         officeAddress: 'Mahamaya Sports Stadium, Ghaziabad',
         affiliatedYear: 1995,
         clubsCount: 12,
@@ -708,10 +734,16 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-knp',
         name: 'Kanpur Nagar',
+        hindiName: 'कानपुर नगर',
         zone: 'Central',
+        presidentName: 'Dr. Alok Agnihotri',
+        presidentPhone: '+91 94150 77889',
         secretaryName: 'Sanjay Awasthi',
         secretaryPhone: '+91 94501 88990',
         secretaryEmail: 'kanpur.skating@gmail.com',
+        treasurerName: 'Deepak Shukla',
+        treasurerPhone: '+91 94501 11223',
+        treasurerEmail: 'treasurer.knp@uprsa.co',
         officeAddress: 'Green Park Stadium, Kanpur',
         affiliatedYear: 1989,
         clubsCount: 10,
@@ -721,10 +753,16 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-vns',
         name: 'Varanasi',
+        hindiName: 'वाराणसी',
         zone: 'Eastern',
+        presidentName: 'Anil Kumar Rai',
+        presidentPhone: '+91 94152 11223',
         secretaryName: 'Pradeep Tripathi',
         secretaryPhone: '+91 94152 77665',
         secretaryEmail: 'varanasi.rollersports@gmail.com',
+        treasurerName: 'Satish Pandey',
+        treasurerPhone: '+91 94152 33445',
+        treasurerEmail: 'treasurer.vns@uprsa.co',
         officeAddress: 'Dr. Sampurnanand Sports Stadium, Sigra, Varanasi',
         affiliatedYear: 1992,
         clubsCount: 8,
@@ -734,10 +772,16 @@ function getInitialDBState(): DBState {
       {
         id: 'dist-agr',
         name: 'Agra',
+        hindiName: 'आगरा',
         zone: 'Western',
+        presidentName: 'Mohan Sharma',
+        presidentPhone: '+91 98370 11223',
         secretaryName: 'Devendra Yadav',
         secretaryPhone: '+91 98370 44556',
         secretaryEmail: 'agra.rollerskating@gmail.com',
+        treasurerName: 'Nitin Bansal',
+        treasurerPhone: '+91 98370 77889',
+        treasurerEmail: 'treasurer.agr@uprsa.co',
         officeAddress: 'Eklavya Sports Stadium, Agra',
         affiliatedYear: 1991,
         clubsCount: 9,
@@ -1165,7 +1209,81 @@ function getInitialDBState(): DBState {
         stateChampionships: 36,
         recognizedClubs: 84
       }
-    }
+    },
+    aboutInfo: {
+      establishedText: 'ESTABLISHED 1988 • REG. NO. UP/S/294',
+      title: 'About Uttar Pradesh Roller Sports Association',
+      tagline: 'The supreme state governing and promotional body for Roller, Speed, Inline Freestyle, Artistic, Roller Hockey, and Downhill skating across 75 districts of Uttar Pradesh.',
+      headOfficeAddress: 'UP Roller Sports Arena, Sector-G, LDA Colony, Kanpur Road, Lucknow, Uttar Pradesh - 226012',
+      phone: '+91 522 2439812, +91 94150 21989',
+      email: 'uprsa.official@gmail.com',
+      constitutionTitle: 'Constitution & Official Policies',
+      statRegisteredAthletesText: '2,800+ Registered Athletes',
+      statAffiliatedUnitsText: '75 District Units Recognized'
+    },
+    aboutSections: [
+      {
+        id: 'sec-vision',
+        title: 'Our Vision',
+        badge: 'State Mission',
+        badgeColor: 'amber',
+        description: "To establish Uttar Pradesh as India's premier roller sports powerhouse by creating international-standard synthetic 200m banked tracks, grassroots talent identification across all 75 districts, and comprehensive athlete training programs.",
+        footerTag: 'Infrastructure & Excellence',
+        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1000&q=80',
+        order: 1,
+        status: 'Active'
+      },
+      {
+        id: 'sec-affiliation',
+        title: 'RSFI & State Affiliation',
+        badge: 'Apex Body',
+        badgeColor: 'indigo',
+        description: 'UPRSA is the solely recognized state member of the Roller Skating Federation of India (RSFI) and UP Olympic Association, recognized by the Department of Sports, Government of Uttar Pradesh for official state team selections.',
+        footerTag: 'Sole Recognized Federation',
+        imageUrl: 'https://images.unsplash.com/photo-1516726817505-f5ed825624d8?auto=format&fit=crop&w=1000&q=80',
+        order: 2,
+        status: 'Active'
+      },
+      {
+        id: 'sec-athlete-dev',
+        title: 'Athlete Development',
+        badge: 'Grassroots To Podium',
+        badgeColor: 'emerald',
+        description: 'Over 2,800 active registered athletes, annual state championships, national training camps, certified coaches, state referee seminars, and transparent merit-based selection trials.',
+        footerTag: '2,800+ Registered Athletes',
+        imageUrl: 'https://images.unsplash.com/photo-1547447134-cd3f5c716030?auto=format&fit=crop&w=1000&q=80',
+        order: 3,
+        status: 'Active'
+      }
+    ],
+    aboutPolicies: [
+      {
+        id: 'pol-1',
+        title: 'RSFI Technical Regulations 2026 for Speed & Inline',
+        description: 'Official competition guidelines and race distances approved by technical committee',
+        order: 1
+      },
+      {
+        id: 'pol-2',
+        title: 'Anti-Doping Policy aligned with NADA / WADA Code',
+        description: 'Zero-tolerance fair play guidelines and mandatory test compliance for state medalists',
+        order: 2
+      },
+      {
+        id: 'pol-3',
+        title: 'POSH & Athlete Safe Sport Protection Committee',
+        description: 'Dedicated women & youth athlete welfare, safety standards, and grievance redressing body',
+        order: 3
+      },
+      {
+        id: 'pol-4',
+        title: 'State Selection Trials & Points Matrix (5-3-1 Rule)',
+        description: 'Transparent computerized ranking system calculating eligibility for National Games',
+        order: 4
+      }
+    ],
+    disciplines: JSON.parse(JSON.stringify(ALL_14_OFFICIAL_DISCIPLINES)),
+    customRankings: []
   };
 }
 
@@ -1185,6 +1303,7 @@ function loadDB(): DBState {
       parsed.tournamentRegistrations = parsed.tournamentRegistrations || initial.tournamentRegistrations;
       parsed.races = parsed.races || initial.races;
       parsed.results = parsed.results || initial.results;
+      parsed.customRankings = parsed.customRankings || initial.customRankings || [];
       parsed.liveSession = parsed.liveSession || initial.liveSession;
       parsed.certificates = parsed.certificates || initial.certificates;
       parsed.certificateSettings = parsed.certificateSettings || initial.certificateSettings;
@@ -1203,6 +1322,10 @@ function loadDB(): DBState {
       parsed.auditLogs = parsed.auditLogs || initial.auditLogs;
       parsed.tickerItems = parsed.tickerItems || initial.tickerItems;
       parsed.siteSettings = parsed.siteSettings || initial.siteSettings;
+      parsed.aboutInfo = parsed.aboutInfo || initial.aboutInfo;
+      parsed.aboutSections = parsed.aboutSections || initial.aboutSections;
+      parsed.aboutPolicies = parsed.aboutPolicies || initial.aboutPolicies;
+      parsed.disciplines = parsed.disciplines && parsed.disciplines.length > 0 ? parsed.disciplines : initial.disciplines;
       return parsed;
     }
   } catch (err) {
@@ -1243,7 +1366,8 @@ function computeRankings() {
       goldCount: 0,
       silverCount: 0,
       bronzeCount: 0,
-      totalPoints: 0
+      totalPoints: 0,
+      photoUrl: skater.photoUrl || ''
     });
   });
 
@@ -1263,9 +1387,12 @@ function computeRankings() {
         goldCount: 0,
         silverCount: 0,
         bronzeCount: 0,
-        totalPoints: 0
+        totalPoints: 0,
+        photoUrl: res.skaterPhotoUrl || ''
       };
       skaterPointsMap.set(res.skaterId, sk);
+    } else if (!sk.photoUrl && res.skaterPhotoUrl) {
+      sk.photoUrl = res.skaterPhotoUrl;
     }
 
     if (res.medal === 'Gold' || res.position === 1) {
@@ -1307,15 +1434,18 @@ function computeRankings() {
   const individualRankings = Array.from(skaterPointsMap.values())
     .sort((a, b) => b.totalPoints - a.totalPoints || b.goldCount - a.goldCount || b.silverCount - a.silverCount)
     .map((item, idx) => {
+      const skRecord = db.skaters.find(s => s.id === item.skaterId || s.registrationNumber === item.registrationNumber);
       const eventsCount = db.results.filter(r => r.skaterId === item.skaterId).length || (item.goldCount + item.silverCount + item.bronzeCount > 0 ? item.goldCount + item.silverCount + item.bronzeCount : 1);
       return {
         ...item,
+        id: item.skaterId,
         rank: idx + 1,
         mandal: getMandalForDistrict(item.district),
         gold: item.goldCount,
         silver: item.silverCount,
         bronze: item.bronzeCount,
         totalMedals: item.goldCount + item.silverCount + item.bronzeCount,
+        photoUrl: item.photoUrl || (skRecord ? skRecord.photoUrl : ''),
         eventsCount
       };
     });
@@ -1323,10 +1453,12 @@ function computeRankings() {
   const districtRankings = Array.from(districtPointsMap.values())
     .sort((a, b) => b.totalPoints - a.totalPoints || b.goldCount - a.goldCount)
     .map((item, idx) => {
+      const distRecord = db.districts.find(d => d.name === item.district);
       const athletesCount = db.skaters.filter(s => s.district === item.district).length || 5;
       const eventsCount = db.results.filter(r => r.district === item.district).length || (item.goldCount + item.silverCount + item.bronzeCount);
       return {
         ...item,
+        id: distRecord?.id || `dist-rnk-${idx + 1}`,
         rank: idx + 1,
         mandal: getMandalForDistrict(item.district),
         gold: item.goldCount,
@@ -1334,17 +1466,20 @@ function computeRankings() {
         bronze: item.bronzeCount,
         totalMedals: item.goldCount + item.silverCount + item.bronzeCount,
         athletesCount,
-        eventsCount
+        eventsCount,
+        logoUrl: distRecord?.presidentPhotoUrl || ''
       };
     });
 
   const clubRankings = Array.from(clubPointsMap.values())
     .sort((a, b) => b.totalPoints - a.totalPoints || b.goldCount - a.goldCount)
     .map((item, idx) => {
+      const clubRecord = db.clubs.find(c => c.name === item.club);
       const athletesCount = db.skaters.filter(s => s.club === item.club).length || 4;
       const eventsCount = db.results.filter(r => r.club === item.club).length || (item.goldCount + item.silverCount + item.bronzeCount);
       return {
         ...item,
+        id: clubRecord?.id || `club-rnk-${idx + 1}`,
         rank: idx + 1,
         mandal: getMandalForDistrict(item.district),
         gold: item.goldCount,
@@ -1352,11 +1487,147 @@ function computeRankings() {
         bronze: item.bronzeCount,
         totalMedals: item.goldCount + item.silverCount + item.bronzeCount,
         athletesCount,
-        eventsCount
+        eventsCount,
+        logoUrl: clubRecord?.bannerUrl || ''
       };
     });
 
-  return { individualRankings, districtRankings, clubRankings };
+  // Merge custom rankings (admin overrides / manual creations)
+  const customList = db.customRankings || [];
+  customList.forEach(custom => {
+    if (custom.type === 'individual' || (!custom.type && (custom.name || custom.skaterName))) {
+      const targetName = (custom.name || custom.skaterName || '').toLowerCase().trim();
+      const existingIdx = individualRankings.findIndex(r => 
+        (r.skaterId && custom.skaterId && r.skaterId === custom.skaterId) || 
+        (r.id && custom.id && r.id === custom.id) ||
+        r.skaterName?.toLowerCase().trim() === targetName
+      );
+      if (existingIdx !== -1) {
+        individualRankings[existingIdx] = {
+          ...individualRankings[existingIdx],
+          ...custom,
+          id: custom.id || individualRankings[existingIdx].id,
+          gold: custom.goldCount !== undefined ? custom.goldCount : (custom.gold || individualRankings[existingIdx].gold),
+          silver: custom.silverCount !== undefined ? custom.silverCount : (custom.silver || individualRankings[existingIdx].silver),
+          bronze: custom.bronzeCount !== undefined ? custom.bronzeCount : (custom.bronze || individualRankings[existingIdx].bronze),
+          photoUrl: custom.photoUrl || individualRankings[existingIdx].photoUrl,
+          isCustom: true
+        };
+      } else {
+        individualRankings.push({
+          id: custom.id || 'rnk-' + Date.now(),
+          rank: custom.rank || individualRankings.length + 1,
+          skaterId: custom.skaterId || custom.id,
+          skaterName: custom.name || custom.skaterName || 'State Athlete',
+          registrationNumber: custom.registrationNumber || 'UPRSA/2026/MANUAL',
+          district: custom.district || 'State Pool',
+          mandal: getMandalForDistrict(custom.district || 'Lucknow'),
+          club: custom.club || 'Unattached',
+          discipline: custom.discipline || 'Speed Skating (Inline)',
+          ageCategory: custom.ageCategory || 'Senior (17 & Above)',
+          gender: custom.gender || 'Male',
+          goldCount: custom.goldCount || custom.gold || 0,
+          gold: custom.goldCount || custom.gold || 0,
+          silverCount: custom.silverCount || custom.silver || 0,
+          silver: custom.silverCount || custom.silver || 0,
+          bronzeCount: custom.bronzeCount || custom.bronze || 0,
+          bronze: custom.bronzeCount || custom.bronze || 0,
+          totalMedals: (custom.goldCount || custom.gold || 0) + (custom.silverCount || custom.silver || 0) + (custom.bronzeCount || custom.bronze || 0),
+          totalPoints: custom.totalPoints !== undefined ? custom.totalPoints : ((custom.goldCount || 0) * 5 + (custom.silverCount || 0) * 3 + (custom.bronzeCount || 0) * 1),
+          photoUrl: custom.photoUrl || '',
+          eventsCount: custom.eventsCount || 1,
+          isCustom: true
+        });
+      }
+    } else if (custom.type === 'district') {
+      const targetName = (custom.name || custom.district || '').toLowerCase().trim();
+      const existingIdx = districtRankings.findIndex(r => 
+        (r.id && custom.id && r.id === custom.id) ||
+        r.district?.toLowerCase().trim() === targetName
+      );
+      if (existingIdx !== -1) {
+        districtRankings[existingIdx] = {
+          ...districtRankings[existingIdx],
+          ...custom,
+          id: custom.id || districtRankings[existingIdx].id,
+          gold: custom.goldCount !== undefined ? custom.goldCount : (custom.gold || districtRankings[existingIdx].gold),
+          silver: custom.silverCount !== undefined ? custom.silverCount : (custom.silver || districtRankings[existingIdx].silver),
+          bronze: custom.bronzeCount !== undefined ? custom.bronzeCount : (custom.bronze || districtRankings[existingIdx].bronze),
+          logoUrl: custom.photoUrl || custom.logoUrl || districtRankings[existingIdx].logoUrl,
+          isCustom: true
+        };
+      } else {
+        districtRankings.push({
+          id: custom.id || 'dist-rnk-' + Date.now(),
+          rank: custom.rank || districtRankings.length + 1,
+          district: custom.name || custom.district || 'District',
+          mandal: getMandalForDistrict(custom.district || custom.name || 'Lucknow'),
+          athletesCount: custom.athletesCount || 5,
+          eventsCount: custom.eventsCount || 1,
+          goldCount: custom.goldCount || custom.gold || 0,
+          gold: custom.goldCount || custom.gold || 0,
+          silverCount: custom.silverCount || custom.silver || 0,
+          silver: custom.silverCount || custom.silver || 0,
+          bronzeCount: custom.bronzeCount || custom.bronze || 0,
+          bronze: custom.bronzeCount || custom.bronze || 0,
+          totalMedals: (custom.goldCount || custom.gold || 0) + (custom.silverCount || custom.silver || 0) + (custom.bronzeCount || custom.bronze || 0),
+          totalPoints: custom.totalPoints !== undefined ? custom.totalPoints : ((custom.goldCount || 0) * 5 + (custom.silverCount || 0) * 3 + (custom.bronzeCount || 0) * 1),
+          logoUrl: custom.photoUrl || custom.logoUrl || '',
+          isCustom: true
+        });
+      }
+    } else if (custom.type === 'club') {
+      const targetName = (custom.name || custom.club || '').toLowerCase().trim();
+      const existingIdx = clubRankings.findIndex(r => 
+        (r.id && custom.id && r.id === custom.id) ||
+        r.club?.toLowerCase().trim() === targetName
+      );
+      if (existingIdx !== -1) {
+        clubRankings[existingIdx] = {
+          ...clubRankings[existingIdx],
+          ...custom,
+          id: custom.id || clubRankings[existingIdx].id,
+          gold: custom.goldCount !== undefined ? custom.goldCount : (custom.gold || clubRankings[existingIdx].gold),
+          silver: custom.silverCount !== undefined ? custom.silverCount : (custom.silver || clubRankings[existingIdx].silver),
+          bronze: custom.bronzeCount !== undefined ? custom.bronzeCount : (custom.bronze || clubRankings[existingIdx].bronze),
+          logoUrl: custom.photoUrl || custom.logoUrl || clubRankings[existingIdx].logoUrl,
+          isCustom: true
+        };
+      } else {
+        clubRankings.push({
+          id: custom.id || 'club-rnk-' + Date.now(),
+          rank: custom.rank || clubRankings.length + 1,
+          club: custom.name || custom.club || 'Club',
+          district: custom.district || 'State Pool',
+          mandal: getMandalForDistrict(custom.district || 'Lucknow'),
+          athletesCount: custom.athletesCount || 4,
+          eventsCount: custom.eventsCount || 1,
+          goldCount: custom.goldCount || custom.gold || 0,
+          gold: custom.goldCount || custom.gold || 0,
+          silverCount: custom.silverCount || custom.silver || 0,
+          silver: custom.silverCount || custom.silver || 0,
+          bronzeCount: custom.bronzeCount || custom.bronze || 0,
+          bronze: custom.bronzeCount || custom.bronze || 0,
+          totalMedals: (custom.goldCount || custom.gold || 0) + (custom.silverCount || custom.silver || 0) + (custom.bronzeCount || custom.bronze || 0),
+          totalPoints: custom.totalPoints !== undefined ? custom.totalPoints : ((custom.goldCount || 0) * 5 + (custom.silverCount || 0) * 3 + (custom.bronzeCount || 0) * 1),
+          logoUrl: custom.photoUrl || custom.logoUrl || '',
+          isCustom: true
+        });
+      }
+    }
+  });
+
+  // Re-sort and re-index ranks
+  individualRankings.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0) || (b.gold || 0) - (a.gold || 0));
+  individualRankings.forEach((r, i) => { if (!r.isCustom || !r.rank) r.rank = i + 1; });
+
+  districtRankings.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0) || (b.gold || 0) - (a.gold || 0));
+  districtRankings.forEach((r, i) => { if (!r.isCustom || !r.rank) r.rank = i + 1; });
+
+  clubRankings.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0) || (b.gold || 0) - (a.gold || 0));
+  clubRankings.forEach((r, i) => { if (!r.isCustom || !r.rank) r.rank = i + 1; });
+
+  return { individualRankings, districtRankings, clubRankings, customRankings: db.customRankings || [] };
 }
 
 // -------------------------------------------------------------
@@ -2291,17 +2562,331 @@ app.get('/api/results', (req, res) => {
 app.post('/api/results', (req, res) => {
   const newResult = {
     ...req.body,
-    id: 'res-' + Date.now(),
-    publishedAt: new Date().toISOString()
+    id: req.body.id || ('res-' + Date.now()),
+    publishedAt: req.body.publishedAt || new Date().toISOString()
   };
   db.results.unshift(newResult);
   saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Created Tournament Result',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Added result: ${newResult.skaterName} - ${newResult.eventName} (${newResult.medal || ('Pos ' + newResult.position)})`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
   res.status(201).json({ success: true, data: newResult, message: 'Result record added successfully' });
+});
+
+// Bulk Import Results from Excel / CSV Sheet
+app.post('/api/results/bulk', (req, res) => {
+  const { results: rawResults, tournamentId: defaultTourId, tournamentName: defaultTourName } = req.body;
+  if (!Array.isArray(rawResults) || rawResults.length === 0) {
+    return res.status(400).json({ success: false, message: 'No results provided to import' });
+  }
+
+  const now = new Date().toISOString();
+  const createdResults: any[] = [];
+
+  rawResults.forEach((row: any, idx: number) => {
+    // 1. Resolve Tournament Name and ID
+    let tourId = (row.tournamentId || defaultTourId || '').trim();
+    let tourName = (row.tournamentName || row.tournamentTitle || row.tournament || defaultTourName || '').trim();
+
+    if (tourId && !tourName) {
+      const matchT = db.tournaments.find(t => t.id === tourId);
+      if (matchT) tourName = matchT.name || matchT.title;
+    } else if (tourName && !tourId) {
+      const matchT = db.tournaments.find(t => 
+        (t.name && t.name.toLowerCase().includes(tourName.toLowerCase())) ||
+        (t.title && t.title.toLowerCase().includes(tourName.toLowerCase()))
+      );
+      if (matchT) {
+        tourId = matchT.id;
+        tourName = matchT.name || matchT.title;
+      } else {
+        tourId = 'tour-' + Date.now() + '-' + idx;
+      }
+    } else if (!tourId && !tourName) {
+      const defaultT = db.tournaments[0];
+      tourId = defaultT ? defaultT.id : 'tour-2026-01';
+      tourName = defaultT ? (defaultT.name || defaultT.title) : '36th UP State Roller Skating Championship 2026';
+    }
+
+    // 2. Resolve Skater Name & Reg No
+    const skaterName = (row.skaterName || row.name || row.athleteName || 'Athlete ' + (idx + 1)).trim();
+    let skaterRegNo = (row.skaterRegNo || row.registrationNumber || row.regNo || '').trim();
+    let skaterId = (row.skaterId || '').trim();
+    let skaterPhoto = (row.skaterPhotoUrl || row.photoUrl || '').trim();
+
+    // Check if athlete exists in db.skaters
+    const matchedSkater = db.skaters.find(s => 
+      (skaterRegNo && s.registrationNumber && s.registrationNumber.toUpperCase() === skaterRegNo.toUpperCase()) ||
+      (skaterName && `${s.firstName} ${s.lastName}`.toLowerCase().trim() === skaterName.toLowerCase().trim())
+    );
+
+    if (matchedSkater) {
+      if (!skaterRegNo) skaterRegNo = matchedSkater.registrationNumber;
+      if (!skaterId) skaterId = matchedSkater.id;
+      if (!skaterPhoto) skaterPhoto = matchedSkater.photoUrl || '';
+      if (!row.district && matchedSkater.district) row.district = matchedSkater.district;
+      if (!row.club && matchedSkater.club) row.club = matchedSkater.club;
+    } else {
+      if (!skaterRegNo) {
+        const distCode = (row.district || 'UP').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'UP');
+        skaterRegNo = `UPRSA/2026/${distCode}/${String(1000 + idx)}`;
+      }
+      if (!skaterId) {
+        skaterId = 'skater-' + Date.now() + '-' + idx;
+      }
+    }
+
+    // 3. Resolve Position & Medal & Points
+    let pos = parseInt(row.position || row.rank || '0', 10);
+    let medal = (row.medal || '').toString().trim();
+
+    // Normalize medal text (English & Hindi)
+    const medalLower = medal.toLowerCase();
+    if (medalLower.includes('gold') || medalLower.includes('स्वर्ण') || medalLower.includes('1st') || medalLower.includes('first')) {
+      medal = 'Gold';
+      if (!pos) pos = 1;
+    } else if (medalLower.includes('silver') || medalLower.includes('रजत') || medalLower.includes('2nd') || medalLower.includes('second')) {
+      medal = 'Silver';
+      if (!pos) pos = 2;
+    } else if (medalLower.includes('bronze') || medalLower.includes('कांस्य') || medalLower.includes('3rd') || medalLower.includes('third')) {
+      medal = 'Bronze';
+      if (!pos) pos = 3;
+    } else if (pos === 1 && !medal) {
+      medal = 'Gold';
+    } else if (pos === 2 && !medal) {
+      medal = 'Silver';
+    } else if (pos === 3 && !medal) {
+      medal = 'Bronze';
+    }
+
+    let points = typeof row.points === 'number' ? row.points : parseInt(row.points || '0', 10);
+    if (!points) {
+      if (medal === 'Gold' || pos === 1) points = 5;
+      else if (medal === 'Silver' || pos === 2) points = 3;
+      else if (medal === 'Bronze' || pos === 3) points = 1;
+      else points = 0;
+    }
+
+    const newRecord = {
+      id: row.id || `res-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+      tournamentId: tourId,
+      tournamentName: tourName,
+      eventId: row.eventId || `ev-${Date.now()}-${idx}`,
+      eventName: (row.eventName || row.event || 'Championship Race').trim(),
+      discipline: row.discipline || 'Speed Skating (Inline)',
+      ageCategory: row.ageCategory || 'Sub-Junior (12 to 15)',
+      gender: row.gender || 'Male',
+      round: row.round || 'Final',
+      position: pos || 1,
+      medal: medal || null,
+      points,
+      skaterId,
+      skaterName,
+      skaterRegNo,
+      district: (row.district || 'Lucknow').trim(),
+      club: (row.club || 'Affiliated Club').trim(),
+      bibNumber: (row.bibNumber || row.bib || '').toString(),
+      timeRecord: (row.timeRecord || row.timeTaken || row.time || row.timing || '').toString(),
+      timeTaken: (row.timeTaken || row.timeRecord || row.time || row.timing || '').toString(),
+      skaterPhotoUrl: skaterPhoto,
+      notes: (row.notes || 'Imported via Excel Bulk Upload').toString(),
+      publishedAt: row.publishedAt || now
+    };
+
+    createdResults.push(newRecord);
+  });
+
+  // Prepend new results to db.results
+  db.results = [...createdResults, ...db.results];
+  saveDB(db);
+
+  // Compute fresh rankings
+  const updatedRankings = computeRankings();
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Excel Bulk Results Upload',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Imported ${createdResults.length} tournament race results via Excel Sheet. State rankings recomputed automatically.`,
+      timestamp: now
+    });
+  }
+
+  res.status(201).json({
+    success: true,
+    data: {
+      addedCount: createdResults.length,
+      totalCount: db.results.length,
+      results: createdResults
+    },
+    rankings: updatedRankings,
+    message: `Successfully imported ${createdResults.length} tournament results from Excel and updated rankings!`
+  });
+});
+
+// Update / Edit Result
+app.put('/api/results/:id', (req, res) => {
+  const { id } = req.params;
+  const index = db.results.findIndex(r => r.id === id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: 'Result record not found' });
+  }
+
+  db.results[index] = {
+    ...db.results[index],
+    ...req.body,
+    id, // protect ID
+    updatedAt: new Date().toISOString()
+  };
+  saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Updated Tournament Result',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Modified result for ${db.results[index].skaterName} (${db.results[index].eventName})`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.json({ success: true, data: db.results[index], message: 'Result updated successfully' });
+});
+
+// Delete Result
+app.delete('/api/results/:id', (req, res) => {
+  const { id } = req.params;
+  const target = db.results.find(r => r.id === id);
+  if (!target) {
+    return res.status(404).json({ success: false, message: 'Result record not found' });
+  }
+
+  db.results = db.results.filter(r => r.id !== id);
+  saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Deleted Tournament Result',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Deleted result of ${target.skaterName} from ${target.eventName}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.json({ success: true, message: 'Result record deleted successfully' });
 });
 
 app.get('/api/rankings', (req, res) => {
   const rankings = computeRankings();
   res.json({ success: true, data: rankings });
+});
+
+// Create Custom / Manual Ranking
+app.post('/api/rankings', (req, res) => {
+  if (!db.customRankings) db.customRankings = [];
+  const newRanking = {
+    ...req.body,
+    id: req.body.id || ('rnk-' + Date.now()),
+    isCustom: true,
+    updatedAt: new Date().toISOString()
+  };
+  db.customRankings.unshift(newRanking);
+  saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Created Custom Ranking',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Created custom ranking entry for ${newRanking.name || newRanking.skaterName || newRanking.district || newRanking.club} (${newRanking.type || 'individual'})`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.status(201).json({ success: true, data: newRanking, message: 'Ranking record created successfully' });
+});
+
+// Update / Edit Ranking
+app.put('/api/rankings/:id', (req, res) => {
+  const { id } = req.params;
+  if (!db.customRankings) db.customRankings = [];
+  const index = db.customRankings.findIndex(r => r.id === id);
+
+  if (index === -1) {
+    // Treat as custom override creation
+    const newOverride = {
+      ...req.body,
+      id,
+      isCustom: true,
+      updatedAt: new Date().toISOString()
+    };
+    db.customRankings.unshift(newOverride);
+    saveDB(db);
+    return res.json({ success: true, data: newOverride, message: 'Ranking entry updated successfully' });
+  }
+
+  db.customRankings[index] = {
+    ...db.customRankings[index],
+    ...req.body,
+    id,
+    isCustom: true,
+    updatedAt: new Date().toISOString()
+  };
+  saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Updated Ranking Record',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Updated ranking for ${db.customRankings[index].name || id}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.json({ success: true, data: db.customRankings[index], message: 'Ranking updated successfully' });
+});
+
+// Delete Custom Ranking
+app.delete('/api/rankings/:id', (req, res) => {
+  const { id } = req.params;
+  if (!db.customRankings) db.customRankings = [];
+  const target = db.customRankings.find(r => r.id === id);
+  db.customRankings = db.customRankings.filter(r => r.id !== id);
+  saveDB(db);
+
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Deleted Ranking Record',
+      user: (req.headers['x-admin-user'] as string) || 'admin@uprsa.org',
+      details: `Deleted ranking record ${target?.name || id}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  res.json({ success: true, message: 'Ranking record deleted successfully' });
+});
+
+// Recompute / Reset Rankings from verified results
+app.post('/api/rankings/recompute', (req, res) => {
+  const { resetOverrides } = req.body || {};
+  if (resetOverrides) {
+    db.customRankings = [];
+    saveDB(db);
+  }
+  const rankings = computeRankings();
+  res.json({ success: true, data: rankings, message: 'Rankings recomputed from verified tournament results successfully' });
 });
 
 // Certificates
@@ -2703,13 +3288,13 @@ app.get('/api/contact-messages', (req, res) => {
 app.post('/api/contact-messages', (req, res) => {
   const newMsg = {
     ...req.body,
-    id: 'cmsg-' + Date.now(),
-    status: 'new',
-    created_at: new Date().toISOString()
+    id: req.body.id || 'cmsg-' + Date.now(),
+    status: req.body.status || 'new',
+    created_at: req.body.created_at || new Date().toISOString()
   };
   db.contactMessages.unshift(newMsg);
   saveDB(db);
-  res.status(201).json({ success: true, data: newMsg, message: 'Message sent successfully. Our state office will reach out soon.' });
+  res.status(201).json({ success: true, data: newMsg, message: 'Message saved successfully.' });
 });
 
 app.put('/api/contact-messages/:id', (req, res) => {
@@ -2769,6 +3354,183 @@ app.put('/api/content/site-settings', (req, res) => {
   db.siteSettings = { ...db.siteSettings, ...req.body };
   saveDB(db);
   res.json({ success: true, data: db.siteSettings, message: 'Site settings updated successfully' });
+});
+
+// About Page CMS (Full Create, Edit, Delete Access)
+app.get('/api/content/about', (req, res) => {
+  if (!db.aboutInfo) {
+    const init = getInitialDBState();
+    db.aboutInfo = init.aboutInfo;
+    db.aboutSections = init.aboutSections;
+    db.aboutPolicies = init.aboutPolicies;
+    saveDB(db);
+  }
+  res.json({
+    success: true,
+    data: {
+      info: db.aboutInfo,
+      sections: (db.aboutSections || []).sort((a, b) => (a.order || 0) - (b.order || 0)),
+      policies: (db.aboutPolicies || []).sort((a, b) => (a.order || 0) - (b.order || 0))
+    }
+  });
+});
+
+app.put('/api/content/about/info', (req, res) => {
+  db.aboutInfo = { ...db.aboutInfo, ...req.body };
+  saveDB(db);
+  res.json({ success: true, data: db.aboutInfo, message: 'About page information updated successfully' });
+});
+
+app.post('/api/content/about/sections', (req, res) => {
+  if (!db.aboutSections) db.aboutSections = [];
+  const newSection = {
+    ...req.body,
+    id: 'sec-' + Date.now(),
+    order: req.body.order || db.aboutSections.length + 1,
+    status: req.body.status || 'Active'
+  };
+  db.aboutSections.push(newSection);
+  saveDB(db);
+  res.status(201).json({ success: true, data: newSection, message: 'About section created successfully' });
+});
+
+app.put('/api/content/about/sections/:id', (req, res) => {
+  if (!db.aboutSections) db.aboutSections = [];
+  const idx = db.aboutSections.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, message: 'About section not found' });
+  db.aboutSections[idx] = { ...db.aboutSections[idx], ...req.body };
+  saveDB(db);
+  res.json({ success: true, data: db.aboutSections[idx], message: 'About section updated successfully' });
+});
+
+app.delete('/api/content/about/sections/:id', (req, res) => {
+  if (!db.aboutSections) db.aboutSections = [];
+  db.aboutSections = db.aboutSections.filter(s => s.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true, message: 'About section deleted successfully' });
+});
+
+app.post('/api/content/about/policies', (req, res) => {
+  if (!db.aboutPolicies) db.aboutPolicies = [];
+  const newPolicy = {
+    ...req.body,
+    id: 'pol-' + Date.now(),
+    order: req.body.order || db.aboutPolicies.length + 1
+  };
+  db.aboutPolicies.push(newPolicy);
+  saveDB(db);
+  res.status(201).json({ success: true, data: newPolicy, message: 'Policy added successfully' });
+});
+
+app.put('/api/content/about/policies/:id', (req, res) => {
+  if (!db.aboutPolicies) db.aboutPolicies = [];
+  const idx = db.aboutPolicies.findIndex(p => p.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, message: 'Policy not found' });
+  db.aboutPolicies[idx] = { ...db.aboutPolicies[idx], ...req.body };
+  saveDB(db);
+  res.json({ success: true, data: db.aboutPolicies[idx], message: 'Policy updated successfully' });
+});
+
+app.delete('/api/content/about/policies/:id', (req, res) => {
+  if (!db.aboutPolicies) db.aboutPolicies = [];
+  db.aboutPolicies = db.aboutPolicies.filter(p => p.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true, message: 'Policy deleted successfully' });
+});
+
+// ==========================================
+// SPORTS DISCIPLINES CMS (Full CRUD)
+// ==========================================
+app.get('/api/disciplines', (req, res) => {
+  if (!db.disciplines || db.disciplines.length === 0) {
+    db.disciplines = JSON.parse(JSON.stringify(ALL_14_OFFICIAL_DISCIPLINES));
+    saveDB(db);
+  }
+  const sorted = [...db.disciplines].sort((a, b) => (Number(a.number) || 99) - (Number(b.number) || 99));
+  res.json({ success: true, data: sorted });
+});
+
+app.post('/api/disciplines', (req, res) => {
+  if (!db.disciplines) db.disciplines = [];
+  const body = req.body || {};
+  if (!body.name) {
+    return res.status(400).json({ success: false, message: 'Discipline name is required' });
+  }
+
+  const generatedId = body.id || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `disc-${Date.now()}`;
+  const maxNumber = db.disciplines.reduce((max, d) => Math.max(max, Number(d.number) || 0), 0);
+  
+  const newDiscipline = {
+    id: generatedId,
+    number: body.number !== undefined ? Number(body.number) : maxNumber + 1,
+    name: body.name.trim().toUpperCase(),
+    hindiName: body.hindiName ? body.hindiName.trim() : '',
+    recognitionBadge: body.recognitionBadge || 'WORLD SKATE & RSFI RECOGNIZED',
+    imageUrl: body.imageUrl || 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=1200&q=80',
+    description: body.description || '',
+    hindiDescription: body.hindiDescription || '',
+    equipmentSpecs: body.equipmentSpecs || '',
+    rinkStandard: body.rinkStandard || '',
+    events: Array.isArray(body.events) ? body.events : (body.events ? String(body.events).split(',').map(s => s.trim()).filter(Boolean) : []),
+    rules: {
+      governingBody: body.rules?.governingBody || 'World Skate & RSFI Technical Committee',
+      ageCategories: body.rules?.ageCategories || 'All Official RSFI Age Categories (Sub-Junior, Junior, Senior, Masters)',
+      safetyGear: body.rules?.safetyGear || 'Official Federation Safety Gear & Helmet Mandatory',
+      scoringFormat: body.rules?.scoringFormat || 'Standard RSFI Scoring & Technical Guidelines',
+      wheelLimit: body.rules?.wheelLimit || 'As per official RSFI discipline regulations'
+    },
+    status: body.status || 'Active'
+  };
+
+  db.disciplines.push(newDiscipline);
+  saveDB(db);
+  res.status(201).json({ success: true, data: newDiscipline, message: 'Discipline created successfully' });
+});
+
+app.put('/api/disciplines/:id', (req, res) => {
+  if (!db.disciplines) db.disciplines = [];
+  const idx = db.disciplines.findIndex(d => d.id === req.params.id);
+  if (idx === -1) {
+    return res.status(404).json({ success: false, message: 'Discipline not found' });
+  }
+
+  const existing = db.disciplines[idx];
+  const body = req.body || {};
+
+  const updated = {
+    ...existing,
+    ...body,
+    id: existing.id, // preserve original id
+    number: body.number !== undefined ? Number(body.number) : existing.number,
+    name: body.name ? body.name.trim().toUpperCase() : existing.name,
+    hindiName: body.hindiName !== undefined ? body.hindiName.trim() : existing.hindiName,
+    events: Array.isArray(body.events) ? body.events : (body.events ? String(body.events).split(',').map(s => s.trim()).filter(Boolean) : existing.events),
+    rules: {
+      ...existing.rules,
+      ...(body.rules || {})
+    }
+  };
+
+  db.disciplines[idx] = updated;
+  saveDB(db);
+  res.json({ success: true, data: updated, message: 'Discipline updated successfully' });
+});
+
+app.delete('/api/disciplines/:id', (req, res) => {
+  if (!db.disciplines) db.disciplines = [];
+  const exists = db.disciplines.some(d => d.id === req.params.id);
+  if (!exists) {
+    return res.status(404).json({ success: false, message: 'Discipline not found' });
+  }
+  db.disciplines = db.disciplines.filter(d => d.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true, message: 'Discipline deleted successfully' });
+});
+
+app.post('/api/disciplines/reset', (req, res) => {
+  db.disciplines = JSON.parse(JSON.stringify(ALL_14_OFFICIAL_DISCIPLINES));
+  saveDB(db);
+  res.json({ success: true, data: db.disciplines, message: 'Disciplines restored to official 14 RSFI default disciplines' });
 });
 
 // Certificate Revocation & Deletion

@@ -300,8 +300,8 @@ export interface TournamentResult {
   discipline: DisciplineType;
   ageCategory: AgeCategory;
   gender: Gender;
-  position: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  medal?: 'Gold' | 'Silver' | 'Bronze' | null;
+  position: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | number;
+  medal?: 'Gold' | 'Silver' | 'Bronze' | null | string;
   points: number; // Gold=5, Silver=3, Bronze=1
   skaterId: string;
   skaterName: string;
@@ -309,10 +309,16 @@ export interface TournamentResult {
   district: string;
   club: string;
   timeRecord?: string;
+  timeTaken?: string;
+  skaterPhotoUrl?: string; // JPG photo of skater/podium winner
+  bibNumber?: string;
+  round?: string;
+  notes?: string;
   publishedAt: string;
 }
 
 export interface SkaterRanking {
+  id?: string;
   rank: number;
   skaterId: string;
   skaterName: string;
@@ -334,9 +340,12 @@ export interface SkaterRanking {
   totalMedals?: number;
   totalPoints: number;
   profileUrl?: string;
+  photoUrl?: string; // JPG headshot/podium photo
+  isCustom?: boolean;
 }
 
 export interface DistrictRanking {
+  id?: string;
   rank: number;
   district: string;
   mandal?: string;
@@ -351,9 +360,13 @@ export interface DistrictRanking {
   bronze?: number;
   totalMedals?: number;
   totalPoints: number;
+  logoUrl?: string; // JPG emblem/crest
+  photoUrl?: string;
+  isCustom?: boolean;
 }
 
 export interface ClubRanking {
+  id?: string;
   rank: number;
   club: string;
   district: string;
@@ -369,6 +382,35 @@ export interface ClubRanking {
   bronze?: number;
   totalMedals?: number;
   totalPoints: number;
+  logoUrl?: string; // JPG club crest
+  photoUrl?: string;
+  isCustom?: boolean;
+}
+
+export interface CustomRankingRecord {
+  id: string;
+  type: 'individual' | 'district' | 'club';
+  rank: number;
+  name: string;
+  registrationNumber?: string;
+  district?: string;
+  mandal?: string;
+  club?: string;
+  discipline?: DisciplineType;
+  ageCategory?: AgeCategory;
+  gender?: Gender;
+  goldCount: number;
+  silverCount: number;
+  bronzeCount: number;
+  totalMedals?: number;
+  totalPoints: number;
+  eventsCount?: number;
+  athletesCount?: number;
+  photoUrl?: string; // JPG photo/logo
+  season?: string;
+  notes?: string;
+  isCustom?: boolean;
+  updatedAt?: string;
 }
 
 export interface Certificate {
@@ -445,15 +487,33 @@ export interface PaymentSettings {
 export interface District {
   id: string;
   name: string;
-  zone: 'Western' | 'Central' | 'Eastern' | 'Southern';
-  secretaryName: string;
-  secretaryPhone: string;
-  secretaryEmail: string;
-  officeAddress: string;
-  affiliatedYear: number;
-  clubsCount: number;
-  skatersCount: number;
-  status: 'Active' | 'Pending';
+  hindiName?: string;
+  zone: 'Western' | 'Central' | 'Eastern' | 'Southern' | 'Bundelkhand' | 'Rohilkhand' | string;
+  president?: string;
+  presidentName?: string;
+  presidentPhone?: string;
+  presidentEmail?: string;
+  presidentPhotoUrl?: string;
+  secretary?: string;
+  secretaryName?: string;
+  secretaryPhone?: string;
+  secretaryEmail?: string;
+  secretaryPhotoUrl?: string;
+  treasurer?: string;
+  treasurerName?: string;
+  treasurerPhone?: string;
+  treasurerEmail?: string;
+  treasurerPhotoUrl?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  officeAddress?: string;
+  stadiumVenue?: string;
+  affiliatedYear?: number;
+  clubsCount?: number;
+  skatersCount?: number;
+  logoUrl?: string;
+  photoUrl?: string;
+  status?: 'Active' | 'Pending' | 'Inactive' | string;
 }
 
 export interface Club {
@@ -463,20 +523,24 @@ export interface Club {
   affiliationNumber?: string;
   district: string;
   city?: string;
-  headCoach: string;
+  headCoach?: string;
+  contactPerson?: string;
   coachDesignation?: string;
   coachPhotoUrl?: string;
-  coachPhone: string;
-  coachEmail: string;
-  venue: string;
+  coachPhone?: string;
+  coachEmail?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  venue?: string;
   officialAddress?: string;
   facility?: string;
   websiteUrl?: string;
   photoUrl?: string;
-  disciplines: DisciplineType[] | string[];
-  establishedYear: number;
-  skatersCount: number;
-  status: 'Active' | 'Pending';
+  logoUrl?: string;
+  disciplines?: DisciplineType[] | string[];
+  establishedYear?: number;
+  skatersCount?: number;
+  status?: 'Active' | 'Pending' | 'Inactive' | string;
   isVerified?: boolean;
 }
 
@@ -495,12 +559,19 @@ export interface HeroSlide {
 export interface Announcement {
   id: string;
   title: string;
+  hindiTitle?: string;
+  circularNumber?: string;
   date: string;
   category: 'Championship' | 'Circular' | 'Results' | 'General';
   isImportant: boolean;
   linkText?: string;
   linkUrl?: string;
   fileUrl?: string;
+  imageUrl?: string; // JPG photo / circular scan banner
+  signatory?: string;
+  designation?: string;
+  urgency?: 'NORMAL' | 'HIGH' | 'CRITICAL';
+  content?: string;
   created_at: string;
 }
 
@@ -578,9 +649,13 @@ export interface ContactMessage {
   district?: string;
   subject: string;
   message: string;
+  category?: string; // 'Skater Query' | 'Affiliation' | 'Tournament' | 'Grievance' | 'General'
+  priority?: 'normal' | 'high' | 'urgent';
   status: 'new' | 'in_progress' | 'resolved' | 'archived';
   adminReply?: string;
   repliedAt?: string;
+  notes?: string;
+  updatedAt?: string;
   created_at: string;
 }
 
@@ -647,5 +722,67 @@ export interface SiteSettings {
     stateChampionships: number;
     recognizedClubs: number;
   };
+}
+
+export interface AboutInfo {
+  establishedText: string;
+  title: string;
+  tagline: string;
+  headOfficeAddress: string;
+  phone: string;
+  email: string;
+  constitutionTitle: string;
+  statRegisteredAthletesText?: string;
+  statAffiliatedUnitsText?: string;
+}
+
+export interface AboutSection {
+  id: string;
+  title: string;
+  badge: string;
+  badgeColor?: 'amber' | 'indigo' | 'emerald' | 'blue' | 'purple' | 'rose';
+  description: string;
+  footerTag: string;
+  imageUrl: string;
+  order: number;
+  status: 'Active' | 'Inactive';
+}
+
+export interface AboutPolicy {
+  id: string;
+  title: string;
+  description?: string;
+  linkUrl?: string;
+  order: number;
+}
+
+export interface AboutContent {
+  info: AboutInfo;
+  sections: AboutSection[];
+  policies: AboutPolicy[];
+}
+
+export interface DisciplineRules {
+  governingBody: string;
+  ageCategories: string;
+  safetyGear: string;
+  scoringFormat: string;
+  wheelLimit: string;
+}
+
+export interface DisciplineItem {
+  id: string;
+  number: number;
+  name: string;
+  hindiName: string;
+  recognitionBadge: string;
+  imageUrl: string;
+  description: string;
+  hindiDescription: string;
+  equipmentSpecs: string;
+  rinkStandard: string;
+  events: string[];
+  rules: DisciplineRules;
+  status?: 'Active' | 'Inactive';
 }
 

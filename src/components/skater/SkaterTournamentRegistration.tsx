@@ -48,6 +48,18 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (skater) {
+      setSkaterRegNo(skater.registrationNumber || '');
+      setSkaterName(`${skater.firstName || ''} ${skater.lastName || ''}`.trim());
+      setDistrict(skater.district || 'Lucknow');
+      setClub(skater.club || 'Lucknow Speed Skating Academy');
+      setAgeCategory(skater.ageCategory || 'Junior (15 to 18)');
+      setGender(skater.gender || 'Male');
+      setDiscipline(skater.discipline || 'Speed Skating (Quad)');
+    }
+  }, [skater]);
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -220,7 +232,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                 <input
                   type="text"
                   required
-                  value={skaterName}
+                  value={skaterName || ''}
                   onChange={(e) => setSkaterName(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                 />
@@ -234,7 +246,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                   type="text"
                   required
                   placeholder="e.g. UPRSA-2026-SK-1001"
-                  value={skaterRegNo}
+                  value={skaterRegNo || ''}
                   onChange={(e) => setSkaterRegNo(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white uppercase font-mono focus:outline-none focus:border-amber-500"
                 />
@@ -248,7 +260,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                 </label>
                 <input
                   type="text"
-                  value={district}
+                  value={district || ''}
                   onChange={(e) => setDistrict(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white"
                 />
@@ -260,7 +272,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                 </label>
                 <input
                   type="text"
-                  value={ageCategory}
+                  value={ageCategory || ''}
                   onChange={(e) => setAgeCategory(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white"
                 />
@@ -271,7 +283,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                   Gender
                 </label>
                 <select
-                  value={gender}
+                  value={gender || 'Male'}
                   onChange={(e) => setGender(e.target.value as any)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white"
                 >
@@ -353,7 +365,7 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
               <input
                 type="text"
                 placeholder="Enter UPI UTR Number (12 digits), e.g. 408219873456"
-                value={paymentUtr}
+                value={paymentUtr || ''}
                 onChange={(e) => setPaymentUtr(e.target.value)}
                 className="w-full bg-slate-950 border border-amber-500/50 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase font-mono placeholder:normal-case focus:outline-none focus:border-amber-400"
               />

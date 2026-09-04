@@ -249,11 +249,11 @@ export const SkaterDocumentsModal: React.FC<SkaterDocumentsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-      {/* Hidden File Input */}
+      {/* Hidden File Input with explicit JPG/JPEG support */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,application/pdf"
+        accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/jpg,image/png,image/*,application/pdf"
         className="hidden"
         onChange={handleFileSelected}
       />

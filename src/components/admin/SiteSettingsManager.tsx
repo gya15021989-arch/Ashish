@@ -11,7 +11,10 @@ import {
   AlertCircle,
   BarChart3,
   Share2,
-  Lock
+  Lock,
+  Upload,
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import { SiteSettings } from '../../types';
 import { api } from '../../services/api';
@@ -47,10 +50,36 @@ export const SiteSettingsManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      alert('File size exceeds 8MB. Please choose a smaller JPG image.');
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        const res = await api.uploadFile(file.name, base64, false);
+        if (res.success && res.fileUrl) {
+          setSettings(prev => ({ ...prev, logoUrl: res.fileUrl }));
+        }
+        setUploadingLogo(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Error uploading logo:', err);
+      setUploadingLogo(false);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -176,6 +205,63 @@ export const SiteSettingsManager: React.FC = () => {
                 onChange={(e) => setSettings({ ...settings, affiliationNotice: e.target.value })}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-slate-200"
               />
+            </div>
+
+            {/* Official Logo (JPG / PNG) */}
+            <div className="md:col-span-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                  Official Organization Logo & Crest (JPG / PNG)
+                </label>
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  JPG UPLOAD
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={settings.logoUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                  placeholder="https://... or upload a local JPG file"
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 font-mono text-xs"
+                />
+
+                <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-slate-700 transition-colors shrink-0">
+                  <Upload className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{uploadingLogo ? 'Uploading...' : 'Upload JPG Logo'}</span>
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*"
+                    className="hidden"
+                    onChange={handleLogoUpload}
+                  />
+                </label>
+              </div>
+
+              {settings.logoUrl && (
+                <div className="flex items-center gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800 w-fit">
+                  <img
+                    src={settings.logoUrl}
+                    alt="Logo Preview"
+                    referrerPolicy="no-referrer"
+                    className="w-12 h-12 object-contain bg-white/5 rounded-lg p-1"
+                  />
+                  <div className="text-xs">
+                    <span className="text-white font-bold block">Current Logo Preview</span>
+                    <span className="text-[10px] text-slate-500 font-mono">JPG / Image verified</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSettings({ ...settings, logoUrl: '' })}
+                    className="p-1 text-slate-500 hover:text-rose-400 ml-2"
+                    title="Remove logo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

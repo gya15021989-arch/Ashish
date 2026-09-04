@@ -20,7 +20,13 @@ import {
   User,
   TickerItem,
   SiteSettings,
-  LiveSession
+  LiveSession,
+  AboutContent,
+  AboutInfo,
+  AboutSection,
+  AboutPolicy,
+  DisciplineItem,
+  CustomRankingRecord
 } from '../types';
 
 const API_BASE = '/api';
@@ -363,6 +369,10 @@ export const api = {
   },
 
   async submitResult(result: Partial<TournamentResult>): Promise<{ success: boolean; data?: TournamentResult; message?: string }> {
+    return this.createResult(result);
+  },
+
+  async createResult(result: Partial<TournamentResult>): Promise<{ success: boolean; data?: TournamentResult; message?: string }> {
     const res = await fetch(`${API_BASE}/results`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -371,8 +381,72 @@ export const api = {
     return res.json();
   },
 
-  async getRankings(): Promise<{ success: boolean; data: { individualRankings: SkaterRanking[]; districtRankings: DistrictRanking[]; clubRankings: ClubRanking[] } }> {
+  async bulkCreateResults(payload: { results: Partial<TournamentResult>[]; tournamentId?: string; tournamentName?: string }): Promise<{ 
+    success: boolean; 
+    data?: { addedCount: number; totalCount: number; results: TournamentResult[] }; 
+    rankings?: any; 
+    message?: string 
+  }> {
+    const res = await fetch(`${API_BASE}/results/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  },
+
+  async updateResult(id: string, updates: Partial<TournamentResult>): Promise<{ success: boolean; data?: TournamentResult; message?: string }> {
+    const res = await fetch(`${API_BASE}/results/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteResult(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/results/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
+
+  async getRankings(): Promise<{ success: boolean; data: { individualRankings: SkaterRanking[]; districtRankings: DistrictRanking[]; clubRankings: ClubRanking[]; customRankings?: CustomRankingRecord[] } }> {
     const res = await fetch(`${API_BASE}/rankings`);
+    return res.json();
+  },
+
+  async createRanking(ranking: Partial<CustomRankingRecord>): Promise<{ success: boolean; data?: CustomRankingRecord; message?: string }> {
+    const res = await fetch(`${API_BASE}/rankings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ranking)
+    });
+    return res.json();
+  },
+
+  async updateRanking(id: string, updates: Partial<CustomRankingRecord>): Promise<{ success: boolean; data?: CustomRankingRecord; message?: string }> {
+    const res = await fetch(`${API_BASE}/rankings/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteRanking(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/rankings/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
+
+  async recomputeRankings(resetOverrides = false): Promise<{ success: boolean; data: { individualRankings: SkaterRanking[]; districtRankings: DistrictRanking[]; clubRankings: ClubRanking[] }; message?: string }> {
+    const res = await fetch(`${API_BASE}/rankings/recompute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resetOverrides })
+    });
     return res.json();
   },
 
@@ -768,6 +842,105 @@ export const api = {
 
   async getAdminStats(): Promise<{ success: boolean; data: any }> {
     const res = await fetch(`${API_BASE}/admin/metrics`);
+    return res.json();
+  },
+
+  // About Page CMS (Full CRUD)
+  async getAboutContent(): Promise<{ success: boolean; data: AboutContent }> {
+    const res = await fetch(`${API_BASE}/content/about`);
+    return res.json();
+  },
+
+  async updateAboutInfo(info: Partial<AboutInfo>): Promise<{ success: boolean; data?: AboutInfo; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/info`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(info)
+    });
+    return res.json();
+  },
+
+  async createAboutSection(section: Partial<AboutSection>): Promise<{ success: boolean; data?: AboutSection; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/sections`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(section)
+    });
+    return res.json();
+  },
+
+  async updateAboutSection(id: string, updates: Partial<AboutSection>): Promise<{ success: boolean; data?: AboutSection; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/sections/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteAboutSection(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/sections/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+
+  async createAboutPolicy(policy: Partial<AboutPolicy>): Promise<{ success: boolean; data?: AboutPolicy; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/policies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(policy)
+    });
+    return res.json();
+  },
+
+  async updateAboutPolicy(id: string, updates: Partial<AboutPolicy>): Promise<{ success: boolean; data?: AboutPolicy; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/policies/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteAboutPolicy(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/policies/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+
+  // Disciplines CMS (Full Create, Edit, Delete CRUD)
+  async getDisciplines(): Promise<{ success: boolean; data: DisciplineItem[] }> {
+    const res = await fetch(`${API_BASE}/disciplines`);
+    return res.json();
+  },
+
+  async createDiscipline(discipline: Partial<DisciplineItem>): Promise<{ success: boolean; data?: DisciplineItem; message?: string }> {
+    const res = await fetch(`${API_BASE}/disciplines`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(discipline)
+    });
+    return res.json();
+  },
+
+  async updateDiscipline(id: string, updates: Partial<DisciplineItem>): Promise<{ success: boolean; data?: DisciplineItem; message?: string }> {
+    const res = await fetch(`${API_BASE}/disciplines/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteDiscipline(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/disciplines/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
+
+  async resetDisciplines(): Promise<{ success: boolean; data?: DisciplineItem[]; message?: string }> {
+    const res = await fetch(`${API_BASE}/disciplines/reset`, {
+      method: 'POST'
+    });
     return res.json();
   }
 };

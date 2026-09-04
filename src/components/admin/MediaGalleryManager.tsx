@@ -514,18 +514,20 @@ export const MediaGalleryManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">High-Res Image URL *</label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                    type="text"
                     required
                     value={photoForm.imageUrl}
                     onChange={(e) => setPhotoForm({ ...photoForm, imageUrl: e.target.value })}
+                    placeholder="https://... or /storage/..."
                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500 outline-none font-mono"
                   />
                   <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'photo')} />
+                    <span>Upload JPG / Image</span>
+                    <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'photo')} />
                   </label>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">Supports JPG, JPEG, PNG or WebP images</p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -577,11 +579,11 @@ export const MediaGalleryManager: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">YouTube / Video Streaming URL *</label>
                 <input
-                  type="url"
+                  type="text"
                   required
                   value={videoForm.videoUrl}
                   onChange={(e) => setVideoForm({ ...videoForm, videoUrl: e.target.value })}
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder="https://www.youtube.com/watch?v=... or video link"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-red-500 outline-none font-mono"
                 />
               </div>
@@ -614,18 +616,19 @@ export const MediaGalleryManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Thumbnail Image URL</label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                    type="text"
                     value={videoForm.thumbnailUrl}
                     onChange={(e) => setVideoForm({ ...videoForm, thumbnailUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="https://images.unsplash.com/... or /storage/..."
                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-red-500 outline-none font-mono"
                   />
                   <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'videoThumb')} />
+                    <span>Upload JPG / Image</span>
+                    <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'videoThumb')} />
                   </label>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">Supports JPG, JPEG, PNG or WebP images</p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">

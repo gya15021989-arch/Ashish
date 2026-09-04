@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Trophy, 
   Search, 
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { ALL_14_OFFICIAL_DISCIPLINES, DetailedDiscipline } from '../../data/all14Disciplines';
+import { api } from '../../services/api';
 
 interface ActivitiesProps {
   setCurrentView?: (view: string) => void;
@@ -37,6 +38,23 @@ export const Activities: React.FC<ActivitiesProps> = ({
   const { lang, setLang } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDisciplineModal, setSelectedDisciplineModal] = useState<DetailedDiscipline | null>(null);
+  const [disciplinesList, setDisciplinesList] = useState<DetailedDiscipline[]>(ALL_14_OFFICIAL_DISCIPLINES);
+
+  useEffect(() => {
+    const fetchDisciplines = async () => {
+      try {
+        const res = await api.getDisciplines();
+        if (res.success && res.data && res.data.length > 0) {
+          // Filter out inactive items for public view
+          const activeOnly = (res.data as any[]).filter(d => d.status !== 'Inactive');
+          setDisciplinesList(activeOnly.length > 0 ? activeOnly : res.data as any[]);
+        }
+      } catch (err) {
+        console.error('Error fetching disciplines in Activities component:', err);
+      }
+    };
+    fetchDisciplines();
+  }, []);
 
   const navigate = (view: string) => {
     if (onNavigate) {
@@ -51,17 +69,17 @@ export const Activities: React.FC<ActivitiesProps> = ({
   // Filter disciplines based on search query
   const filteredDisciplines = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return ALL_14_OFFICIAL_DISCIPLINES;
+    if (!q) return disciplinesList;
 
-    return ALL_14_OFFICIAL_DISCIPLINES.filter((disc) => {
-      const nameMatch = disc.name.toLowerCase().includes(q) || disc.hindiName.toLowerCase().includes(q);
-      const descMatch = disc.description.toLowerCase().includes(q) || disc.hindiDescription.toLowerCase().includes(q);
-      const eventMatch = disc.events.some((ev) => ev.toLowerCase().includes(q));
-      const equipMatch = disc.equipmentSpecs.toLowerCase().includes(q);
-      const badgeMatch = disc.recognitionBadge.toLowerCase().includes(q);
+    return disciplinesList.filter((disc) => {
+      const nameMatch = (disc.name || '').toLowerCase().includes(q) || ((disc as any).hindiName || '').toLowerCase().includes(q);
+      const descMatch = ((disc as any).description || '').toLowerCase().includes(q) || ((disc as any).hindiDescription || '').toLowerCase().includes(q);
+      const eventMatch = (disc.events || []).some((ev) => ev.toLowerCase().includes(q));
+      const equipMatch = ((disc as any).equipmentSpecs || '').toLowerCase().includes(q);
+      const badgeMatch = ((disc as any).recognitionBadge || '').toLowerCase().includes(q);
       return nameMatch || descMatch || eventMatch || equipMatch || badgeMatch;
     });
-  }, [searchQuery]);
+  }, [disciplinesList, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#060b17] text-slate-100 py-12 px-4 sm:px-6 lg:px-8">

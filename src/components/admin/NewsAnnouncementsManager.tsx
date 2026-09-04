@@ -14,7 +14,8 @@ import {
   Calendar, 
   Tag, 
   Shield, 
-  ExternalLink 
+  ExternalLink,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Announcement } from '../../types';
 import { api } from '../../services/api';
@@ -27,8 +28,9 @@ export const NewsAnnouncementsManager: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnn, setEditingAnn] = useState<Announcement | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [uploadingJpg, setUploadingJpg] = useState(false);
 
-  // Form State with rich bilingual and PDF support
+  // Form State with rich bilingual, JPG photo and PDF support
   const [formData, setFormData] = useState<Partial<Announcement> & {
     hindiTitle?: string;
     circularNumber?: string;
@@ -36,6 +38,7 @@ export const NewsAnnouncementsManager: React.FC = () => {
     designation?: string;
     urgency?: 'NORMAL' | 'HIGH' | 'CRITICAL';
     content?: string;
+    imageUrl?: string;
   }>({
     title: '',
     hindiTitle: '',
@@ -46,6 +49,7 @@ export const NewsAnnouncementsManager: React.FC = () => {
     linkText: 'Download Official Circular (PDF)',
     linkUrl: '',
     fileUrl: '',
+    imageUrl: '',
     signatory: 'General Secretary',
     designation: 'Uttar Pradesh Roller Sports Association',
     urgency: 'NORMAL',
@@ -88,6 +92,7 @@ export const NewsAnnouncementsManager: React.FC = () => {
       linkText: 'Download Official Circular (PDF)',
       linkUrl: '',
       fileUrl: '',
+      imageUrl: '',
       signatory: 'General Secretary',
       designation: 'Uttar Pradesh Roller Sports Association',
       urgency: 'NORMAL',
@@ -98,8 +103,46 @@ export const NewsAnnouncementsManager: React.FC = () => {
 
   const handleOpenEdit = (ann: Announcement) => {
     setEditingAnn(ann);
-    setFormData({ ...ann });
+    setFormData({ 
+      ...ann,
+      imageUrl: (ann as any).imageUrl || ''
+    });
     setIsModalOpen(true);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/^image\/(jpeg|jpg|png|webp)/i) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
+      showToast('Please select a JPG, JPEG, or PNG image file', 'error');
+      return;
+    }
+
+    setUploadingJpg(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      try {
+        const res = await api.uploadFile(file.name, base64, true);
+        if (res.success && res.fileUrl) {
+          setFormData(prev => ({ 
+            ...prev, 
+            imageUrl: res.fileUrl 
+          }));
+          showToast('JPG Photo attached successfully');
+        }
+      } catch (err) {
+        showToast('Image upload failed', 'error');
+      } finally {
+        setUploadingJpg(false);
+      }
+    };
+    reader.onerror = () => {
+      setUploadingJpg(false);
+      showToast('Failed to read image file', 'error');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -262,70 +305,93 @@ export const NewsAnnouncementsManager: React.FC = () => {
                 ann.isImportant ? 'border-amber-500/40 bg-slate-900/90' : 'border-slate-800'
               }`}
             >
-              <div className="space-y-1.5 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                    ann.category === 'Championship' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                    ann.category === 'Results' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                    ann.category === 'Circular' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-                    'bg-slate-800 text-slate-300'
-                  }`}>
-                    {ann.category}
-                  </span>
-
-                  {ann.isImportant && (
-                    <span className="bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3 text-red-400" />
-                      CRITICAL NOTICE
-                    </span>
-                  )}
-
-                  <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-slate-500" />
-                    {ann.date}
-                  </span>
-                </div>
-
-                <h3 className="text-sm sm:text-base font-bold text-white leading-snug">
-                  {ann.title}
-                </h3>
-
-                {(ann as any).hindiTitle && (
-                  <p className="text-xs text-amber-300/80 font-medium font-sans">
-                    {(ann as any).hindiTitle}
-                  </p>
-                )}
-
-                {(ann.linkUrl || ann.fileUrl) && (
-                  <div className="pt-1">
-                    <a
-                      href={ann.linkUrl || ann.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 bg-blue-950/40 border border-blue-800/40 px-2.5 py-1 rounded-lg"
-                    >
-                      <Paperclip className="w-3 h-3" />
-                      <span>{ann.linkText || 'Download PDF Attachment'}</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
+              <div className="flex items-start gap-4 flex-1">
+                {/* JPG Photo Thumbnail if available */}
+                {Boolean((ann as any).imageUrl) && (
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shrink-0 hidden sm:block">
+                    <img
+                      src={(ann as any).imageUrl}
+                      alt={ann.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 )}
+
+                <div className="space-y-1.5 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                      ann.category === 'Championship' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                      ann.category === 'Results' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                      ann.category === 'Circular' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                      'bg-slate-800 text-slate-300'
+                    }`}>
+                      {ann.category}
+                    </span>
+
+                    {ann.isImportant && (
+                      <span className="bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-red-400" />
+                        CRITICAL NOTICE
+                      </span>
+                    )}
+
+                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-slate-500" />
+                      {ann.date}
+                    </span>
+
+                    {Boolean((ann as any).imageUrl) && (
+                      <span className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono flex items-center gap-1">
+                        <ImageIcon className="w-2.5 h-2.5" />
+                        JPG PHOTO
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm sm:text-base font-bold text-white leading-snug">
+                    {ann.title}
+                  </h3>
+
+                  {(ann as any).hindiTitle && (
+                    <p className="text-xs text-amber-300/80 font-medium font-sans">
+                      {(ann as any).hindiTitle}
+                    </p>
+                  )}
+
+                  {(ann.linkUrl || ann.fileUrl) && (
+                    <div className="pt-1">
+                      <a
+                        href={ann.linkUrl || ann.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 bg-blue-950/40 border border-blue-800/40 px-2.5 py-1 rounded-lg"
+                      >
+                        <Paperclip className="w-3 h-3" />
+                        <span>{ann.linkText || 'Download PDF Attachment'}</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                 <button
                   onClick={() => handleOpenEdit(ann)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 transition-colors"
+                  className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-700"
                   title="Edit notice"
                 >
-                  <Edit3 className="w-4 h-4" />
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit</span>
                 </button>
                 <button
                   onClick={() => handleDelete(ann.id)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-red-950/50 text-red-400 transition-colors"
+                  className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-red-950/50 text-red-400 hover:text-red-300 font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-700"
                   title="Delete notice"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
@@ -425,8 +491,64 @@ export const NewsAnnouncementsManager: React.FC = () => {
                 />
               </div>
 
+              {/* JPG Photo / Banner Upload */}
+              <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-amber-400" />
+                    <span>Circular Photo / Banner (सर्कुलर/इवेंट फोटो JPG)</span>
+                  </label>
+                  {Boolean(formData.imageUrl) && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                      className="text-[11px] text-red-400 hover:text-red-300 font-bold"
+                    >
+                      Remove Photo
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <input
+                    type="text"
+                    value={formData.imageUrl || ''}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="https://... or upload local JPG photo"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
+                  />
+                  <label className="cursor-pointer bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0 shadow-lg shadow-amber-500/20">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{uploadingJpg ? 'Uploading...' : 'Upload JPG Photo'}</span>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                </div>
+
+                {Boolean(formData.imageUrl) && (
+                  <div className="flex items-center gap-3 pt-1">
+                    <img
+                      src={formData.imageUrl}
+                      alt="Photo Preview"
+                      referrerPolicy="no-referrer"
+                      className="w-20 h-14 object-cover rounded-lg border border-slate-700 bg-slate-900"
+                    />
+                    <span className="text-[11px] text-emerald-400 font-mono">
+                      ✓ JPG Image attached - will display on website circular card
+                    </span>
+                  </div>
+                )}
+                <p className="text-[11px] text-slate-400">
+                  Accepts standard <strong>.JPG</strong>, <strong>.JPEG</strong>, or <strong>.PNG</strong> banner photos for public notice cards.
+                </p>
+              </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Attach PDF Document or File URL</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Attach Official PDF Circular / Scanned Gazette</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -437,10 +559,11 @@ export const NewsAnnouncementsManager: React.FC = () => {
                   />
                   <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Upload PDF</span>
-                    <input type="file" accept=".pdf,.doc,.docx,image/*" className="hidden" onChange={handleFileUpload} />
+                    <span>Upload PDF Circular</span>
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,image/jpeg,image/jpg,image/png,image/*,application/pdf" className="hidden" onChange={handleFileUpload} />
                   </label>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">Supports PDF circulars, official circular scans, or JPG/PNG documents</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

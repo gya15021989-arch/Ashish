@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Edit3, 
   X, 
@@ -12,7 +12,9 @@ import {
   Activity, 
   CheckCircle2, 
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  Camera
 } from 'lucide-react';
 import { Skater, DisciplineType, AgeCategory, Gender, BloodGroup } from '../../types';
 import { api } from '../../services/api';
@@ -94,18 +96,72 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
     licenseNumber: skater.licenseNumber || '',
     applicationNumber: skater.applicationNumber || '',
     annualFeeUtr: skater.annualFeeUtr || '',
-    adminRemarks: skater.adminRemarks || ''
+    adminRemarks: skater.adminRemarks || '',
+    photoUrl: skater.photoUrl || ''
   });
 
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (skater) {
+      setFormData({
+        firstName: skater.firstName || '',
+        lastName: skater.lastName || '',
+        fatherName: skater.fatherName || '',
+        motherName: skater.motherName || '',
+        dateOfBirth: skater.dateOfBirth || '',
+        gender: skater.gender || 'Male',
+        bloodGroup: skater.bloodGroup || 'O+',
+        phone: skater.phone || '',
+        emergencyPhone: skater.emergencyPhone || '',
+        email: skater.email || '',
+        address: skater.address || '',
+        district: skater.district || 'Lucknow',
+        club: skater.club || '',
+        coachName: skater.coachName || '',
+        coachPhone: skater.coachPhone || '',
+        discipline: skater.discipline || 'Speed Skating (Inline)',
+        ageCategory: skater.ageCategory || 'Sub-Junior (12 to 15)',
+        skateModel: skater.skateModel || '',
+        wheelSize: skater.wheelSize || '',
+        aadhaarNumberMasked: skater.aadhaarNumberMasked || '',
+        licenseNumber: skater.licenseNumber || '',
+        applicationNumber: skater.applicationNumber || '',
+        annualFeeUtr: skater.annualFeeUtr || '',
+        adminRemarks: skater.adminRemarks || '',
+        photoUrl: skater.photoUrl || ''
+      });
+      setError(null);
+      setSuccessMsg(null);
+    }
+  }, [skater, isOpen]);
 
   if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setError('Photo file size exceeds 8MB. Please select a smaller JPG/JPEG image.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData(prev => ({ ...prev, photoUrl: reader.result as string }));
+      setSuccessMsg(`Athlete photo loaded successfully (${(file.size / 1024).toFixed(0)} KB)`);
+    };
+    reader.onerror = () => {
+      setError('Failed to process image file. Please retry with a valid JPG/JPEG.');
+    };
+    reader.readAsDataURL(file);
   };
 
   const calculateAge = (dob: string) => {
@@ -226,6 +282,58 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
               </h3>
             </div>
 
+            {/* Skater Photo Field with JPG Option */}
+            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Skater Passport / Profile Photo</span>
+                </label>
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  JPG / JPEG Supported • Max 8MB
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                  {formData.photoUrl ? (
+                    <img 
+                      src={formData.photoUrl} 
+                      alt="Skater preview" 
+                      className="w-full h-full object-cover" 
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-slate-600" />
+                  )}
+                </div>
+                <div className="flex-1 flex gap-2">
+                  <input
+                    type="text"
+                    name="photoUrl"
+                    value={formData.photoUrl || ''}
+                    onChange={handleChange}
+                    placeholder="https://... or click Upload JPG"
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-sm"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload JPG</span>
+                  </button>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/jpg,image/png,image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div>
                 <label className="block text-slate-400 text-[11px] font-medium mb-1">
@@ -234,7 +342,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="firstName"
-                  value={formData.firstName}
+                  value={formData.firstName || ''}
                   onChange={handleChange}
                   required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -248,7 +356,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="lastName"
-                  value={formData.lastName}
+                  value={formData.lastName || ''}
                   onChange={handleChange}
                   required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -262,7 +370,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="fatherName"
-                  value={formData.fatherName}
+                  value={formData.fatherName || ''}
                   onChange={handleChange}
                   required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -276,7 +384,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="motherName"
-                  value={formData.motherName}
+                  value={formData.motherName || ''}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 />
@@ -289,7 +397,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="date"
                   name="dateOfBirth"
-                  value={formData.dateOfBirth}
+                  value={formData.dateOfBirth || ''}
                   onChange={handleChange}
                   required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -302,7 +410,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 </label>
                 <select
                   name="gender"
-                  value={formData.gender}
+                  value={formData.gender || 'Male'}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 >
@@ -318,7 +426,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 </label>
                 <select
                   name="bloodGroup"
-                  value={formData.bloodGroup}
+                  value={formData.bloodGroup || 'O+'}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 >
@@ -335,7 +443,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="aadhaarNumberMasked"
-                  value={formData.aadhaarNumberMasked}
+                  value={formData.aadhaarNumberMasked || ''}
                   onChange={handleChange}
                   placeholder="****-****-1234"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500"
@@ -361,7 +469,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="phone"
-                  value={formData.phone}
+                  value={formData.phone || ''}
                   onChange={handleChange}
                   required
                   placeholder="+91 98765 43210"
@@ -376,7 +484,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="emergencyPhone"
-                  value={formData.emergencyPhone}
+                  value={formData.emergencyPhone || ''}
                   onChange={handleChange}
                   placeholder="+91 94150 00000"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -390,7 +498,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
+                  value={formData.email || ''}
                   onChange={handleChange}
                   placeholder="athlete@example.com"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -404,7 +512,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <textarea
                   name="address"
                   rows={2}
-                  value={formData.address}
+                  value={formData.address || ''}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 />
@@ -428,7 +536,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 </label>
                 <select
                   name="district"
-                  value={formData.district}
+                  value={formData.district || 'Lucknow'}
                   onChange={handleChange}
                   required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -446,7 +554,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="club"
-                  value={formData.club}
+                  value={formData.club || ''}
                   onChange={handleChange}
                   placeholder="e.g. Awadh Roller Sports Club"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -459,7 +567,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 </label>
                 <select
                   name="discipline"
-                  value={formData.discipline}
+                  value={formData.discipline || 'Speed Skating (Inline)'}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 >
@@ -475,7 +583,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 </label>
                 <select
                   name="ageCategory"
-                  value={formData.ageCategory}
+                  value={formData.ageCategory || 'Sub-Junior (12 to 15)'}
                   onChange={handleChange}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
                 >
@@ -492,7 +600,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="coachName"
-                  value={formData.coachName}
+                  value={formData.coachName || ''}
                   onChange={handleChange}
                   placeholder="Coach Name"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -506,7 +614,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="coachPhone"
-                  value={formData.coachPhone}
+                  value={formData.coachPhone || ''}
                   onChange={handleChange}
                   placeholder="+91 94150 00000"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -520,7 +628,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="skateModel"
-                  value={formData.skateModel}
+                  value={formData.skateModel || ''}
                   onChange={handleChange}
                   placeholder="e.g. Powerslide 110mm"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -534,7 +642,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="wheelSize"
-                  value={formData.wheelSize}
+                  value={formData.wheelSize || ''}
                   onChange={handleChange}
                   placeholder="e.g. 100mm, 110mm, Quad 62mm"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
@@ -548,7 +656,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="licenseNumber"
-                  value={formData.licenseNumber}
+                  value={formData.licenseNumber || ''}
                   onChange={handleChange}
                   placeholder="e.g. UP-SK-LKO-2026-0101"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500"
@@ -574,7 +682,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="annualFeeUtr"
-                  value={formData.annualFeeUtr}
+                  value={formData.annualFeeUtr || ''}
                   onChange={handleChange}
                   placeholder="e.g. UPI-20260110-897612"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500"
@@ -588,7 +696,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <input
                   type="text"
                   name="applicationNumber"
-                  value={formData.applicationNumber}
+                  value={formData.applicationNumber || ''}
                   onChange={handleChange}
                   placeholder="e.g. UPRSA-APP-2026-0042"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500"
@@ -602,7 +710,7 @@ export const SkaterEditModal: React.FC<SkaterEditModalProps> = ({
                 <textarea
                   name="adminRemarks"
                   rows={2}
-                  value={formData.adminRemarks}
+                  value={formData.adminRemarks || ''}
                   onChange={handleChange}
                   placeholder="Official notes for internal secretariat verification..."
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"

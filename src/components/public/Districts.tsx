@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   MapPin, 
   Search, 
@@ -17,6 +17,8 @@ import {
   Trophy
 } from 'lucide-react';
 import { ALL_75_DISTRICTS, DetailedDistrict, DistrictOfficeBearer } from '../../data/all75Districts';
+import { api } from '../../services/api';
+import { District } from '../../types';
 
 interface DistrictsProps {
   onNavigate?: (page: string) => void;
@@ -38,6 +40,62 @@ export const Districts: React.FC<DistrictsProps> = ({ onNavigate }) => {
   const [search, setSearch] = useState('');
   const [selectedZone, setSelectedZone] = useState<ZoneFilterType>('ALL UP ZONES');
   const [selectedDistrictModal, setSelectedDistrictModal] = useState<DetailedDistrict | null>(null);
+  const [liveDistricts, setLiveDistricts] = useState<District[]>([]);
+
+  useEffect(() => {
+    const fetchLive = async () => {
+      try {
+        const res = await api.getDistricts();
+        if (res.success && res.data) {
+          setLiveDistricts(res.data);
+        }
+      } catch (err) {
+        console.error('Error fetching live districts:', err);
+      }
+    };
+    fetchLive();
+  }, []);
+
+  // Merge static 75 with any dynamic edits from Admin CMS
+  const combinedDistricts = useMemo(() => {
+    return ALL_75_DISTRICTS.map(staticD => {
+      const live = liveDistricts.find(
+        ld => ld.name?.toLowerCase().trim() === staticD.name?.toLowerCase().trim() ||
+              ld.id === staticD.id
+      );
+      if (!live) return staticD;
+
+      return {
+        ...staticD,
+        hindiName: live.hindiName || staticD.hindiName,
+        zone: (live.zone ? `${live.zone} UP` : staticD.zone) as any,
+        officeAddress: live.officeAddress || staticD.officeAddress,
+        stadiumVenue: live.stadiumVenue || staticD.stadiumVenue,
+        imageUrl: live.photoUrl || live.logoUrl || staticD.imageUrl,
+        president: {
+          ...staticD.president,
+          name: live.presidentName || live.president || staticD.president.name,
+          phone: live.presidentPhone || staticD.president.phone,
+          email: live.presidentEmail || staticD.president.email,
+          photoUrl: live.presidentPhotoUrl || staticD.president.photoUrl
+        },
+        generalSecretary: {
+          ...staticD.generalSecretary,
+          name: live.secretaryName || live.secretary || staticD.generalSecretary.name,
+          phone: live.secretaryPhone || live.contactPhone || staticD.generalSecretary.phone,
+          email: live.secretaryEmail || live.contactEmail || staticD.generalSecretary.email,
+          photoUrl: live.secretaryPhotoUrl || staticD.generalSecretary.photoUrl
+        },
+        treasurer: {
+          ...staticD.treasurer,
+          name: live.treasurerName || live.treasurer || staticD.treasurer?.name || 'Honorary Treasurer',
+          phone: live.treasurerPhone || staticD.treasurer?.phone,
+          email: live.treasurerEmail || staticD.treasurer?.email,
+          photoUrl: live.treasurerPhotoUrl || staticD.treasurer?.photoUrl
+        }
+      };
+    });
+  }, [liveDistricts]);
 
   // Helper to extract initials safely
   const getInitials = (name: string): string => {
@@ -53,7 +111,7 @@ export const Districts: React.FC<DistrictsProps> = ({ onNavigate }) => {
   const filteredDistricts = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return ALL_75_DISTRICTS.filter((district) => {
+    return combinedDistricts.filter((district) => {
       // Zone match logic
       let matchesZone = true;
       if (selectedZone !== 'ALL UP ZONES') {

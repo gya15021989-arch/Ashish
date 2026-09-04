@@ -171,7 +171,7 @@ export const TournamentEventBuilder: React.FC = () => {
                 type="text"
                 required
                 placeholder="e.g. 38th UP State Roller Skating Championship 2026"
-                value={title}
+                value={title || ''}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -182,7 +182,7 @@ export const TournamentEventBuilder: React.FC = () => {
                 Sanction Level *
               </label>
               <select
-                value={level}
+                value={level || 'State'}
                 onChange={(e) => setLevel(e.target.value as any)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               >
@@ -204,7 +204,7 @@ export const TournamentEventBuilder: React.FC = () => {
                 type="text"
                 required
                 placeholder="e.g. Synthetic Banked Track, KD Singh Babu Stadium, Lucknow"
-                value={venue}
+                value={venue || ''}
                 onChange={(e) => setVenue(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -217,7 +217,7 @@ export const TournamentEventBuilder: React.FC = () => {
               <input
                 type="text"
                 required
-                value={district}
+                value={district || 'Lucknow'}
                 onChange={(e) => setDistrict(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -232,7 +232,7 @@ export const TournamentEventBuilder: React.FC = () => {
               <input
                 type="date"
                 required
-                value={startDate}
+                value={startDate || ''}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -245,7 +245,7 @@ export const TournamentEventBuilder: React.FC = () => {
               <input
                 type="date"
                 required
-                value={endDate}
+                value={endDate || ''}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -258,7 +258,7 @@ export const TournamentEventBuilder: React.FC = () => {
               <input
                 type="date"
                 required
-                value={registrationDeadline}
+                value={registrationDeadline || ''}
                 onChange={(e) => setRegistrationDeadline(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               />
@@ -271,7 +271,7 @@ export const TournamentEventBuilder: React.FC = () => {
               <input
                 type="number"
                 required
-                value={entryFeeBase}
+                value={entryFeeBase ?? 1000}
                 onChange={(e) => setEntryFeeBase(Number(e.target.value))}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
               />
@@ -299,7 +299,7 @@ export const TournamentEventBuilder: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Event Name, e.g. 500m + D"
-                      value={ev.eventName}
+                      value={ev.eventName || ''}
                       onChange={(e) => handleUpdateEvent(idx, 'eventName', e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
                     />
@@ -307,9 +307,9 @@ export const TournamentEventBuilder: React.FC = () => {
 
                   <div>
                     <select
-                      value={ev.discipline}
+                      value={ev.discipline || 'Speed Skating (Quad)'}
                       onChange={(e) => handleUpdateEvent(idx, 'discipline', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
                     >
                       {DISCIPLINES.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                     </select>
@@ -317,9 +317,9 @@ export const TournamentEventBuilder: React.FC = () => {
 
                   <div>
                     <select
-                      value={ev.ageCategory}
+                      value={ev.ageCategory || 'Junior (15 to 18)'}
                       onChange={(e) => handleUpdateEvent(idx, 'ageCategory', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
                     >
                       {AGE_CATEGORIES_2026.map(a => <option key={a.category} value={a.category}>{a.category}</option>)}
                     </select>
@@ -329,9 +329,9 @@ export const TournamentEventBuilder: React.FC = () => {
                     <input
                       type="number"
                       placeholder="Fee"
-                      value={ev.entryFee}
+                      value={ev.entryFee ?? 0}
                       onChange={(e) => handleUpdateEvent(idx, 'entryFee', Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
                     />
                   </div>
 
