@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { AccountDropdown } from './AccountDropdown';
 import { UprsaLogo } from './UprsaLogo';
 import { LiveTicker } from './LiveTicker';
@@ -73,8 +74,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   const { lang, setLang, t } = useLanguage();
   const { user, skater, isAuthenticated, isAdmin, logout } = useAuth();
+  const { settings } = useSiteSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+
+  const isHindi = lang === 'hi';
+  const orgName = isHindi
+    ? (settings?.organizationNameHindi || settings?.organizationName || 'उत्तर प्रदेश रोलर स्पोर्ट्स एसोसिएशन')
+    : (settings?.organizationName || 'UTTAR PRADESH ROLLER SPORTS ASSOCIATION');
+  const orgTagline = isHindi
+    ? (settings?.taglineHindi || settings?.tagline || 'स्टेट गवर्निंग बॉडी ऑफ रोलर स्पोर्ट्स इन उत्तर प्रदेश')
+    : (settings?.tagline || 'STATE GOVERNING BODY FOR ROLLER SPORTS IN UTTAR PRADESH');
 
   const displayName = skater 
     ? `${skater.firstName} ${skater.lastName}`
@@ -127,11 +137,11 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-extrabold text-base sm:text-lg lg:text-xl tracking-tight text-white group-hover:text-amber-400 transition-colors uppercase leading-none">
-                    UTTAR PRADESH ROLLER SPORTS ASSOCIATION
+                    {orgName}
                   </h1>
                 </div>
-                <p className="text-[11px] sm:text-xs text-amber-400/95 font-semibold tracking-wide mt-0.5 leading-tight">
-                  STATE GOVERNING BODY FOR ROLLER SPORTS IN UTTAR PRADESH
+                <p className="text-[11px] sm:text-xs text-amber-400/95 font-semibold tracking-wide mt-0.5 leading-tight uppercase">
+                  {orgTagline}
                 </p>
                 <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5 hidden sm:flex">
                   <span className="text-emerald-400 font-bold">● RSFI AFFILIATED</span>

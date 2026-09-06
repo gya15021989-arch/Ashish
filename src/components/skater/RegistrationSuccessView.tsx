@@ -109,7 +109,7 @@ export const RegistrationSuccessView: React.FC<RegistrationSuccessViewProps> = (
                 <span className="text-[11px] text-slate-400">Status Verification Pending</span>
               </div>
               <p className="text-[11px] text-slate-300 leading-normal">
-                Your dossier (Aadhaar, Municipal DOB, Medical certificate, and ₹500 fee reference) is currently undergoing administrative scrutiny by the UPRSA technical scrutiny panel.
+                Your dossier (Aadhaar, Municipal DOB, Medical certificate, and submitted credentials) is currently undergoing administrative scrutiny by the UPRSA technical scrutiny panel.
               </p>
             </div>
           </div>

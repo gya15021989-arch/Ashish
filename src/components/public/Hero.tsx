@@ -24,6 +24,8 @@ import {
 import { CURRENT_SEASON } from '../../config/season';
 import { HeroSlide } from '../../types';
 import { api } from '../../services/api';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface HeroProps {
   setCurrentView?: (view: string) => void;
@@ -85,6 +87,10 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenLiveScore,
   slides: initialSlides
 }) => {
+  const { settings } = useSiteSettings();
+  const { lang } = useLanguage();
+  const isHindi = lang === 'hi';
+
   const [slides, setSlides] = useState<HeroSlide[]>(initialSlides && initialSlides.length > 0 ? initialSlides : DEFAULT_SLIDES);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -178,7 +184,26 @@ export const Hero: React.FC<HeroProps> = ({
     setIsPaused(false);
   };
 
-  const activeSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
+  const rawSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
+  const isFirstSlide = currentIndex === 0;
+
+  const dynamicTitle = isFirstSlide && (settings?.heroTitle || settings?.organizationName)
+    ? (isHindi
+        ? (settings.heroTitleHindi || settings.organizationNameHindi || settings.heroTitle || settings.organizationName)
+        : (settings.heroTitle || settings.organizationName))
+    : rawSlide.title;
+
+  const dynamicSubtitle = isFirstSlide && (settings?.heroSubtitle || settings?.tagline)
+    ? (isHindi
+        ? (settings.heroSubtitleHindi || settings.taglineHindi || settings.heroSubtitle || settings.tagline)
+        : (settings.heroSubtitle || settings.tagline))
+    : rawSlide.subtitle;
+
+  const activeSlide = {
+    ...rawSlide,
+    title: dynamicTitle,
+    subtitle: dynamicSubtitle
+  };
 
   return (
     <div 

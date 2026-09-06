@@ -11,9 +11,14 @@ import {
   EyeOff,
   ArrowRight,
   RotateCw,
-  Sparkles
+  Sparkles,
+  Copy,
+  Check,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -30,8 +35,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onNavigateToActivation,
   initialRole = 'skater'
 }) => {
-  if (!isOpen) return null;
-
   const { login } = useAuth();
   const [activeTab, setActiveTab] = useState<'skater' | 'admin'>(initialRole);
   const [skaterId, setSkaterId] = useState('');
@@ -41,6 +44,40 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+
+  // Admin password recovery state
+  const [resetStep, setResetStep] = useState<'email' | 'verify'>('email');
+  const [resetEmail, setResetEmail] = useState('uprsa.official@gmail.com');
+  const [resetOtp, setResetOtp] = useState('');
+  const [simulatedOtp, setSimulatedOtp] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState('');
+  const [resetNewPass, setResetNewPass] = useState('');
+  const [resetConfirmPass, setResetConfirmPass] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
+
+  // Countdown timer effect
+  React.useEffect(() => {
+    let timer: any;
+    if (otpCountdown > 0) {
+      timer = setInterval(() => {
+        setOtpCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
+
+  // Sync tab and reset error when modal opens or initialRole changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialRole);
+      setError(null);
+    }
+  }, [isOpen, initialRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +132,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (res.success) {
           onClose();
         } else {
-          setError('Invalid administrator credentials.');
+          setError(res.message || 'Invalid administrator credentials.');
         }
       } catch {
         setError('Unable to connect to state server. Please try again.');
@@ -111,11 +148,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     try {
       if (role === 'admin') {
         const res = await login({
-          email: 'admin@uprsa.org',
-          password: 'uprsa@admin2026'
+          email: 'uprsa.official@gmail.com',
+          password: 'Ashish@1502'
         });
         if (res.success) onClose();
-        else setError('Invalid administrator credentials.');
+        else setError(res.message || 'Invalid administrator credentials.');
       } else {
         const res = await login({
           registrationNumber: 'UPRSA/2026/LKO/00101',
@@ -130,6 +167,107 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setLoading(false);
     }
   };
+
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!resetEmail.trim()) {
+      setResetError('कृपया अपना पंजीकृत एडमिन ईमेल दर्ज करें।');
+      return;
+    }
+
+    setSendingOtp(true);
+    setResetError(null);
+    setResetSuccess(null);
+
+    try {
+      const res = await api.sendAdminOtp(resetEmail.trim());
+      if (res.success) {
+        setResetStep('verify');
+        setSimulatedOtp(res.otp || null);
+        setOtpCountdown(60);
+        setResetSuccess(res.message || 'सुरक्षा कोड (Security Code) ईमेल पर भेज दिया गया है।');
+      } else {
+        setResetError(res.message || 'सुरक्षा कोड भेजने में विफल। कृपया ईमेल जांचें।');
+      }
+    } catch (err: any) {
+      setResetError(err.message || 'नेटवर्क त्रुटि।');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      setResetError('कृपया एडमिन ईमेल दर्ज करें।');
+      return;
+    }
+    if (!resetOtp.trim() && !resetKey.trim()) {
+      setResetError('कृपया ईमेल पर प्राप्त 6-अंकों का सुरक्षा कोड दर्ज करें।');
+      return;
+    }
+    if (!resetNewPass || resetNewPass.length < 6) {
+      setResetError('नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।');
+      return;
+    }
+    if (resetNewPass !== resetConfirmPass) {
+      setResetError('दोनों पासवर्ड मेल नहीं खाते।');
+      return;
+    }
+
+    setResetLoading(true);
+    setResetError(null);
+    setResetSuccess(null);
+
+    try {
+      const res = await api.resetAdminPassword({
+        email: resetEmail.trim(),
+        otp: resetOtp.trim() || undefined,
+        securityKey: resetKey.trim() || undefined,
+        newPassword: resetNewPass.trim()
+      });
+
+      if (res.success) {
+        setResetSuccess(res.message || 'सुरक्षा कोड सत्यापित हुआ! एडमिन पासवर्ड सफलतापूर्वक बदल दिया गया है।');
+        setAdminId(resetEmail.trim());
+        setPassword(resetNewPass.trim());
+        setTimeout(() => {
+          setIsForgotModalOpen(false);
+          setResetSuccess(null);
+          setResetStep('email');
+          setResetOtp('');
+          setSimulatedOtp(null);
+          setResetNewPass('');
+          setResetConfirmPass('');
+        }, 2200);
+      } else {
+        setResetError(res.message || 'पासवर्ड रीसेट नहीं हो सका। कृपया सुरक्षा कोड जांचें।');
+      }
+    } catch (err: any) {
+      setResetError(err.message || 'नेटवर्क त्रुटि।');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleCopyOtpToField = () => {
+    if (simulatedOtp) {
+      setResetOtp(simulatedOtp);
+    }
+  };
+
+  const handleFillSecretariatKey = () => {
+    setResetKey('UPRSA-SEC-2026');
+    setResetError(null);
+  };
+
+  const handleCopyDefaultCreds = () => {
+    navigator.clipboard.writeText('ID: admin@uprsa.org | Pass: uprsa@admin2026');
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs animate-in fade-in duration-200">
@@ -264,7 +402,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   autoComplete="username"
                   value={adminId}
                   onChange={(e) => setAdminId(e.target.value)}
-                  placeholder="admin@uprsa.org"
+                  placeholder="uprsa.official@gmail.com"
                   className="w-full bg-[#050b18] border border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-2xl px-3.5 py-2.5 text-sm text-white font-medium placeholder-slate-500 outline-none transition-all"
                 />
               </div>
@@ -399,24 +537,199 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       {/* Forgot Password Modal */}
       {isForgotModalOpen && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
-          <div className="bg-[#0b1329] border border-amber-500/40 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
-            <h4 className="font-bold text-white text-sm flex items-center gap-2">
-              <Shield className="w-4 h-4 text-amber-400" />
-              <span>Admin Recovery Assistance</span>
-            </h4>
-            <p className="text-xs text-slate-300">
-              For state administrative security, please contact the UPRSA IT Secretariat to generate a temporary recovery token:
-            </p>
-            <div className="bg-[#050b18] p-3 rounded-xl text-xs space-y-1 text-slate-300">
-              <p>Email: <strong className="text-amber-400">it-admin@uprsa.org</strong></p>
-              <p>Helpline: <strong className="text-amber-400">+91 94150 21989</strong></p>
+          <div className="bg-[#0b1329] border border-amber-500/40 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span>Admin Password Recovery (पासवर्ड रीसेट)</span>
+              </h4>
+              <button 
+                onClick={() => setIsForgotModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => setIsForgotModalOpen(false)}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs cursor-pointer"
-            >
-              Close
-            </button>
+
+            {/* Notification messages */}
+            {resetSuccess && (
+              <div className="bg-emerald-950/70 border border-emerald-500/50 p-3 rounded-xl text-emerald-200 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{resetSuccess}</span>
+              </div>
+            )}
+
+            {resetError && (
+              <div className="bg-red-950/70 border border-red-500/50 p-3 rounded-xl text-red-200 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{resetError}</span>
+              </div>
+            )}
+
+            {/* OTP Flow: Step 1 vs Step 2 */}
+            {resetStep === 'email' ? (
+              <form onSubmit={handleSendOtp} className="space-y-3 pt-1">
+                <div className="bg-[#050b18] border border-amber-500/20 p-3 rounded-xl text-xs text-slate-300 space-y-1">
+                  <p className="font-bold text-amber-400 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>स्टेप 1: ईमेल पर सुरक्षा कोड मंगाएं</span>
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    अपना पंजीकृत एडमिन ईमेल दर्ज करें। सत्यापन के लिए आपके ईमेल पर 6-अंकों का गोपनीय सुरक्षा कोड (OTP) भेजा जाएगा।
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">
+                    पंजीकृत एडमिन ईमेल (Admin Email) *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="uprsa.official@gmail.com / uprsa.support@gmail.com"
+                    className="w-full bg-[#050b18] border border-slate-700 focus:border-amber-500 rounded-xl px-3 py-2.5 text-xs text-white outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={sendingOtp}
+                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {sendingOtp ? (
+                    <>
+                      <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>सुरक्षा कोड भेजा जा रहा है...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>📧 सुरक्षा कोड (Security Code) ईमेल पर भेजें ➔</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-3 pt-1 animate-in fade-in">
+                
+                {/* OTP Notification Banner */}
+                <div className="bg-blue-950/40 border border-blue-500/40 p-3 rounded-xl text-xs text-blue-200 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white flex items-center gap-1">
+                      <Mail className="w-3.5 h-3.5 text-blue-400" />
+                      <span>सुरक्षा कोड भेजा गया: <strong className="text-amber-300">{resetEmail}</strong></span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetStep('email');
+                        setResetError(null);
+                        setResetSuccess(null);
+                      }}
+                      className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer"
+                    >
+                      बदलें
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    कृपया अपने ईमेल इनबॉक्स / स्पैम फोल्डर की जांच करें और प्राप्त 6-अंकों का सुरक्षा कोड यहां दर्ज करें।
+                  </p>
+                </div>
+
+                {/* 6-Digit OTP Input */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 uppercase">
+                      6-अंकों का सुरक्षा कोड (Security OTP) *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleSendOtp()}
+                      disabled={sendingOtp || otpCountdown > 0}
+                      className="text-[10px] text-amber-400 hover:underline disabled:text-slate-500 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      {otpCountdown > 0 ? `पुनः भेजें (${otpCountdown}s)` : 'पुनः भेजें'}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="••••••"
+                    className="w-full bg-[#050b18] border border-amber-500/50 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-amber-300 font-mono tracking-widest text-center font-black outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">
+                      नया पासवर्ड *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={resetNewPass}
+                      onChange={(e) => setResetNewPass(e.target.value)}
+                      placeholder="नया पासवर्ड"
+                      className="w-full bg-[#050b18] border border-slate-700 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1">
+                      पुष्टि करें *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={resetConfirmPass}
+                      onChange={(e) => setResetConfirmPass(e.target.value)}
+                      placeholder="पुनः दर्ज करें"
+                      className="w-full bg-[#050b18] border border-slate-700 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {resetLoading ? (
+                    <>
+                      <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>सत्यापित हो रहा है...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>🔐 सुरक्षा कोड सत्यापित करें एवं पासवर्ड बदलें ➔</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="text-center pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetStep('email');
+                      setResetError(null);
+                      setResetSuccess(null);
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-amber-400 cursor-pointer"
+                  >
+                    ← पिछला स्टेप (ईमेल बदलें)
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 space-y-0.5">
+              <p>हेल्पलाइन: <strong className="text-amber-400">+91 94150 21989</strong> | <strong className="text-amber-400">it-admin@uprsa.org</strong></p>
+            </div>
           </div>
         </div>
       )}

@@ -125,7 +125,7 @@ export interface Skater {
   status: RegistrationStatus;
   rejectionReason?: string;
   adminRemarks?: string;
-  paymentStatus?: 'pending' | 'submitted' | 'verified' | 'rejected';
+  paymentStatus?: 'pending' | 'submitted' | 'verified' | 'rejected' | 'waived' | 'free';
   annualFeePaid: boolean;
   annualFeePaymentDate?: string;
   annualFeeUtr?: string;
@@ -145,11 +145,12 @@ export interface TournamentEvent {
   id: string;
   tournamentId: string;
   discipline: DisciplineType;
-  ageCategory: AgeCategory;
-  gender: Gender;
+  ageCategory: AgeCategory; // default / primary age category
+  ageCategories?: string[]; // Multiple eligible age categories for this race (e.g. ['Cadet (8 to 10)', 'Cadet (10 to 12)'])
+  gender: Gender | 'All Genders' | 'Both' | string; // All races open to all genders (Boys & Girls)
   eventName: string; // e.g. "500m Rink Race", "1000m Rink Race", "One Lap Road", "10000m Elimination"
   distance?: string;
-  entryFee: number;
+  entryFee?: number; // 0 or covered under fixed tournament fee
   maxParticipants?: number;
 }
 
@@ -197,11 +198,14 @@ export interface TournamentRegistration {
   ageCategory: AgeCategory;
   gender: Gender;
   discipline: DisciplineType;
-  selectedEvents: string[]; // event IDs
+  selectedEvents: string[] | any[]; // event IDs or event objects
+  selectedEventIds?: string[];
+  eventsCount?: number;
   bibNumber?: string;
   totalFee: number;
   paymentStatus: 'pending' | 'submitted' | 'verified' | 'failed';
   paymentUtr?: string;
+  paymentDate?: string;
   paymentReceiptUrl?: string;
   status: 'pending' | 'confirmed' | 'rejected' | 'withdrawn';
   remarks?: string;
@@ -413,6 +417,11 @@ export interface CustomRankingRecord {
   updatedAt?: string;
 }
 
+export interface CertificateRaceItem {
+  raceName: string; // e.g. "500m Rink Race Quad"
+  position: string; // e.g. "1st Place - Gold Medal (State Champion)"
+}
+
 export interface Certificate {
   id: string;
   certificateNumber: string; // e.g. UPRSA/CERT/2026/00482
@@ -429,6 +438,10 @@ export interface Certificate {
   ageCategory?: AgeCategory;
   gender?: Gender;
   position?: string; // "1st Place (Gold Medal)", "Participation", etc.
+  tournamentStartDate?: string;
+  tournamentEndDate?: string;
+  tournamentVenue?: string;
+  tournamentCity?: string;
   issueDate: string;
   status: 'valid' | 'revoked';
   isRevoked?: boolean;
@@ -437,6 +450,15 @@ export interface Certificate {
   signatoryPresident: string;
   signatorySecretary: string;
   created_at: string;
+  
+  // Multi-Race / Multi-Event Support
+  races?: CertificateRaceItem[];
+  race1Name?: string;
+  race1Position?: string;
+  race2Name?: string;
+  race2Position?: string;
+  race3Name?: string;
+  race3Position?: string;
 }
 
 export interface CertificateTemplateSettings {
@@ -698,24 +720,96 @@ export interface TickerItem {
   created_at?: string;
 }
 
+export interface CustomSocialLink {
+  id: string;
+  name: string;
+  href: string;
+  icon?: string;
+  bgColor?: string;
+  tooltip?: string;
+  enabled: boolean;
+}
+
+export interface SocialMediaConfig {
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  whatsapp?: string;
+  twitter?: string;
+  linkedin?: string;
+  telegram?: string;
+  threads?: string;
+  whatsappMessage?: string;
+}
+
+export interface SocialVisibilityConfig {
+  facebook?: boolean;
+  instagram?: boolean;
+  youtube?: boolean;
+  whatsapp?: boolean;
+  twitter?: boolean;
+  linkedin?: boolean;
+  telegram?: boolean;
+  threads?: boolean;
+  floatingBarEnabled?: boolean;
+  floatingBarPosition?: 'right' | 'left';
+}
+
+export interface LiveScoreConfig {
+  enabled: boolean;
+  title: string;
+  subtitle: string;
+  badge: string; // e.g. 'LIVE NOW', 'HEAT IN PROGRESS', 'FINALS'
+  actionType: 'internal' | 'external';
+  targetPage: string; // 'live_score' | 'race_console' | 'results' | 'tournaments' | 'rankings'
+  externalUrl?: string;
+  pulseAnimation: boolean;
+  position: 'bottom-right' | 'bottom-left';
+  showOnMobile: boolean;
+  announcementText?: string;
+}
+
+export interface TopTickerConfig {
+  enabled: boolean;
+  badgeText: string; // e.g. 'LIVE NOW', 'लाइव अपडेट', 'BREAKING'
+  badgeActionType: 'internal' | 'external';
+  badgeTargetPage: string; // e.g. 'live_score' | 'results' | 'tournaments' | 'race_console'
+  badgeExternalUrl?: string;
+  badgePulse: boolean;
+  rightButtonText: string; // e.g. 'Scoreboard', 'Watch Live', 'स्कोरबोर्ड'
+  rightButtonActionType: 'internal' | 'external';
+  rightButtonTargetPage: string; // e.g. 'live_score'
+  rightButtonExternalUrl?: string;
+  showRightButton: boolean;
+  scrollSpeed: 'slow' | 'medium' | 'fast';
+  pauseOnHover: boolean;
+}
+
 export interface SiteSettings {
   organizationName: string;
+  organizationNameHindi?: string;
   shortName: string;
   tagline: string;
+  taglineHindi?: string;
+  heroTitle?: string;
+  heroTitleHindi?: string;
+  heroSubtitle?: string;
+  heroSubtitleHindi?: string;
   affiliationNotice: string;
+  affiliationNoticeHindi?: string;
   logoUrl?: string;
+  logoShape?: 'shield' | 'circle' | 'rounded';
   contactEmail: string;
   contactPhone: string;
   officialAddress: string;
   registrationOpen: boolean;
   liveStreamingActive: boolean;
   headerNotice?: string;
-  socialLinks: {
-    facebook?: string;
-    instagram?: string;
-    youtube?: string;
-    twitter?: string;
-  };
+  socialLinks: SocialMediaConfig;
+  socialVisibility?: SocialVisibilityConfig;
+  customSocialLinks?: CustomSocialLink[];
+  liveScoreWidget?: LiveScoreConfig;
+  topTickerConfig?: TopTickerConfig;
   stats: {
     registeredSkaters: number;
     affiliatedDistricts: number;

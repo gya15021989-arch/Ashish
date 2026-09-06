@@ -20,7 +20,8 @@ import {
   Image as ImageIcon,
   Building2,
   Inbox,
-  HardDrive
+  HardDrive,
+  Share2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -37,18 +38,21 @@ import { ExecutiveCommitteeManager } from './ExecutiveCommitteeManager';
 import { ContactInquiriesManager } from './ContactInquiriesManager';
 import { AuditBackupManager } from './AuditBackupManager';
 import { TickerManager } from './TickerManager';
+import { LiveScoreCMSManager } from './LiveScoreCMSManager';
 import { SiteSettingsManager } from './SiteSettingsManager';
+import { SocialLinksCMSManager } from './SocialLinksCMSManager';
 import { AboutCMSManager } from './AboutCMSManager';
 import { DisciplinesManager } from './DisciplinesManager';
 import { ResultsRankingsManager } from './ResultsRankingsManager';
+import { CertificateRecordsManager } from './CertificateRecordsManager';
 import { Certificate } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    'skaters' | 'tournaments' | 'race_console' | 'results_rankings' | 'certificates' | 'finance' | 'cms' | 'inquiries' | 'backup'
+    'skaters' | 'tournaments' | 'race_console' | 'results_rankings' | 'certificates' | 'branding' | 'finance' | 'cms' | 'inquiries' | 'backup'
   >('skaters');
-  const [cmsSubTab, setCmsSubTab] = useState<'hero' | 'about' | 'disciplines' | 'news' | 'media' | 'districts' | 'committee' | 'ticker' | 'settings'>('hero');
+  const [cmsSubTab, setCmsSubTab] = useState<'live_score' | 'settings' | 'social' | 'hero' | 'about' | 'disciplines' | 'news' | 'media' | 'districts' | 'committee' | 'ticker' | 'certificates'>('live_score');
   const [stats, setStats] = useState<any>(null);
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [issuedCerts, setIssuedCerts] = useState<Certificate[]>([]);
@@ -101,6 +105,15 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setActiveTab('branding')}
+              className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="एसोसिएशन नाम, सब-टाइटल व लोगो बदलें"
+            >
+              <Shield className="w-4 h-4 text-amber-400" />
+              <span>लोगो व नाम बदलें (Branding)</span>
+            </button>
+
             <button
               onClick={() => setIsCertModalOpen(true)}
               className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20"
@@ -233,6 +246,18 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('branding')}
+            className={`flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'branding'
+                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20'
+                : 'text-amber-400 hover:text-amber-300 bg-amber-500/10 border border-amber-500/30'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span>लोगो व नाम (Branding)</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('cms')}
             className={`flex-1 min-w-[130px] py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'cms'
@@ -301,66 +326,9 @@ export const AdminDashboard: React.FC = () => {
           <ResultsRankingsManager />
         )}
 
-        {/* Tab 4: Certificate Registry */}
+        {/* Tab 4: Certificate Registry & Excel/PDF Manager */}
         {activeTab === 'certificates' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white">Issued State Certificate Registry</h3>
-                <span className="text-xs text-slate-400">All authenticated merit and participation certificates</span>
-              </div>
-              <button
-                onClick={() => setIsCertModalOpen(true)}
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Issue New Certificate</span>
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-                  <tr>
-                    <th className="py-3 px-3">Certificate No</th>
-                    <th className="py-3 px-3">Recipient / Reg No</th>
-                    <th className="py-3 px-3">Type</th>
-                    <th className="py-3 px-3">Championship & Event</th>
-                    <th className="py-3 px-3">Position</th>
-                    <th className="py-3 px-3">Issue Date</th>
-                    <th className="py-3 px-3 text-center">Auth Code</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {issuedCerts.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-850">
-                      <td className="py-3 px-3 font-mono font-bold text-white">{c.certificateNumber}</td>
-                      <td className="py-3 px-3">
-                        <div className="font-semibold text-white">{c.recipientName}</div>
-                        <div className="text-[10px] text-slate-400">{c.district} {c.recipientRegNo ? `• ${c.recipientRegNo}` : ''}</div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded text-[10px] font-bold">
-                          {c.type}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-200">
-                        <div>{c.tournamentName}</div>
-                        <div className="text-[10px] text-slate-400">{c.eventName}</div>
-                      </td>
-                      <td className="py-3 px-3 font-bold text-amber-400">
-                        {c.position || 'Participated'}
-                      </td>
-                      <td className="py-3 px-3 text-slate-400">{c.issueDate}</td>
-                      <td className="py-3 px-3 text-center font-mono text-[10px] text-emerald-400">
-                        {c.verificationCode}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <CertificateRecordsManager />
         )}
 
         {/* Tab 5: Complete CMS Website Management */}
@@ -453,31 +421,59 @@ export const AdminDashboard: React.FC = () => {
               </button>
 
               <button
-                onClick={() => setCmsSubTab('ticker')}
-                className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                  cmsSubTab === 'ticker'
-                    ? 'bg-red-500 text-white font-extrabold shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setCmsSubTab('live_score')}
+                className={`flex-1 min-w-[170px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  cmsSubTab === 'live_score'
+                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black shadow-lg shadow-red-500/25'
+                    : 'text-red-300 hover:text-white bg-red-500/10 border border-red-500/30'
                 }`}
               >
-                <Radio className="w-3.5 h-3.5" />
-                <span>Live Ticker</span>
+                <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                <span>लाइव स्कोर व बटन (Live Score CMS)</span>
+              </button>
+
+              <button
+                onClick={() => setCmsSubTab('social')}
+                className={`flex-1 min-w-[160px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  cmsSubTab === 'social'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black shadow-lg shadow-blue-500/25'
+                    : 'text-blue-300 hover:text-white bg-blue-500/10 border border-blue-500/30'
+                }`}
+              >
+                <Share2 className="w-3.5 h-3.5 text-blue-400" />
+                <span>सोशल मीडिया लिंक्स (Social Media)</span>
+              </button>
+
+              <button
+                onClick={() => setCmsSubTab('certificates')}
+                className={`flex-1 min-w-[150px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  cmsSubTab === 'certificates'
+                    ? 'bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-400/20'
+                    : 'text-amber-400 hover:text-white bg-amber-500/10 border border-amber-500/30'
+                }`}
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>सर्टिफिकेट डेटा (Excel/PDF)</span>
               </button>
 
               <button
                 onClick={() => setCmsSubTab('settings')}
                 className={`flex-1 min-w-[120px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   cmsSubTab === 'settings'
-                    ? 'bg-indigo-600 text-white font-extrabold shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
+                    : 'text-amber-300 hover:text-white bg-amber-500/10'
                 }`}
               >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Site Settings</span>
+                <Shield className="w-3.5 h-3.5" />
+                <span>लोगो, नाम व सेटिंग्स</span>
               </button>
             </div>
 
             {/* CMS Sub-views */}
+            {cmsSubTab === 'live_score' && <LiveScoreCMSManager />}
+            {cmsSubTab === 'social' && <SocialLinksCMSManager />}
+            {cmsSubTab === 'certificates' && <CertificateRecordsManager />}
+            {cmsSubTab === 'settings' && <SiteSettingsManager />}
             {cmsSubTab === 'hero' && <HeroSlidesManager />}
             {cmsSubTab === 'about' && <AboutCMSManager />}
             {cmsSubTab === 'disciplines' && <DisciplinesManager />}
@@ -486,8 +482,12 @@ export const AdminDashboard: React.FC = () => {
             {cmsSubTab === 'districts' && <DistrictsClubsManager />}
             {cmsSubTab === 'committee' && <ExecutiveCommitteeManager />}
             {cmsSubTab === 'ticker' && <TickerManager />}
-            {cmsSubTab === 'settings' && <SiteSettingsManager />}
           </div>
+        )}
+
+        {/* Tab: Dedicated Branding, Association Name & Logo Manager */}
+        {activeTab === 'branding' && (
+          <SiteSettingsManager />
         )}
 
         {/* Tab 6: Helpdesk Inquiries */}

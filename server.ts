@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import nodemailer from 'nodemailer';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import { getMandalForDistrict } from './src/data/mandals';
@@ -110,9 +111,33 @@ function getInitialDBState(): DBState {
     users: [
       {
         id: 'usr-admin-01',
-        email: 'admin@uprsa.org',
+        email: 'uprsa.official@gmail.com',
         passwordHash: 'uprsa@admin2026', // In production, hashed with bcrypt/argon2
         name: 'UPRSA State Administrator',
+        role: 'admin',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'usr-admin-02',
+        email: 'uprsa.support@gmail.com',
+        passwordHash: 'uprsa@admin2026',
+        name: 'UPRSA Support Secretariat',
+        role: 'admin',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'usr-admin-03',
+        email: 'admin@uprsa.org',
+        passwordHash: 'uprsa@admin2026',
+        name: 'UPRSA Official Admin',
+        role: 'admin',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'usr-admin-04',
+        email: 'gya15021989@gmail.com',
+        passwordHash: 'uprsa@admin2026',
+        name: 'UPRSA Master Secretariat Admin',
         role: 'admin',
         created_at: new Date().toISOString()
       },
@@ -552,18 +577,42 @@ function getInitialDBState(): DBState {
         fatherName: 'Rajesh Sharma',
         district: 'Lucknow',
         club: 'Awadh Roller Sports Club',
-        tournamentName: 'UP State Inter-District Speed Skating League 2026 (NCR Zone)',
-        eventName: '500m Sprint Inline Speed',
+        tournamentName: 'UP State Roller Sports Championship 2026',
+        eventName: 'Inline Speed (3 Races/Events)',
         discipline: 'Speed Skating (Inline)',
         ageCategory: 'Sub-Junior (12 to 15)',
         gender: 'Male',
         position: '1st Place - Gold Medal (State Champion)',
+        tournamentStartDate: '2026-08-20',
+        tournamentEndDate: '2026-08-22',
+        tournamentVenue: 'KD Singh Babu Stadium, Lucknow',
+        tournamentCity: 'Lucknow',
         issueDate: '2026-08-22',
         status: 'valid',
         qrVerificationUrl: '/certificate/verify/7f89a101',
         signatoryPresident: 'Dr. Akhilesh Chandra Sharma (President)',
         signatorySecretary: 'Rajesh Kumar Singh (Secretary General)',
-        created_at: '2026-08-22T19:00:00Z'
+        created_at: '2026-08-22T19:00:00Z',
+        races: [
+          {
+            raceName: '500m Sprint Inline Speed',
+            position: '1st Place - Gold Medal (State Champion)'
+          },
+          {
+            raceName: '1000m Inline Speed',
+            position: '1st Place - Gold Medal'
+          },
+          {
+            raceName: '5000m Elimination Inline',
+            position: '2nd Place - Silver Medal'
+          }
+        ],
+        race1Name: '500m Sprint Inline Speed',
+        race1Position: '1st Place - Gold Medal (State Champion)',
+        race2Name: '1000m Inline Speed',
+        race2Position: '1st Place - Gold Medal',
+        race3Name: '5000m Elimination Inline',
+        race3Position: '2nd Place - Silver Medal'
       },
       {
         id: 'cert-002',
@@ -581,6 +630,10 @@ function getInitialDBState(): DBState {
         ageCategory: 'Cadet (10 to 12)',
         gender: 'Female',
         position: '1st Place - Gold Medal (State Champion)',
+        tournamentStartDate: '2026-08-20',
+        tournamentEndDate: '2026-08-22',
+        tournamentVenue: 'Noida Roller Skating Complex, Sector 21A',
+        tournamentCity: 'Noida',
         issueDate: '2026-08-22',
         status: 'valid',
         qrVerificationUrl: '/certificate/verify/9a31b202',
@@ -604,12 +657,63 @@ function getInitialDBState(): DBState {
         ageCategory: 'Sub-Junior (12 to 15)',
         gender: 'Male',
         position: '2nd Place - Silver Medal',
+        tournamentStartDate: '2026-08-20',
+        tournamentEndDate: '2026-08-22',
+        tournamentVenue: 'Noida Roller Skating Complex, Sector 21A',
+        tournamentCity: 'Noida',
         issueDate: '2026-08-22',
         status: 'valid',
         qrVerificationUrl: '/certificate/verify/4c77d303',
         signatoryPresident: 'Dr. Akhilesh Chandra Sharma (President)',
         signatorySecretary: 'Rajesh Kumar Singh (Secretary General)',
         created_at: '2026-08-22T19:00:00Z'
+      },
+      {
+        id: 'cert-004',
+        certificateNumber: 'UPRSA/CERT/2026/00202',
+        verificationCode: 'va2j70k2',
+        type: 'Merit',
+        recipientName: 'Riya Srivastava',
+        recipientRegNo: 'UPRSA/2026/VAR/00202',
+        fatherName: 'Sanjay Srivastava',
+        district: 'Varanasi',
+        club: 'Kashi Roller Skating Club',
+        tournamentName: 'UP State Roller Sports Championship 2026',
+        eventName: 'Quad Speed (3 Races/Events)',
+        discipline: 'Speed Skating (Quad)',
+        ageCategory: 'Sub-Junior (12 to 15)',
+        gender: 'Female',
+        position: '2nd Place - Silver Medal',
+        tournamentStartDate: '2026-08-20',
+        tournamentEndDate: '2026-08-22',
+        tournamentVenue: 'KD Singh Babu Stadium, Lucknow',
+        tournamentCity: 'Lucknow',
+        issueDate: '2026-08-22',
+        status: 'valid',
+        qrVerificationUrl: '/certificate/verify/va2j70k2',
+        signatoryPresident: 'Dr. Akhilesh Chandra Sharma (President)',
+        signatorySecretary: 'Rajesh Kumar Singh (Secretary General)',
+        created_at: '2026-08-22T19:00:00Z',
+        races: [
+          {
+            raceName: '500m Rink Race (Quad)',
+            position: '1st Place - Gold Medal (State Champion)'
+          },
+          {
+            raceName: '1000m Rink Race (Quad)',
+            position: '2nd Place - Silver Medal'
+          },
+          {
+            raceName: '1 Lap Road Race (Quad)',
+            position: '3rd Place - Bronze Medal'
+          }
+        ],
+        race1Name: '500m Rink Race (Quad)',
+        race1Position: '1st Place - Gold Medal (State Champion)',
+        race2Name: '1000m Rink Race (Quad)',
+        race2Position: '2nd Place - Silver Medal',
+        race3Name: '1 Lap Road Race (Quad)',
+        race3Position: '3rd Place - Bronze Medal'
       }
     ],
     certificateSettings: {
@@ -1187,10 +1291,18 @@ function getInitialDBState(): DBState {
     ],
     siteSettings: {
       organizationName: 'Uttar Pradesh Roller Sports Association',
+      organizationNameHindi: 'उत्तर प्रदेश रोलर स्पोर्ट्स एसोसिएशन',
       shortName: 'UPRSA',
       tagline: 'STATE GOVERNING BODY FOR ROLLER SPORTS IN UTTAR PRADESH',
+      taglineHindi: 'स्टेट गवर्निंग बॉडी ऑफ रोलर स्पोर्ट्स इन उत्तर प्रदेश',
+      heroTitle: 'UTTAR PRADESH ROLLER SPORTS ASSOCIATION',
+      heroTitleHindi: 'उत्तर प्रदेश रोलर स्पोर्ट्स एसोसिएशन',
+      heroSubtitle: 'Promoting Roller Sports Across Uttar Pradesh • Building Champions, Building Nation. State Governing Body Affiliated with Roller Skating Federation of India (RSFI).',
+      heroSubtitleHindi: 'उत्तर प्रदेश भर में रोलर स्पोर्ट्स को प्रोत्साहन • चैंपियंस का निर्माण, राष्ट्र का निर्माण। भारतीय रोलर स्केटिंग महासंघ (RSFI) से संबद्ध राज्य नियामक संस्था।',
       affiliationNotice: 'Affiliated to Roller Skating Federation of India (RSFI) & UP Olympic Association (UPOA)',
+      affiliationNoticeHindi: 'भारतीय रोलर स्केटिंग महासंघ (RSFI) एवं यूपी ओलंपिक संघ (UPOA) से संबद्ध',
       logoUrl: '',
+      logoShape: 'shield',
       contactEmail: 'sec.uprsa@gmail.com',
       contactPhone: '+91 94150 23456',
       officialAddress: 'UPRSA State Secretariat, K.D. Singh Babu Stadium Complex, Hazratganj, Lucknow, UP - 226001',
@@ -1198,10 +1310,55 @@ function getInitialDBState(): DBState {
       liveStreamingActive: true,
       headerNotice: 'OFFICIAL RSFI RECOGNIZED STATE GOVERNING BODY',
       socialLinks: {
-        facebook: 'https://facebook.com/uprsa.official',
+        facebook: 'https://facebook.com/uprsa',
         instagram: 'https://instagram.com/uprsa_official',
-        youtube: 'https://youtube.com/@uprollersports',
-        twitter: 'https://twitter.com/uprsa_sports'
+        youtube: 'https://youtube.com/@uprsa',
+        whatsapp: '919415021989',
+        twitter: 'https://x.com/uprsa_official',
+        linkedin: 'https://linkedin.com/company/uprsa',
+        telegram: 'https://t.me/uprsa_official',
+        whatsappMessage: 'Hello UPRSA Secretariat, I have a query regarding Roller Skating in Uttar Pradesh.'
+      },
+      socialVisibility: {
+        facebook: true,
+        instagram: true,
+        youtube: true,
+        whatsapp: true,
+        twitter: true,
+        linkedin: true,
+        telegram: false,
+        threads: false,
+        floatingBarEnabled: true,
+        floatingBarPosition: 'right'
+      },
+      customSocialLinks: [],
+      liveScoreWidget: {
+        enabled: true,
+        title: 'LIVE SCORING',
+        subtitle: '36th State Trials',
+        badge: 'LIVE NOW',
+        actionType: 'internal',
+        targetPage: 'live_score',
+        externalUrl: '',
+        pulseAnimation: true,
+        position: 'bottom-right',
+        showOnMobile: true,
+        announcementText: 'Live Race Scoring & Track Heats in Progress'
+      },
+      topTickerConfig: {
+        enabled: true,
+        badgeText: 'LIVE NOW',
+        badgeActionType: 'internal',
+        badgeTargetPage: 'live_score',
+        badgeExternalUrl: '',
+        badgePulse: true,
+        rightButtonText: 'Scoreboard',
+        rightButtonActionType: 'internal',
+        rightButtonTargetPage: 'live_score',
+        rightButtonExternalUrl: '',
+        showRightButton: true,
+        scrollSpeed: 'medium',
+        pauseOnHover: true
       },
       stats: {
         registeredSkaters: 1248,
@@ -1287,6 +1444,176 @@ function getInitialDBState(): DBState {
   };
 }
 
+function generateComprehensiveTournamentEvents(tournamentId: string) {
+  const events = [
+    // --- Speed Quad ---
+    {
+      id: `${tournamentId}-quad-500m`,
+      tournamentId,
+      discipline: 'Speed Skating (Quad)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '500m Rink Race (Quad)',
+      distance: '500m Rink',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-quad-1000m`,
+      tournamentId,
+      discipline: 'Speed Skating (Quad)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '1000m Rink Race (Quad)',
+      distance: '1000m Rink',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-quad-1lap`,
+      tournamentId,
+      discipline: 'Speed Skating (Quad)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '1 Lap Road Sprint (Quad)',
+      distance: '1 Lap Road (300m)',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-quad-1500m`,
+      tournamentId,
+      discipline: 'Speed Skating (Quad)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '1500m Rink Elimination Race (Quad)',
+      distance: '1500m Rink',
+      entryFee: 0
+    },
+
+    // --- Speed Inline ---
+    {
+      id: `${tournamentId}-inline-500m`,
+      tournamentId,
+      discipline: 'Speed Skating (Inline)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '500m+D Sprint Rink Race (Inline)',
+      distance: '500m+D',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-inline-1000m`,
+      tournamentId,
+      discipline: 'Speed Skating (Inline)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '1000m Sprint Rink Race (Inline)',
+      distance: '1000m',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-inline-5000m`,
+      tournamentId,
+      discipline: 'Speed Skating (Inline)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '5000m Points Elimination Race (Inline)',
+      distance: '5000m',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-inline-100m`,
+      tournamentId,
+      discipline: 'Speed Skating (Inline)',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: '100m Road Sprint (Inline)',
+      distance: '100m Road Straight',
+      entryFee: 0
+    },
+
+    // --- Inline Freestyle ---
+    {
+      id: `${tournamentId}-freestyle-speed`,
+      tournamentId,
+      discipline: 'Inline Freestyle',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: 'Speed Slalom Knockout',
+      distance: 'Slalom Cones',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-freestyle-classic`,
+      tournamentId,
+      discipline: 'Inline Freestyle',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: 'Classic Slalom Musical Routine',
+      distance: 'Music Freestyle Routine',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-freestyle-battle`,
+      tournamentId,
+      discipline: 'Inline Freestyle',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)'],
+      gender: 'Both',
+      eventName: 'Battle Slalom Technical',
+      distance: 'Freestyle Battle Cones',
+      entryFee: 0
+    },
+
+    // --- Artistic Skating ---
+    {
+      id: `${tournamentId}-artistic-solo`,
+      tournamentId,
+      discipline: 'Artistic Skating',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: 'Solo Dance Championship',
+      distance: 'Figure Routine',
+      entryFee: 0
+    },
+    {
+      id: `${tournamentId}-artistic-free`,
+      tournamentId,
+      discipline: 'Artistic Skating',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: 'Free Skating Artistic Routine',
+      distance: 'Free Skating Routine',
+      entryFee: 0
+    },
+
+    // --- Roller Hockey ---
+    {
+      id: `${tournamentId}-hockey-championship`,
+      tournamentId,
+      discipline: 'Roller Hockey',
+      ageCategory: 'Sub-Junior (12 to 15)',
+      ageCategories: ['Sub-Junior (11 to 14 Years)', 'Sub-Junior (12 to 15)', 'Cadet (9 to 11 Years)', 'Cadet (10 to 12)', 'Junior (14 to 17 Years)', 'Junior (15 to 18)', 'Senior (Above 17/18)', 'Senior (Above 14)', '5 to 7 Years', '7 to 9 Years', 'Masters (Above 35)'],
+      gender: 'Both',
+      eventName: 'Roller Hockey State Trophy Match',
+      distance: '2x20 Mins Match',
+      entryFee: 0
+    }
+  ];
+
+  return events;
+}
+
 // Database helper functions
 let db: DBState;
 
@@ -1298,8 +1625,48 @@ function loadDB(): DBState {
       // Ensure all arrays exist even if loaded from older JSON version
       const initial = getInitialDBState();
       parsed.users = parsed.users || initial.users;
+
+      // Ensure official admin emails exist in users list and synchronize passwords
+      const requiredAdmins = [
+        { email: 'uprsa.official@gmail.com', name: 'UPRSA State Administrator' },
+        { email: 'uprsa.support@gmail.com', name: 'UPRSA Support Secretariat' },
+        { email: 'admin@uprsa.org', name: 'UPRSA Official Admin' },
+        { email: 'gya15021989@gmail.com', name: 'UPRSA Master Secretariat Admin' }
+      ];
+
+      // Find any newly customized admin password (e.g. from reset) or default to Ashish@1502 / uprsa@admin2026
+      const existingAdminWithCustomPass = parsed.users.find((u: any) => u.role === 'admin' && u.passwordHash && u.passwordHash !== 'uprsa@admin2026');
+      const activeAdminPassword = existingAdminWithCustomPass ? existingAdminWithCustomPass.passwordHash : 'Ashish@1502';
+
+      requiredAdmins.forEach(adm => {
+        const found = parsed.users.find((u: any) => u.email && u.email.toLowerCase() === adm.email.toLowerCase());
+        if (!found) {
+          parsed.users.push({
+            id: 'usr-admin-' + Math.random().toString(36).substring(2, 7),
+            email: adm.email,
+            passwordHash: activeAdminPassword,
+            name: adm.name,
+            role: 'admin',
+            created_at: new Date().toISOString()
+          });
+        } else {
+          // Synchronize password across admin accounts
+          found.passwordHash = activeAdminPassword;
+          found.role = 'admin';
+        }
+      });
       parsed.skaters = parsed.skaters || initial.skaters;
       parsed.tournaments = parsed.tournaments || initial.tournaments;
+
+      // Ensure all tournaments have comprehensive official events
+      if (Array.isArray(parsed.tournaments)) {
+        parsed.tournaments.forEach((t: any) => {
+          if (!t.events || t.events.length < 10) {
+            t.events = generateComprehensiveTournamentEvents(t.id);
+          }
+        });
+      }
+
       parsed.tournamentRegistrations = parsed.tournamentRegistrations || initial.tournamentRegistrations;
       parsed.races = parsed.races || initial.races;
       parsed.results = parsed.results || initial.results;
@@ -1646,14 +2013,52 @@ app.post('/api/auth/login', (req, res) => {
   const emailClean = (email || '').trim().toLowerCase();
 
   // Admin login check
-  if (emailClean === 'admin@uprsa.org' && password === 'uprsa@admin2026') {
-    const adminUser = db.users.find(u => u.email.toLowerCase() === 'admin@uprsa.org');
-    return res.json({
-      success: true,
-      token: 'jwt_admin_session_token_' + Date.now(),
-      user: adminUser,
-      message: 'Admin authentication successful'
-    });
+  const adminEmailsList = [
+    'uprsa.official@gmail.com',
+    'uprsa.support@gmail.com',
+    'admin@uprsa.org',
+    'gya15021989@gmail.com',
+    'it-admin@uprsa.org'
+  ];
+
+  const isAdminEmailInput = adminEmailsList.includes(emailClean) || db.users.some(u => u.role === 'admin' && u.email && u.email.toLowerCase() === emailClean);
+
+  if (isAdminEmailInput) {
+    const adminUsers = db.users.filter(u => u.role === 'admin' || (u.email && adminEmailsList.includes(u.email.toLowerCase())));
+    const specificAdmin = adminUsers.find(u => u.email && u.email.toLowerCase() === emailClean) || adminUsers[0];
+
+    // Check if password matches any admin password, or master passwords
+    const validAdminPass = 
+      (specificAdmin && specificAdmin.passwordHash === password) ||
+      adminUsers.some(u => u.passwordHash === password) ||
+      password === 'Ashish@1502' ||
+      password === 'uprsa@admin2026';
+
+    if (validAdminPass) {
+      // Sync password across all admin accounts so future logins with any admin email work effortlessly
+      adminUsers.forEach(u => {
+        u.passwordHash = password;
+        u.role = 'admin';
+      });
+      saveDB(db);
+
+      return res.json({
+        success: true,
+        token: 'jwt_admin_session_token_' + Date.now(),
+        user: specificAdmin || {
+          id: 'usr-admin-01',
+          email: emailClean || 'uprsa.official@gmail.com',
+          name: 'UPRSA State Administrator',
+          role: 'admin'
+        },
+        message: 'Admin authentication successful'
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: 'अमान्य एडमिन पासवर्ड। कृपया अपना सही पासवर्ड दर्ज करें अथवा "Forgot Password" से नया पासवर्ड बनाएं।'
+      });
+    }
   }
 
   // Skater login via Registration Number OR Email
@@ -1739,6 +2144,230 @@ app.post('/api/auth/activate', (req, res) => {
 
   saveDB(db);
   res.json({ success: true, message: 'Account activated successfully! You can now log into the Skater Portal.', user, skater });
+});
+
+// Store active admin OTPs in memory: email -> { otp: string, expiresAt: number, attempts: number }
+const adminOtpStore: Record<string, { otp: string; expiresAt: number; attempts: number }> = {};
+
+// Helper: Send Real Email using Nodemailer SMTP if credentials provided, with clean error handling
+async function sendAdminSecurityOtpEmail(toEmail: string, otp: string) {
+  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const smtpPort = Number(process.env.SMTP_PORT) || 587;
+  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER || '';
+  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '';
+  const fromEmail = process.env.EMAIL_FROM || '"UPRSA IT Secretariat" <notifications@uprsa.org>';
+
+  console.log(`[UPRSA IT Security] Admin Reset OTP generated for ${toEmail}: ${otp}`);
+
+  if (smtpUser && smtpPass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
+
+      await transporter.sendMail({
+        from: fromEmail,
+        to: toEmail,
+        subject: `UPRSA Portal: Admin Password Reset Security Code - ${otp}`,
+        text: `UPRSA STATE FEDERATION PORTAL\n\nYour Admin Password Reset Security Code is: ${otp}\n\nThis verification code is valid for 10 minutes. If you did not request this password reset, please contact the UPRSA IT Desk (+91 94150 21989) immediately.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; background: #070e20; color: #ffffff; padding: 24px; border-radius: 12px; max-width: 500px; margin: auto; border: 1px solid rgba(245, 158, 11, 0.4);">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #fbbf24; margin: 0;">UPRSA STATE PORTAL</h2>
+              <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">Uttar Pradesh Roller Skating Association • Secretariat</p>
+            </div>
+            <div style="background: #0f172a; border-radius: 8px; padding: 20px; text-align: center; border: 1px solid #1e293b;">
+              <p style="color: #cbd5e1; font-size: 14px; margin: 0 0 12px 0;">Admin Password Reset Security Code:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #fbbf24; background: #050b18; padding: 12px; border-radius: 8px; border: 1px dashed #fbbf24; font-family: monospace;">
+                ${otp}
+              </div>
+              <p style="color: #94a3b8; font-size: 12px; margin-top: 14px;">Valid for 10 minutes. Do not share this code with anyone.</p>
+            </div>
+            <div style="margin-top: 20px; font-size: 11px; color: #64748b; text-align: center;">
+              Helpline: +91 94150 21989 | Support: it-admin@uprsa.org
+            </div>
+          </div>
+        `
+      });
+      console.log(`[UPRSA Email Service] Real OTP email successfully delivered to ${toEmail}`);
+      return { success: true, delivered: true };
+    } catch (err: any) {
+      console.error(`[UPRSA Email Service] SMTP Error:`, err.message);
+      return { success: false, delivered: false, error: err.message };
+    }
+  }
+
+  // If external SMTP credentials are not yet configured in environment
+  return { success: true, delivered: false, note: 'SMTP_CONFIG_AWAITING' };
+}
+
+// Admin Send Security OTP to Email Endpoint
+app.post('/api/auth/admin/send-otp', async (req, res) => {
+  const { email } = req.body;
+  const emailClean = (email || '').trim().toLowerCase();
+
+  if (!emailClean) {
+    return res.status(400).json({ success: false, message: 'कृपया पंजीकृत एडमिन ईमेल दर्ज करें।' });
+  }
+
+  // Verify email belongs to an authorized admin or standard secretariat email
+  const authorizedAdminEmails = [
+    'uprsa.official@gmail.com',
+    'uprsa.support@gmail.com',
+    'admin@uprsa.org',
+    'gya15021989@gmail.com',
+    'it-admin@uprsa.org'
+  ];
+
+  const isAdminEmail = 
+    authorizedAdminEmails.includes(emailClean) ||
+    db.users.some(u => u.role === 'admin' && u.email.toLowerCase() === emailClean);
+
+  if (!isAdminEmail) {
+    return res.status(404).json({ 
+      success: false, 
+      message: 'यह ईमेल अधिकृत एडमिन रिकॉर्ड में नहीं मिला। कृपया अधिकृत एडमिन ईमेल दर्ज करें (उदा. uprsa.official@gmail.com या uprsa.support@gmail.com)।' 
+    });
+  }
+
+  // Generate 6-digit numeric security OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes validity
+
+  adminOtpStore[emailClean] = {
+    otp,
+    expiresAt,
+    attempts: 0
+  };
+
+  // Dispatch email
+  await sendAdminSecurityOtpEmail(emailClean, otp);
+
+  // Add audit record
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Admin Password Reset OTP Requested',
+    user: emailClean,
+    details: `6-digit Security OTP code dispatched for admin password recovery to ${emailClean}`,
+    timestamp: new Date().toISOString()
+  });
+  saveDB(db);
+
+  return res.json({
+    success: true,
+    message: `सुरक्षा कोड (Security Code) आपके एडमिन ईमेल ${emailClean} पर भेज दिया गया है। यह कोड 10 मिनट के लिए मान्य है।`,
+    email: emailClean,
+    expiresInSeconds: 600
+  });
+});
+
+// Admin Password Reset / Verify OTP & Change Password Endpoint
+app.post(['/api/auth/admin/reset-password', '/api/auth/admin/verify-otp-and-reset', '/api/auth/admin/forgot-password'], (req, res) => {
+  const { email, otp, securityKey, newPassword } = req.body;
+  const emailClean = (email || '').trim().toLowerCase();
+  const otpClean = (otp || '').trim();
+  const secKeyClean = (securityKey || '').trim();
+  const newPassClean = (newPassword || '').trim();
+
+  // Valid Secretariat Master Keys / Fallback Recovery Tokens
+  const validSecretariatKeys = ['UPRSA-SEC-2026', 'UPRSA2026', 'ADMIN@UPRSA', '9415021989', 'UPRSA-MASTER-KEY'];
+
+  if (!emailClean) {
+    return res.status(400).json({ success: false, message: 'एडमिन ईमेल दर्ज करना अनिवार्य है।' });
+  }
+
+  if (!newPassClean || newPassClean.length < 6) {
+    return res.status(400).json({ success: false, message: 'नया पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।' });
+  }
+
+  // Check OTP validity
+  const storedOtpData = adminOtpStore[emailClean];
+  let isOtpValid = false;
+
+  if (otpClean && storedOtpData) {
+    if (Date.now() > storedOtpData.expiresAt) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'सुरक्षा कोड (OTP) की समय सीमा समाप्त हो गई है। कृपया नया कोड भेजें।' 
+      });
+    }
+    if (storedOtpData.otp === otpClean) {
+      isOtpValid = true;
+    } else {
+      storedOtpData.attempts = (storedOtpData.attempts || 0) + 1;
+      return res.status(400).json({ 
+        success: false, 
+        message: 'गलत सुरक्षा कोड दर्ज किया गया है। कृपया ईमेल पर प्राप्त 6-अंकों का कोड सही से दर्ज करें।' 
+      });
+    }
+  }
+
+  const isMasterKeyValid = secKeyClean && validSecretariatKeys.some(k => k.toLowerCase() === secKeyClean.toLowerCase());
+
+  if (!isOtpValid && !isMasterKeyValid) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'कृपया ईमेल पर भेजा गया 6-अंकों का सुरक्षा कोड (Security Code) दर्ज करें।' 
+    });
+  }
+
+  // Clear OTP from store once verified
+  delete adminOtpStore[emailClean];
+
+  // Find or create admin user and synchronize new password
+  const adminEmailsList = [
+    'uprsa.official@gmail.com',
+    'uprsa.support@gmail.com',
+    'admin@uprsa.org',
+    'gya15021989@gmail.com',
+    'it-admin@uprsa.org'
+  ];
+
+  let targetAdmin = db.users.find(u => u.email && u.email.toLowerCase() === emailClean);
+  if (!targetAdmin) {
+    targetAdmin = {
+      id: 'usr-admin-' + Math.random().toString(36).substring(2, 7),
+      email: emailClean,
+      passwordHash: newPassClean,
+      name: 'UPRSA State Administrator',
+      role: 'admin',
+      created_at: new Date().toISOString()
+    };
+    db.users.push(targetAdmin);
+  } else {
+    targetAdmin.passwordHash = newPassClean;
+    targetAdmin.updated_at = new Date().toISOString();
+  }
+
+  // Also sync new password to other admin accounts for seamless login with any authorized admin email
+  db.users.forEach(u => {
+    if (u.role === 'admin' || (u.email && adminEmailsList.includes(u.email.toLowerCase()))) {
+      u.passwordHash = newPassClean;
+      u.updated_at = new Date().toISOString();
+    }
+  });
+
+  // Audit log
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Admin Password Reset via Email OTP',
+    user: targetAdmin.email,
+    details: `Admin password successfully reset and synchronized following verified security code for ${targetAdmin.email}`,
+    timestamp: new Date().toISOString()
+  });
+
+  saveDB(db);
+
+  return res.json({
+    success: true,
+    message: 'सुरक्षा कोड सफलतापूर्वक सत्यापित हुआ! एडमिन पासवर्ड बदल दिया गया है। आप नए पासवर्ड से लॉगिन कर सकते हैं।'
+  });
 });
 
 // Skaters CRUD & Management
@@ -1873,8 +2502,10 @@ app.post('/api/skaters', (req, res) => {
   const body = req.body;
 
   // Validation: Required Fields
-  if (!body.firstName || !body.lastName) {
-    return res.status(400).json({ success: false, message: 'First name and last name are required.' });
+  const firstName = (body.firstName || '').trim();
+  const lastName = (body.lastName || '').trim() || '.';
+  if (!firstName) {
+    return res.status(400).json({ success: false, message: 'Athlete name (First Name) is required.' });
   }
   if (!body.dateOfBirth) {
     return res.status(400).json({ success: false, message: 'Date of birth is required.' });
@@ -1884,28 +2515,28 @@ app.post('/api/skaters', (req, res) => {
   const phoneClean = (body.phone || '').replace(/[^0-9]/g, '');
   const rsfiClean = (body.rsfiNumber || '').trim().toUpperCase();
 
-  // Duplicate Check: Prevent duplicate registrations by email, phone, or RSFI number
-  const existing = db.skaters.find(s => {
-    const sEmail = (s.email || '').trim().toLowerCase();
-    const sPhone = (s.phone || '').replace(/[^0-9]/g, '');
+  // Duplicate Check: Check if exact same athlete is already registered
+  const exactDuplicate = db.skaters.find(s => {
     const sRsfi = (s.rsfiNumber || '').trim().toUpperCase();
-    if (emailClean && sEmail && sEmail === emailClean) return true;
-    if (phoneClean && phoneClean.length >= 10 && sPhone.length >= 10 && sPhone.slice(-10) === phoneClean.slice(-10)) return true;
     if (rsfiClean && sRsfi && sRsfi === rsfiClean) return true;
+
+    const sName = `${s.firstName} ${s.lastName}`.trim().toLowerCase();
+    const curName = `${firstName} ${lastName}`.trim().toLowerCase();
+    const sDob = (s.dateOfBirth || '').split('T')[0];
+    const curDob = (body.dateOfBirth || '').split('T')[0];
+    
+    // Match same name AND same date of birth
+    if (sName === curName && sDob === curDob && curDob) return true;
     return false;
   });
 
-  if (existing) {
-    const reason = emailClean && (existing.email || '').toLowerCase() === emailClean
-      ? `email address (${existing.email})`
-      : phoneClean && (existing.phone || '').includes(phoneClean.slice(-10))
-        ? `phone number (${existing.phone})`
-        : `RSFI registration number (${existing.rsfiNumber})`;
-
-    return res.status(409).json({
-      success: false,
-      message: `An athlete is already registered with this ${reason}. Their official Registration ID is ${existing.registrationNumber}. Please sign in to the Skater Portal or verify registration status.`,
-      existingRegNo: existing.registrationNumber
+  if (exactDuplicate) {
+    return res.status(200).json({
+      success: true,
+      data: exactDuplicate,
+      registrationNumber: exactDuplicate.registrationNumber,
+      message: `एथलीट पहले से पंजीकृत हैं। आपका आधिकारिक रजिस्ट्रेशन नंबर ${exactDuplicate.registrationNumber} है।`,
+      alreadyRegistered: true
     });
   }
 
@@ -1971,11 +2602,11 @@ app.post('/api/skaters', (req, res) => {
     mandal,
     ageCategory,
     season: CURRENT_SEASON_CODE,
-    status: 'pending_verification',
-    paymentStatus: body.annualFeeUtr ? 'submitted' : 'pending',
-    annualFeePaid: false, // Requires admin approval
-    annualFeePaymentDate: body.annualFeeUtr ? now.split('T')[0] : undefined,
-    annualFeeUtr: body.annualFeeUtr || undefined,
+    status: body.status || 'UNDER_SCRUTINY',
+    paymentStatus: 'waived', // Free registration
+    annualFeePaid: true,
+    annualFeePaymentDate: now.split('T')[0],
+    annualFeeUtr: body.annualFeeUtr || 'FREE_GOVT_SCHEME_2026',
     qrVerificationUrl,
     validUntil: OFFICIAL_SEASON_LABELS.VALID_UNTIL_DATE,
     documents: documentsList,
@@ -2309,6 +2940,73 @@ app.post('/api/skaters/:id/documents/:docType/status', (req, res) => {
   res.json({ success: true, data: skater, message: `Document ${docType} status updated to ${status}` });
 });
 
+// Update / Reset Athlete Password (Admin Action)
+const handleUpdateSkaterPassword = (req: any, res: any) => {
+  const queryId = (req.params.id || '').trim();
+  const index = db.skaters.findIndex(s => s.id === queryId || s.registrationNumber === queryId);
+  if (index === -1) return res.status(404).json({ success: false, message: 'Skater not found' });
+
+  const skater = db.skaters[index];
+  const { password, autoGenerate, adminEmail } = req.body;
+  const adminUser = (req.headers['x-admin-user'] as string) || adminEmail || 'admin@uprsa.org';
+
+  let finalPassword = (password || '').trim();
+  if (autoGenerate || !finalPassword) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#';
+    finalPassword = 'UP@' + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  // Find or create user account record
+  let user = db.users.find(u => u.skaterId === skater.id || (u.email && u.email.toLowerCase() === skater.email.toLowerCase()));
+  if (!user) {
+    user = {
+      id: 'usr-' + skater.id,
+      email: skater.email,
+      passwordHash: finalPassword,
+      name: `${skater.firstName} ${skater.lastName}`,
+      role: 'skater',
+      skaterId: skater.id,
+      district: skater.district,
+      club: skater.club,
+      created_at: new Date().toISOString()
+    };
+    db.users.push(user);
+  } else {
+    user.passwordHash = finalPassword;
+    user.updated_at = new Date().toISOString();
+  }
+
+  // Update skater document fields
+  skater.password = finalPassword;
+  skater.loginId = skater.registrationNumber || skater.email;
+  skater.updated_at = new Date().toISOString();
+
+  // Audit log
+  db.auditLogs.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    action: 'Skater Password Changed',
+    user: adminUser,
+    details: `Updated login credentials/password for athlete ${skater.firstName} ${skater.lastName} (${skater.registrationNumber || skater.id})`,
+    timestamp: new Date().toISOString()
+  });
+
+  saveDB(db);
+
+  return res.json({
+    success: true,
+    data: {
+      loginId: skater.registrationNumber || skater.email,
+      temporaryPassword: finalPassword
+    },
+    message: 'Athlete password has been updated successfully.'
+  });
+};
+
+app.put('/api/admin/skaters/:id/password', handleUpdateSkaterPassword);
+app.post('/api/admin/skaters/:id/password', handleUpdateSkaterPassword);
+app.put('/api/skaters/:id/password', handleUpdateSkaterPassword);
+app.post('/api/skaters/:id/password', handleUpdateSkaterPassword);
+
 app.post('/api/skaters/:id/status', (req, res) => {
   const { status, rejectionReason, adminRemarks, licenseNumber } = req.body;
   const queryId = (req.params.id || '').trim();
@@ -2421,10 +3119,20 @@ app.get('/api/tournaments/:id', (req, res) => {
 app.post('/api/tournaments', (req, res) => {
   const newTournament = {
     ...req.body,
-    id: 'tour-' + Date.now(),
+    id: req.body.id || ('tour-' + Date.now()),
     created_at: new Date().toISOString()
   };
   db.tournaments.unshift(newTournament);
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'log-' + Date.now(),
+      action: 'CREATE_TOURNAMENT',
+      target: newTournament.title,
+      details: `Created tournament ${newTournament.title} (${newTournament.venue || ''})`,
+      timestamp: new Date().toISOString(),
+      performedBy: req.body.performedBy || 'Admin'
+    });
+  }
   saveDB(db);
   res.status(201).json({ success: true, data: newTournament, message: 'Tournament created successfully' });
 });
@@ -2432,13 +3140,53 @@ app.post('/api/tournaments', (req, res) => {
 app.put('/api/tournaments/:id', (req, res) => {
   const idx = db.tournaments.findIndex(t => t.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Tournament not found' });
-  db.tournaments[idx] = { ...db.tournaments[idx], ...req.body };
+  db.tournaments[idx] = { ...db.tournaments[idx], ...req.body, updated_at: new Date().toISOString() };
+  if (db.auditLogs) {
+    db.auditLogs.unshift({
+      id: 'log-' + Date.now(),
+      action: 'UPDATE_TOURNAMENT',
+      target: db.tournaments[idx].title,
+      details: `Updated tournament ${db.tournaments[idx].title}`,
+      timestamp: new Date().toISOString(),
+      performedBy: req.body.performedBy || 'Admin'
+    });
+  }
   saveDB(db);
   res.json({ success: true, data: db.tournaments[idx], message: 'Tournament updated successfully' });
 });
 
 app.delete('/api/tournaments/:id', (req, res) => {
+  const target = db.tournaments.find(t => t.id === req.params.id);
   db.tournaments = db.tournaments.filter(t => t.id !== req.params.id);
+  if (db.auditLogs && target) {
+    db.auditLogs.unshift({
+      id: 'log-' + Date.now(),
+      action: 'DELETE_TOURNAMENT',
+      target: target.title,
+      details: `Deleted tournament ${target.title} (${target.id})`,
+      timestamp: new Date().toISOString(),
+      performedBy: 'Admin'
+    });
+  }
+  saveDB(db);
+  res.json({ success: true, message: 'Tournament deleted successfully' });
+});
+
+app.post('/api/tournaments/delete', (req, res) => {
+  const id = req.body.id;
+  if (!id) return res.status(400).json({ success: false, message: 'Tournament ID is required' });
+  const target = db.tournaments.find(t => t.id === id);
+  db.tournaments = db.tournaments.filter(t => t.id !== id);
+  if (db.auditLogs && target) {
+    db.auditLogs.unshift({
+      id: 'log-' + Date.now(),
+      action: 'DELETE_TOURNAMENT',
+      target: target.title,
+      details: `Deleted tournament ${target.title} (${id})`,
+      timestamp: new Date().toISOString(),
+      performedBy: req.body.performedBy || 'Admin'
+    });
+  }
   saveDB(db);
   res.json({ success: true, message: 'Tournament deleted successfully' });
 });
@@ -2907,17 +3655,38 @@ app.get('/api/certificates', (req, res) => {
 });
 
 app.get('/api/certificates/verify/:code', (req, res) => {
-  const code = req.params.code.trim();
-  const cert = db.certificates.find(c => 
-    c.verificationCode.toLowerCase() === code.toLowerCase() ||
-    c.certificateNumber.toLowerCase() === code.toLowerCase()
+  const rawCode = (req.params.code || '').trim();
+  const clean = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanCode = clean(rawCode);
+
+  if (!rawCode) {
+    return res.status(400).json({ success: false, message: 'Please enter a valid certificate number or verification code.' });
+  }
+
+  // Multi-tier smart match:
+  // 1. Direct verificationCode match
+  // 2. Direct certificateNumber match
+  // 3. Cleaned alphanumeric match on certificateNumber or verificationCode
+  // 4. Match recipient registration number if code resembles a skater reg no
+  let cert = db.certificates.find(c => 
+    c.verificationCode.toLowerCase() === rawCode.toLowerCase() ||
+    c.certificateNumber.toLowerCase() === rawCode.toLowerCase()
   );
+
+  if (!cert && cleanCode.length >= 4) {
+    cert = db.certificates.find(c => 
+      clean(c.verificationCode) === cleanCode ||
+      clean(c.certificateNumber) === cleanCode ||
+      clean(c.certificateNumber).endsWith(cleanCode) ||
+      (c.recipientRegNo && clean(c.recipientRegNo) === cleanCode)
+    );
+  }
 
   // Log verification scan
   db.verificationLogs.unshift({
     id: 'vlog-' + Date.now(),
     certificateId: cert ? cert.id : 'unknown',
-    certificateNumber: cert ? cert.certificateNumber : code,
+    certificateNumber: cert ? cert.certificateNumber : rawCode,
     verifiedAt: new Date().toISOString(),
     ipAddress: req.ip,
     userAgent: req.headers['user-agent'],
@@ -2926,29 +3695,154 @@ app.get('/api/certificates/verify/:code', (req, res) => {
   saveDB(db);
 
   if (!cert) {
-    return res.status(404).json({ success: false, message: 'Certificate verification failed: No official UPRSA record matches this code.' });
+    return res.status(404).json({ 
+      success: false, 
+      message: `Certificate verification failed: No official UPRSA record matches "${rawCode}". Please check the certificate number and try again.` 
+    });
   }
 
-  res.json({ success: true, data: cert, verificationStatus: cert.status });
+  // If tournament info exists in DB, attach tournament dates & venue for richer verification details
+  const matchedTournament = db.tournaments.find(t => 
+    t.title === cert.tournamentName || (cert.tournamentName && t.title.toLowerCase().includes(cert.tournamentName.toLowerCase()))
+  );
+
+  const enrichedCert = {
+    ...cert,
+    tournamentStartDate: cert.tournamentStartDate || matchedTournament?.startDate,
+    tournamentEndDate: cert.tournamentEndDate || matchedTournament?.endDate,
+    tournamentVenue: cert.tournamentVenue || matchedTournament?.venue,
+    tournamentCity: cert.tournamentCity || matchedTournament?.city || cert.district
+  };
+
+  res.json({ success: true, data: enrichedCert, verificationStatus: cert.status });
 });
 
 app.post('/api/certificates', (req, res) => {
-  const code = Math.random().toString(36).substring(2, 10);
+  const code = req.body.verificationCode || Math.random().toString(36).substring(2, 10);
   const certNumber = req.body.certificateNumber || `UPRSA/CERT/2026/${(db.certificates.length + 101).toString().padStart(5, '0')}`;
   
+  // Parse multi-races
+  let races: { raceName: string; position: string }[] = [];
+  if (Array.isArray(req.body.races) && req.body.races.length > 0) {
+    races = req.body.races.filter((r: any) => r.raceName);
+  } else {
+    if (req.body.race1Name) races.push({ raceName: req.body.race1Name.trim(), position: req.body.race1Position?.trim() || 'Participation' });
+    if (req.body.race2Name) races.push({ raceName: req.body.race2Name.trim(), position: req.body.race2Position?.trim() || 'Participation' });
+    if (req.body.race3Name) races.push({ raceName: req.body.race3Name.trim(), position: req.body.race3Position?.trim() || 'Participation' });
+    if (races.length === 0 && req.body.eventName) {
+      races.push({ raceName: req.body.eventName.trim(), position: req.body.position?.trim() || 'Participation' });
+    }
+  }
+
   const newCert = {
     ...req.body,
     id: 'cert-' + Date.now(),
     certificateNumber: certNumber,
     verificationCode: code,
     qrVerificationUrl: `/certificate/verify/${code}`,
-    status: 'valid',
+    status: req.body.status || 'valid',
+    issueDate: req.body.issueDate || new Date().toISOString().split('T')[0],
+    races,
+    race1Name: races[0]?.raceName || req.body.race1Name || req.body.eventName || '',
+    race1Position: races[0]?.position || req.body.race1Position || req.body.position || '',
+    race2Name: races[1]?.raceName || req.body.race2Name || '',
+    race2Position: races[1]?.position || req.body.race2Position || '',
+    race3Name: races[2]?.raceName || req.body.race3Name || '',
+    race3Position: races[2]?.position || req.body.race3Position || '',
     created_at: new Date().toISOString()
   };
 
   db.certificates.unshift(newCert);
   saveDB(db);
   res.status(201).json({ success: true, data: newCert, message: 'Certificate issued successfully' });
+});
+
+// Bulk Import Certificates from Excel / CSV
+app.post('/api/certificates/bulk-import', (req, res) => {
+  const { certificates } = req.body;
+  if (!Array.isArray(certificates) || certificates.length === 0) {
+    return res.status(400).json({ success: false, message: 'No certificate records provided for import.' });
+  }
+
+  let importedCount = 0;
+  let updatedCount = 0;
+
+  certificates.forEach((row: any, idx: number) => {
+    if (!row.recipientName) return;
+
+    const certNum = row.certificateNumber?.trim() || `UPRSA/CERT/2026/${(db.certificates.length + idx + 101).toString().padStart(5, '0')}`;
+    const authCode = row.verificationCode?.trim() || Math.random().toString(36).substring(2, 10);
+
+    const existingIdx = db.certificates.findIndex(c => 
+      c.certificateNumber.toLowerCase() === certNum.toLowerCase()
+    );
+
+    // Build multi-races array from Excel columns (Race 1, Race 2, Race 3)
+    let races: { raceName: string; position: string }[] = [];
+    if (Array.isArray(row.races) && row.races.length > 0) {
+      races = row.races.filter((r: any) => r.raceName);
+    } else {
+      if (row.race1Name) races.push({ raceName: row.race1Name.trim(), position: row.race1Position?.trim() || 'Participation' });
+      if (row.race2Name) races.push({ raceName: row.race2Name.trim(), position: row.race2Position?.trim() || 'Participation' });
+      if (row.race3Name) races.push({ raceName: row.race3Name.trim(), position: row.race3Position?.trim() || 'Participation' });
+      if (races.length === 0 && row.eventName) {
+        races.push({ raceName: row.eventName.trim(), position: row.position?.trim() || 'Participation' });
+      }
+    }
+
+    const certRecord = {
+      id: existingIdx >= 0 ? db.certificates[existingIdx].id : `cert-${Date.now()}-${idx}`,
+      certificateNumber: certNum,
+      verificationCode: authCode,
+      type: row.type || 'Merit',
+      recipientName: row.recipientName.trim(),
+      recipientRegNo: row.recipientRegNo?.trim() || '',
+      fatherName: row.fatherName?.trim() || '',
+      district: row.district?.trim() || 'Uttar Pradesh',
+      club: row.club?.trim() || '',
+      tournamentName: row.tournamentName?.trim() || 'UP State Roller Sports Championship 2026',
+      eventName: races.length > 1 ? `${races.length} Events/Races` : (row.eventName?.trim() || races[0]?.raceName || ''),
+      discipline: row.discipline?.trim() || 'Speed Skating',
+      ageCategory: row.ageCategory?.trim() || '',
+      gender: row.gender?.trim() || 'Mixed',
+      position: row.position?.trim() || races[0]?.position || 'Participation',
+      tournamentStartDate: row.tournamentStartDate?.trim() || row.tournamentDate?.trim() || '',
+      tournamentEndDate: row.tournamentEndDate?.trim() || '',
+      tournamentVenue: row.tournamentVenue?.trim() || '',
+      tournamentCity: row.tournamentCity?.trim() || '',
+      issueDate: row.issueDate?.trim() || new Date().toISOString().split('T')[0],
+      status: (row.status === 'revoked' ? 'revoked' : 'valid'),
+      qrVerificationUrl: `/certificate/verify/${authCode}`,
+      signatoryPresident: row.signatoryPresident?.trim() || 'Dr. Akhilesh Chandra Sharma (President)',
+      signatorySecretary: row.signatorySecretary?.trim() || 'Rajesh Kumar Singh (Secretary General)',
+      races,
+      race1Name: races[0]?.raceName || row.race1Name || row.eventName || '',
+      race1Position: races[0]?.position || row.race1Position || row.position || '',
+      race2Name: races[1]?.raceName || row.race2Name || '',
+      race2Position: races[1]?.position || row.race2Position || '',
+      race3Name: races[2]?.raceName || row.race3Name || '',
+      race3Position: races[2]?.position || row.race3Position || '',
+      created_at: existingIdx >= 0 ? db.certificates[existingIdx].created_at : new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (existingIdx >= 0) {
+      db.certificates[existingIdx] = { ...db.certificates[existingIdx], ...certRecord };
+      updatedCount++;
+    } else {
+      db.certificates.unshift(certRecord);
+      importedCount++;
+    }
+  });
+
+  saveDB(db);
+  res.json({
+    success: true,
+    message: `Successfully processed: ${importedCount} new certificates added, ${updatedCount} existing records updated.`,
+    importedCount,
+    updatedCount,
+    total: db.certificates.length
+  });
 });
 
 app.get('/api/certificates/template-settings', (req, res) => {
@@ -3555,9 +4449,36 @@ app.put('/api/certificates/:id/revoke', (req, res) => {
   res.json({ success: true, data: db.certificates[idx], message: 'Certificate has been officially revoked' });
 });
 
+app.post('/api/certificates/delete', (req, res) => {
+  const targetId = req.body.id || req.body.certificateNumber;
+  if (!targetId) {
+    return res.status(400).json({ success: false, message: 'Certificate ID or Number is required' });
+  }
+  const target = db.certificates.find(c => c.id === targetId || c.certificateNumber === targetId || c.verificationCode === targetId);
+  const initialCount = db.certificates.length;
+  db.certificates = db.certificates.filter(c => c.id !== targetId && c.certificateNumber !== targetId && c.verificationCode !== targetId);
+
+  if (target) {
+    db.auditLogs.unshift({
+      id: 'audit-' + Date.now(),
+      action: 'Certificate Deleted',
+      user: 'admin@uprsa.org',
+      details: `Certificate record removed: ${target.certificateNumber} (${target.recipientName})`,
+      timestamp: new Date().toISOString()
+    });
+  }
+  saveDB(db);
+  res.json({ 
+    success: true, 
+    message: target ? `सर्टिफिकेट ${target.certificateNumber} (${target.recipientName}) सफलतापूर्वक हटा दिया गया।` : 'Certificate removed',
+    deletedCount: initialCount - db.certificates.length
+  });
+});
+
 app.delete('/api/certificates/:id', (req, res) => {
-  const target = db.certificates.find(c => c.id === req.params.id);
-  db.certificates = db.certificates.filter(c => c.id !== req.params.id);
+  const targetId = req.params.id;
+  const target = db.certificates.find(c => c.id === targetId || c.certificateNumber === targetId || c.verificationCode === targetId);
+  db.certificates = db.certificates.filter(c => c.id !== targetId && c.certificateNumber !== targetId && c.verificationCode !== targetId);
   if (target) {
     db.auditLogs.unshift({
       id: 'audit-' + Date.now(),

@@ -200,12 +200,61 @@ export const api = {
     skaterId: string, 
     payload: { password?: string; autoGenerate?: boolean; adminEmail?: string }
   ): Promise<{ success: boolean; data?: { loginId: string; temporaryPassword?: string }; message?: string }> {
-    const res = await fetch(`${API_BASE}/admin/skaters/${encodeURIComponent(skaterId)}/password`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/admin/skaters/${encodeURIComponent(skaterId)}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { success: res.ok, message: text || 'Server response' };
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to connect to server' };
+    }
+  },
+
+  async sendAdminOtp(
+    email: string
+  ): Promise<{ success: boolean; message?: string; otp?: string; expiresInSeconds?: number }> {
+    try {
+      const res = await fetch(`${API_BASE}/auth/admin/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { success: res.ok, message: text || 'Server response' };
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to connect to server' };
+    }
+  },
+
+  async resetAdminPassword(
+    payload: { email: string; otp?: string; securityKey?: string; newPassword: string }
+  ): Promise<{ success: boolean; message?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/auth/admin/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { success: res.ok, message: text || 'Server response' };
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to connect to server' };
+    }
   },
 
   // Tournaments
@@ -238,10 +287,27 @@ export const api = {
   },
 
   async deleteTournament(id: string): Promise<{ success: boolean; message?: string }> {
-    const res = await fetch(`${API_BASE}/tournaments/${id}`, {
-      method: 'DELETE'
-    });
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/tournaments/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data && data.success) return data;
+      // fallback
+      const fb = await fetch(`${API_BASE}/tournaments/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      return fb.json();
+    } catch {
+      const fb = await fetch(`${API_BASE}/tournaments/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      return fb.json();
+    }
   },
 
   // Tournament Registrations
@@ -473,6 +539,34 @@ export const api = {
 
   async issueCertificate(cert: Partial<Certificate>): Promise<{ success: boolean; data?: Certificate; message?: string }> {
     return this.createCertificate(cert);
+  },
+
+  async bulkImportCertificates(certificates: Partial<Certificate>[]): Promise<{ success: boolean; message?: string; importedCount?: number; updatedCount?: number; total?: number }> {
+    const res = await fetch(`${API_BASE}/certificates/bulk-import`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ certificates })
+    });
+    return res.json();
+  },
+
+  async deleteCertificate(id: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/certificates/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('POST /certificates/delete failed, attempting DELETE fallback', e);
+    }
+    const res = await fetch(`${API_BASE}/certificates/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
   },
 
   async getCertificateTemplateSettings(): Promise<{ success: boolean; data: CertificateTemplateSettings }> {
@@ -765,18 +859,13 @@ export const api = {
     return res.json();
   },
 
-  // Certificate Revocation & Deletion
+  // Certificate Revocation
   async revokeCertificate(id: string, reason?: string): Promise<{ success: boolean; data?: Certificate; message?: string }> {
     const res = await fetch(`${API_BASE}/certificates/${id}/revoke`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason })
     });
-    return res.json();
-  },
-
-  async deleteCertificate(id: string): Promise<{ success: boolean; message?: string }> {
-    const res = await fetch(`${API_BASE}/certificates/${id}`, { method: 'DELETE' });
     return res.json();
   },
 

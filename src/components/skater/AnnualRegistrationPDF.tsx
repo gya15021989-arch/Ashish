@@ -315,12 +315,22 @@ export const AnnualRegistrationPDF: React.FC<AnnualRegistrationPDFProps> = ({
               </div>
 
               <div className="grid grid-cols-12">
-                <span className="col-span-4 font-bold text-black">Father Name</span>
+                <span className="col-span-4 font-bold text-black">Father / Guardian</span>
                 <span className="col-span-1 text-center font-bold">:</span>
                 <span className="col-span-7 font-bold text-black uppercase">
                   {skater.fatherName || 'N/A'}
                 </span>
               </div>
+
+              {skater.motherName && (
+                <div className="grid grid-cols-12">
+                  <span className="col-span-4 font-bold text-black">Mother Name</span>
+                  <span className="col-span-1 text-center font-bold">:</span>
+                  <span className="col-span-7 font-bold text-black uppercase">
+                    {skater.motherName}
+                  </span>
+                </div>
+              )}
 
               <div className="grid grid-cols-12">
                 <span className="col-span-4 font-bold text-black">Date of Birth</span>

@@ -188,6 +188,25 @@ export const TickerManager: React.FC = () => {
 
               <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                 <button
+                  type="button"
+                  onClick={() => {
+                    const link = item.link;
+                    if (!link) return;
+                    if (link.startsWith('http://') || link.startsWith('https://') || link.startsWith('www.')) {
+                      const url = link.startsWith('www.') ? `https://${link}` : link;
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                    } else {
+                      window.open(`/#${link}`, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="p-1.5 px-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                  title="Test / Open Link in new tab"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Open Link</span>
+                </button>
+
+                <button
                   onClick={() => handleToggleActive(item)}
                   className={`p-1.5 rounded-lg border text-xs font-bold flex items-center gap-1 cursor-pointer ${
                     item.isActive

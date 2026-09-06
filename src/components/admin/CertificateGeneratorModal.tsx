@@ -26,8 +26,6 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
   onCertificateIssued,
   prefillSkater
 }) => {
-  if (!isOpen) return null;
-
   const [recipientName, setRecipientName] = useState(prefillSkater ? `${prefillSkater.firstName} ${prefillSkater.lastName}` : '');
   const [recipientRegNo, setRecipientRegNo] = useState(prefillSkater?.registrationNumber || '');
   const [fatherName, setFatherName] = useState(prefillSkater?.fatherName || '');
@@ -102,6 +100,8 @@ export const CertificateGeneratorModal: React.FC<CertificateGeneratorModalProps>
       setLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200">

@@ -21,11 +21,17 @@ import {
   X,
   Flame,
   Award,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import { Tournament, TournamentEvent } from '../../types';
 import { api } from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { OFFICIAL_UPRSA_TOURNAMENTS } from '../../data/allTournamentsData';
 
 interface TournamentsProps {
@@ -46,9 +52,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   onViewResults
 }) => {
   const { lang, setLang } = useLanguage();
+  const { isAuthenticated, skater, login } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTournamentForModal, setSelectedTournamentForModal] = useState<Tournament | null>(null);
+
+  // Skater Login for Tournament Entry Modal State
+  const [showSkaterLoginModal, setShowSkaterLoginModal] = useState(false);
+  const [loginTargetTournament, setLoginTargetTournament] = useState<Tournament | null>(null);
+  const [skaterLoginRegNo, setSkaterLoginRegNo] = useState('');
+  const [skaterLoginPassword, setSkaterLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // Filter States
   const [search, setSearch] = useState('');
@@ -79,11 +95,66 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     if (onSelectTournamentForEntry) {
       onSelectTournamentForEntry(t);
     }
-    if (onEnterTournament) {
-      onEnterTournament(t);
+    // If the athlete is already authenticated as a skater, proceed directly to entry workspace
+    if (isAuthenticated && skater) {
+      if (onEnterTournament) {
+        onEnterTournament(t);
+      } else {
+        navigate('tournament_entry');
+      }
     } else {
-      navigate('tournament_entry');
+      // Skater is not logged in: Prompt for Registration Number and Password
+      setLoginTargetTournament(t);
+      setSkaterLoginRegNo('');
+      setSkaterLoginPassword('');
+      setLoginError(null);
+      setShowSkaterLoginModal(true);
     }
+  };
+
+  const handleSkaterLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!skaterLoginRegNo.trim()) {
+      setLoginError('कृपया अपना रजिस्ट्रेशन नंबर दर्ज करें।');
+      return;
+    }
+    if (!skaterLoginPassword.trim()) {
+      setLoginError('कृपया अपना पासवर्ड दर्ज करें।');
+      return;
+    }
+
+    setLoginLoading(true);
+    setLoginError(null);
+    try {
+      const res = await login({
+        registrationNumber: skaterLoginRegNo.trim(),
+        password: skaterLoginPassword.trim()
+      });
+
+      if (res.success) {
+        setShowSkaterLoginModal(false);
+        const target = loginTargetTournament;
+        if (target) {
+          if (onSelectTournamentForEntry) onSelectTournamentForEntry(target);
+          if (onEnterTournament) onEnterTournament(target);
+          else navigate('tournament_entry');
+        } else {
+          navigate('tournament_entry');
+        }
+      } else {
+        setLoginError(res.message || 'अमान्य रजिस्ट्रेशन नंबर या पासवर्ड। कृपया पुनः जांचें।');
+      }
+    } catch (err: any) {
+      setLoginError(err.message || 'लॉगिन के दौरान त्रुटि हुई।');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleFillDemoSkater = () => {
+    setSkaterLoginRegNo('UPRSA/2026/LKO/00101');
+    setSkaterLoginPassword('aarav@123');
+    setLoginError(null);
   };
 
   useEffect(() => {
@@ -442,9 +513,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <span className="text-[10px] text-slate-400 block">Strict cut-off</span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] font-bold uppercase">Base Entry Fee</span>
+                <span className="text-slate-500 block text-[10px] font-bold uppercase">टूर्नामेंट कुल फ़ीस (Fixed Fee)</span>
                 <span className="font-bold text-emerald-400 text-xs">₹{selectedTournamentForModal.entryFeeBase}</span>
-                <span className="text-[10px] text-slate-400 block">Per Skater</span>
+                <span className="text-[10px] text-slate-400 block">सभी रेस सम्मिलित</span>
               </div>
               <div>
                 <span className="text-slate-500 block text-[10px] font-bold uppercase">District</span>
@@ -492,19 +563,43 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             {/* Events / Brackets if available */}
             {selectedTournamentForModal.events && selectedTournamentForModal.events.length > 0 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
-                  Events &amp; Age Categories ({selectedTournamentForModal.events.length})
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                  {selectedTournamentForModal.events.map((ev, i) => (
-                    <div key={ev.id || i} className="p-3 bg-[#050b18] rounded-xl border border-blue-900/40 flex items-center justify-between text-xs">
-                      <div>
-                        <span className="font-bold text-white block">{ev.eventName}</span>
-                        <span className="text-[10px] text-slate-400">{ev.discipline} • {ev.ageCategory} ({ev.gender})</span>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                    रेस इवेंट्स व आयु वर्ग ({selectedTournamentForModal.events.length})
+                  </h4>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    सभी रेस टूर्नामेंट फीस में सम्मिलित
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                  {selectedTournamentForModal.events.map((ev, i) => {
+                    const cats = ev.ageCategories && ev.ageCategories.length > 0
+                      ? ev.ageCategories
+                      : (ev.ageCategory ? [ev.ageCategory] : []);
+
+                    return (
+                      <div key={ev.id || i} className="p-3 bg-[#050b18] rounded-xl border border-blue-900/40 text-xs space-y-1.5">
+                        <div className="flex items-start justify-between gap-1">
+                          <span className="font-bold text-white block">{ev.eventName}</span>
+                          <span className="font-mono text-emerald-400 font-bold text-[10px] bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
+                            ₹0 अतिरिक्त
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                          <span>{ev.discipline}</span>
+                          <span className="text-amber-300 text-[10px] font-medium">👥 All Genders</span>
+                        </div>
+                        <div className="pt-1 border-t border-slate-900 flex items-center gap-1 flex-wrap">
+                          <span className="text-[9px] text-slate-500 font-bold">पात्र वर्ग:</span>
+                          {cats.map((c, idx) => (
+                            <span key={idx} className="text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.2 rounded font-medium">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <span className="font-mono text-amber-400 font-bold text-[11px]">₹{ev.entryFee}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -554,6 +649,168 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================================================== */}
+      {/* SKATER LOGIN FOR TOURNAMENT ENTRY MODAL            */}
+      {/* ================================================== */}
+      {showSkaterLoginModal && loginTargetTournament && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-[#0b1427] border border-amber-500/50 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl shadow-amber-500/10 p-6 sm:p-8 space-y-5 relative">
+            {/* Close button */}
+            <button
+              onClick={() => setShowSkaterLoginModal(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                <Trophy className="w-3 h-3 text-amber-400" />
+                <span>TOURNAMENT ENTRY FORM</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-black text-white">
+                टूर्नामेंट फॉर्म में प्रवेश (Skater Login)
+              </h3>
+              <p className="text-xs text-slate-400">
+                रेस चुनने एवं फॉर्म भरने हेतु अपना रजिस्ट्रेशन नंबर व पासवर्ड दर्ज करें।
+              </p>
+            </div>
+
+            {/* Selected Championship Preview Card */}
+            <div className="bg-[#050b18] border border-blue-900/50 rounded-2xl p-3.5 text-xs space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-extrabold text-white text-xs line-clamp-2">
+                  {loginTargetTournament.title}
+                </span>
+                <span className="shrink-0 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md">
+                  फीस: ₹{loginTargetTournament.entryFeeBase || 1000} (फिक्स)
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] text-slate-400 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-amber-400" />
+                  <span>{loginTargetTournament.startDate}</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-blue-400" />
+                  <span>{loginTargetTournament.district}</span>
+                </span>
+                <span className="text-emerald-400 font-medium">
+                  ✓ सभी रेस टूर्नामेंट फीस में सम्मिलित
+                </span>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {loginError && (
+              <div className="p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleSkaterLoginSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1">
+                  UPRSA रजिस्ट्रेशन नंबर (Registration No.) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="उदा. UPRSA/2026/LKO/00101"
+                    value={skaterLoginRegNo}
+                    onChange={(e) => setSkaterLoginRegNo(e.target.value)}
+                    className="w-full bg-[#050b18] border border-slate-700 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase font-mono placeholder:normal-case placeholder:text-slate-500 focus:outline-none"
+                  />
+                  <div className="absolute right-3 top-2.5 text-slate-500 text-[10px] font-mono pointer-events-none">
+                    REG NO
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-300 block">
+                    पासवर्ड (Password) *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[11px] text-amber-400 hover:underline flex items-center gap-1"
+                  >
+                    {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    <span>{showPassword ? 'Hide' : 'Show'}</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="अपना पासवर्ड दर्ज करें"
+                    value={skaterLoginPassword}
+                    onChange={(e) => setSkaterLoginPassword(e.target.value)}
+                    className="w-full bg-[#050b18] border border-slate-700 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none placeholder:text-slate-500"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs py-3 px-4 rounded-xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95"
+              >
+                {loginLoading ? (
+                  <span>सत्यापित किया जा रहा है...</span>
+                ) : (
+                  <>
+                    <span>लॉगिन करें और रेस चुनें</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              {/* Quick Demo Login Helper */}
+              <button
+                type="button"
+                onClick={handleFillDemoSkater}
+                className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>⚡ डेमो खिलाड़ी ऑटो-फिल (Aarav Sharma - Speed Skating)</span>
+              </button>
+
+              {/* Registration & Activation links */}
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSkaterLoginModal(false);
+                    navigate('register');
+                  }}
+                  className="text-amber-400 hover:underline cursor-pointer"
+                >
+                  नया खिलाड़ी रजिस्ट्रेशन करें
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSkaterLoginModal(false);
+                    navigate('activate_skater');
+                  }}
+                  className="text-blue-400 hover:underline cursor-pointer"
+                >
+                  पासवर्ड एक्टिवेट करें
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -739,13 +996,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         {/* RIGHT: REGISTRATION / ACTION PANEL                 */}
         {/* ================================================== */}
         <div className="w-full lg:w-48 shrink-0 flex flex-col justify-center items-stretch lg:items-end gap-3 pt-4 lg:pt-0 lg:pl-6 lg:border-l border-slate-800/80">
-          {/* Base Fee Badge */}
+          {/* Fixed Championship Fee Badge */}
           <div className="bg-[#060c1d] border border-blue-900/60 rounded-xl p-2.5 w-full text-center lg:text-right">
-            <span className="text-[10px] font-bold text-slate-400 block uppercase">Base Entry Fee</span>
+            <span className="text-[10px] font-bold text-slate-400 block uppercase">टूर्नामेंट कुल फ़ीस</span>
             <span className="text-base font-black text-amber-400 font-mono">
               ₹{t.entryFeeBase || 1000}
             </span>
-            <span className="text-[9px] text-slate-500 block">Per Registered Athlete</span>
+            <span className="text-[9px] text-emerald-400 font-medium block">सभी रेस सम्मिलित (Fixed Fee)</span>
           </div>
 
           {/* Primary Action Button */}

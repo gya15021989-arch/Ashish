@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { SiteSettingsProvider } from './context/SiteSettingsContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { FloatingSocialBar } from './components/layout/FloatingSocialBar';
@@ -35,11 +36,12 @@ import { SkaterTournamentRegistration } from './components/skater/SkaterTourname
 
 // Admin Dashboard
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { Skater } from './types';
+import { Skater, Tournament } from './types';
 
 const MainApp: React.FC = () => {
   const { user, skater, isAdmin, isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState<string>('home');
+  const [selectedTournamentForEntry, setSelectedTournamentForEntry] = useState<Tournament | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [modalInitialRole, setModalInitialRole] = useState<'skater' | 'admin'>('skater');
   const [isChatBoardOpen, setIsChatBoardOpen] = useState(false);
@@ -116,7 +118,11 @@ const MainApp: React.FC = () => {
         {currentPage === 'tournaments' && (
           <Tournaments 
             onNavigate={(page) => setCurrentPage(page)}
-            onEnterTournament={() => setCurrentPage('tournament_entry')}
+            onSelectTournamentForEntry={(t) => setSelectedTournamentForEntry(t)}
+            onEnterTournament={(t) => {
+              if (t) setSelectedTournamentForEntry(t);
+              setCurrentPage('tournament_entry');
+            }}
             onViewResults={() => setCurrentPage('results')}
             onOpenLiveScore={() => setCurrentPage('live_score')}
           />
@@ -165,7 +171,7 @@ const MainApp: React.FC = () => {
         {currentPage === 'register' && (
           <RegistrationForm
             onSuccess={(newSkater: Skater) => {
-              setCurrentPage('skater_portal');
+              // Athlete record stored; user stays on registration success view to print/view ID & slip
             }}
             onNavigateToPortal={() => setCurrentPage('skater_portal')}
             onNavigateToVerify={(regNo) => {
@@ -212,6 +218,7 @@ const MainApp: React.FC = () => {
 
         {currentPage === 'tournament_entry' && (
           <SkaterTournamentRegistration
+            initialTournament={selectedTournamentForEntry}
             skater={skater}
             onSuccess={() => setCurrentPage('skater_portal')}
             onCancel={() => setCurrentPage('tournaments')}
@@ -242,7 +249,7 @@ const MainApp: React.FC = () => {
       <FloatingSocialBar />
       
       <FloatingLiveMatchButton
-        onOpenLiveScore={() => setCurrentPage('live_score')}
+        onOpenLiveScore={(targetPage) => setCurrentPage(targetPage || 'live_score')}
       />
 
       <FloatingChatButton
@@ -279,9 +286,11 @@ const MainApp: React.FC = () => {
 export default function App() {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
+      <SiteSettingsProvider>
+        <AuthProvider>
+          <MainApp />
+        </AuthProvider>
+      </SiteSettingsProvider>
     </LanguageProvider>
   );
 }
