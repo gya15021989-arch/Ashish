@@ -294,12 +294,6 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
     }
   };
 
-  const handleFillDemoSkater = () => {
-    setLoginRegNo('UPRSA/2026/LKO/00101');
-    setLoginPassword('aarav@123');
-    setLoginError(null);
-  };
-
   // Step 1 -> Step 2: "सबमिट दबाने पर फीस पेमेंट का विकल्प खुले"
   const handleProceedToPayment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -538,18 +532,9 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
                     <button
                       type="submit"
                       disabled={loginLoading}
-                      className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs py-2 px-3 rounded-xl shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs py-2 px-3 rounded-xl shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {loginLoading ? 'जांच जारी...' : 'लॉगिन करें ➔'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleFillDemoSkater}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-2 rounded-xl flex items-center justify-center gap-1 cursor-pointer"
-                      title="1-क्लिक टेस्ट क्रेडेंशियल्स भरें"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>डेमो</span>
                     </button>
                   </div>
                 </form>

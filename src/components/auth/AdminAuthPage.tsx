@@ -96,26 +96,6 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
     }
   };
 
-  const handleQuickDemoAdmin = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await login({
-        email: 'uprsa.official@gmail.com',
-        password: 'Ashish@1502'
-      });
-      if (res.success) {
-        if (onSuccess) onSuccess();
-      } else {
-        setError(res.message || 'Invalid administrator credentials.');
-      }
-    } catch {
-      setError('Unable to connect to state server. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!resetEmail.trim()) {
@@ -357,20 +337,6 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
             Forgot Password? • पासवर्ड भूल गए?
           </button>
         </div>
-
-        {/* Quick Demo Executive Admin Access */}
-        <div className="mt-5 pt-4 border-t border-slate-800/80 text-center">
-          <button
-            type="button"
-            onClick={handleQuickDemoAdmin}
-            disabled={loading}
-            className="text-[11px] font-semibold text-amber-300/90 hover:text-amber-300 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 px-3.5 py-2 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-          >
-            <Shield className="w-3.5 h-3.5 text-amber-400" />
-            <span>⚡ 1-Click State Secretariat Access (Demo)</span>
-          </button>
-        </div>
-
       </div>
 
       {/* Switch to Skater Login */}

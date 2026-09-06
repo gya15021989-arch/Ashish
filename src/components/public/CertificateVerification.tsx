@@ -37,16 +37,6 @@ export const CertificateVerification: React.FC<CertificateVerificationProps> = (
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
-  const [recentCerts, setRecentCerts] = useState<Certificate[]>([]);
-
-  useEffect(() => {
-    // Load some sample certificates to help users test easily
-    api.getCertificates().then(res => {
-      if (res.success && res.data) {
-        setRecentCerts(res.data.slice(0, 5));
-      }
-    }).catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (initialCode) {
@@ -171,40 +161,6 @@ export const CertificateVerification: React.FC<CertificateVerificationProps> = (
               )}
             </button>
           </form>
-
-          {/* Quick sample chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-            <span className="text-[11px] text-slate-500 font-semibold">त्वरित टेस्ट कोड (क्लिक करें):</span>
-            {recentCerts.length > 0 ? (
-              recentCerts.slice(0, 4).map((rc) => (
-                <button
-                  key={rc.id}
-                  onClick={() => { setCode(rc.certificateNumber); handleVerify(rc.certificateNumber); }}
-                  className="bg-slate-900 hover:bg-slate-800 border border-slate-700/80 hover:border-amber-500/60 text-slate-300 hover:text-amber-300 px-3 py-1 rounded-xl text-[11px] font-mono transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  <span>{rc.certificateNumber}</span>
-                  <span className="text-[10px] text-amber-400">({rc.recipientName})</span>
-                </button>
-              ))
-            ) : (
-              <>
-                <button 
-                  onClick={() => { setCode('UPRSA/CERT/2026/00202'); handleVerify('UPRSA/CERT/2026/00202'); }}
-                  className="font-mono text-amber-400 hover:underline cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 flex items-center gap-1"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  <span>UPRSA/CERT/2026/00202 (रियायत श्रीवास्तव - 3 रेस)</span>
-                </button>
-                <button 
-                  onClick={() => { setCode('UPRSA/CERT/2026/00101'); handleVerify('UPRSA/CERT/2026/00101'); }}
-                  className="font-mono text-indigo-400 hover:underline cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
-                >
-                  UPRSA/CERT/2026/00101 (आरव शर्मा)
-                </button>
-              </>
-            )}
-          </div>
         </div>
 
         {/* Verification Results Display */}

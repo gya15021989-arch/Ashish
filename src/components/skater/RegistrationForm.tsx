@@ -181,31 +181,6 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Quick helper to attach verified demo documents for instant testing
-  const handleAttachDemoDocs = () => {
-    const samplePhoto = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400';
-    const sampleDob = '/storage/public/sample_dob.pdf';
-    const sampleMedical = '/storage/public/sample_medical.pdf';
-    const sampleAadhaar = '/storage/public/sample_aadhaar.pdf';
-
-    setFormData(prev => ({
-      ...prev,
-      photoUrl: samplePhoto,
-      dobProofUrl: sampleDob,
-      medicalCertUrl: sampleMedical,
-      aadhaarDocUrl: sampleAadhaar
-    }));
-    setUploadStatus({
-      photoUrl: { fileName: 'athlete_passport_photo.jpg', status: 'UPLOADED' },
-      dobProofUrl: { fileName: 'birth_certificate_official.pdf', status: 'UPLOADED' },
-      medicalCertUrl: { fileName: 'mbbs_medical_fitness.pdf', status: 'UPLOADED' },
-      aadhaarDocUrl: { fileName: 'aadhaar_card_verified.pdf', status: 'UPLOADED' },
-      schoolIdDocUrl: { fileName: '', status: 'EMPTY' },
-      otherDocUrl: { fileName: '', status: 'EMPTY' }
-    });
-    setError(null);
-  };
-
   // Step 1 Validation
   const validateStep1 = () => {
     if (!formData.fullName.trim() && !formData.firstName.trim()) {
@@ -886,15 +861,6 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <p className="text-[11px] text-slate-400">एथलीट का फोटो (JPG) तथा अन्य प्रमाण पत्र JPG या PDF में अपलोड करें।</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleAttachDemoDocs}
-                    className="text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-105"
-                    title="जांच हेतु सैंपल दस्तावेज़ संलग्न करें"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>⚡ सैंपल दस्तावेज़ लोड करें (Quick Sample Docs)</span>
-                  </button>
                   <span className="text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-lg shrink-0">
                     Step 3/4
                   </span>

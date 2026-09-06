@@ -151,12 +151,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     }
   };
 
-  const handleFillDemoSkater = () => {
-    setSkaterLoginRegNo('UPRSA/2026/LKO/00101');
-    setSkaterLoginPassword('aarav@123');
-    setLoginError(null);
-  };
-
   useEffect(() => {
     loadTournaments();
   }, []);
@@ -775,16 +769,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
-              </button>
-
-              {/* Quick Demo Login Helper */}
-              <button
-                type="button"
-                onClick={handleFillDemoSkater}
-                className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>⚡ डेमो खिलाड़ी ऑटो-फिल (Aarav Sharma - Speed Skating)</span>
               </button>
 
               {/* Registration & Activation links */}

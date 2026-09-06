@@ -142,32 +142,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  const handleDemoLogin = async (role: 'admin' | 'skater') => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (role === 'admin') {
-        const res = await login({
-          email: 'uprsa.official@gmail.com',
-          password: 'Ashish@1502'
-        });
-        if (res.success) onClose();
-        else setError(res.message || 'Invalid administrator credentials.');
-      } else {
-        const res = await login({
-          registrationNumber: 'UPRSA/2026/LKO/00101',
-          password: 'aarav@123'
-        });
-        if (res.success) onClose();
-        else setError('Invalid Skater ID or password.');
-      }
-    } catch {
-      setError('Unable to connect right now. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!resetEmail.trim()) {
@@ -493,18 +467,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </button>
                 </div>
               )}
-
-              {/* 1-Click Demo Athlete */}
-              <div className="pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('skater')}
-                  disabled={loading}
-                  className="text-[11px] font-semibold text-slate-400 hover:text-amber-300 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-                >
-                  <span>⚡ Quick Demo Athlete Login (Aarav Sharma)</span>
-                </button>
-              </div>
             </div>
           ) : (
             <div className="space-y-3 pt-2 text-center">
@@ -515,19 +477,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               >
                 Forgot Password? • पासवर्ड भूल गए?
               </button>
-
-              {/* 1-Click Demo Admin */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('admin')}
-                  disabled={loading}
-                  className="text-[11px] font-semibold text-amber-300 bg-slate-900 border border-amber-500/30 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-                >
-                  <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  <span>⚡ 1-Click State Secretariat Access (Demo)</span>
-                </button>
-              </div>
             </div>
           )}
 

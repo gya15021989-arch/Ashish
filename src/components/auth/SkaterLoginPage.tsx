@@ -79,26 +79,6 @@ export const SkaterLoginPage: React.FC<SkaterLoginPageProps> = ({
     }
   };
 
-  const handleQuickDemoSkater = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await login({
-        registrationNumber: 'UPRSA/2026/LKO/00101',
-        password: 'aarav@123'
-      });
-      if (res.success) {
-        if (onSuccess) onSuccess();
-      } else {
-        setError('Your account could not be verified. Please check your credentials.');
-      }
-    } catch {
-      setError('Unable to connect right now. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-[85vh] bg-[#070d18] flex flex-col justify-center items-center py-12 px-4 sm:px-6 relative overflow-hidden">
       {/* Subtle Background Glows */}
@@ -273,18 +253,6 @@ export const SkaterLoginPage: React.FC<SkaterLoginPageProps> = ({
               Public <strong>Athlete Registry →</strong>
             </button>
           )}
-        </div>
-
-        {/* Quick Demo Athlete Helper */}
-        <div className="mt-4 pt-3 border-t border-slate-800/60 text-center">
-          <button
-            type="button"
-            onClick={handleQuickDemoSkater}
-            disabled={loading}
-            className="text-[11px] font-semibold text-slate-400 hover:text-amber-300 bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 px-3 py-1.5 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-          >
-            <span>⚡ Demo Login as State Athlete (Aarav Sharma)</span>
-          </button>
         </div>
 
       </div>
