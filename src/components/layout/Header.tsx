@@ -21,7 +21,8 @@ import {
   ArrowRight,
   Phone,
   FileText,
-  Newspaper
+  Newspaper,
+  Heart
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -77,6 +78,8 @@ export const Header: React.FC<HeaderProps> = ({
   const { settings } = useSiteSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [mobileAboutExpanded, setMobileAboutExpanded] = useState(false);
 
   const isHindi = lang === 'hi';
   const orgName = isHindi
@@ -274,7 +277,8 @@ export const Header: React.FC<HeaderProps> = ({
             {navItems.map((item) => {
               const isCurrent = 
                 active === item.targetView || 
-                (item.alias && item.alias.includes(active));
+                (item.alias && item.alias.includes(active)) ||
+                (item.id === 'about' && (active === 'about' || active === 'about_executive' || active === 'about_athletes' || active === 'about_family'));
 
               if (item.isRegistration) {
                 return (
@@ -291,6 +295,111 @@ export const Header: React.FC<HeaderProps> = ({
                     <Sparkles className="w-3.5 h-3.5 shrink-0" />
                     <span>{item.label}</span>
                   </button>
+                );
+              }
+
+              // Special Dropdown for ABOUT (Executive Council, Our Athletes, UPRSA Family)
+              if (item.id === 'about') {
+                return (
+                  <div 
+                    key={item.id}
+                    className="relative"
+                    onMouseEnter={() => setAboutDropdownOpen(true)}
+                    onMouseLeave={() => setAboutDropdownOpen(false)}
+                  >
+                    <button
+                      id={`header-nav-${item.id}`}
+                      onClick={() => {
+                        navigate('about');
+                        setAboutDropdownOpen(false);
+                      }}
+                      className={`relative px-2 xl:px-3 2xl:px-3.5 py-2 rounded-lg text-[13px] xl:text-[14px] 2xl:text-[15px] font-bold tracking-wide transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        isCurrent 
+                          ? 'text-amber-400 bg-amber-500/15 border-b-2 border-amber-400 font-extrabold' 
+                          : 'text-slate-200 hover:text-white hover:bg-slate-800/70'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-amber-400 transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* About Dropdown Menu */}
+                    {aboutDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-[#070d18] border border-amber-500/30 rounded-2xl p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl">
+                        <div className="px-3 py-1.5 text-[10px] font-black text-amber-400/90 uppercase tracking-widest border-b border-slate-800/80 mb-1">
+                          About UPRSA
+                        </div>
+
+                        {/* 1. Overview */}
+                        <button
+                          onClick={() => {
+                            navigate('about');
+                            setAboutDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-amber-300 hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                            <Award className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-white">About Association</div>
+                            <div className="text-[10px] text-slate-400 font-normal">History, Vision & Affiliation</div>
+                          </div>
+                        </button>
+
+                        {/* 2. Executive Council */}
+                        <button
+                          onClick={() => {
+                            navigate('about_executive');
+                            setAboutDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-amber-300 hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
+                            <Users className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-white">UPRSA Executive Council</div>
+                            <div className="text-[10px] text-slate-400 font-normal">State Office Bearers & Leadership</div>
+                          </div>
+                        </button>
+
+                        {/* 3. Our Athletes */}
+                        <button
+                          onClick={() => {
+                            navigate('about_athletes');
+                            setAboutDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-amber-300 hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                            <Trophy className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-white">Our Athletes</div>
+                            <div className="text-[10px] text-slate-400 font-normal">State Champions & Record Holders</div>
+                          </div>
+                        </button>
+
+                        {/* 4. UPRSA Family */}
+                        <button
+                          onClick={() => {
+                            navigate('about_family');
+                            setAboutDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-amber-300 hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors cursor-pointer"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center shrink-0">
+                            <Heart className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-white">UPRSA Family</div>
+                            <div className="text-[10px] text-slate-400 font-normal">75 Districts, Clubs & Coaches</div>
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               }
 
@@ -322,14 +431,92 @@ export const Header: React.FC<HeaderProps> = ({
       {mobileMenuOpen && (
         <div className="lg:hidden w-full bg-[#070d18] border-b border-amber-500/30 px-4 pt-3 pb-6 space-y-4 shadow-2xl animate-in slide-in-from-top duration-200">
           
-          {/* Fast Navigation Grid - ALL 10 ITEMS DIRECTLY ACCESSIBLE */}
+          {/* Fast Navigation Grid */}
           <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-800">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isCurrent = 
                 active === item.id || 
                 active === item.targetView || 
-                (item.alias && item.alias.includes(active));
+                (item.alias && item.alias.includes(active)) ||
+                (item.id === 'about' && (active === 'about' || active === 'about_executive' || active === 'about_athletes' || active === 'about_family'));
+
+              if (item.id === 'about') {
+                return (
+                  <div key={item.id} className="col-span-2 space-y-1">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          navigate('about');
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                          isCurrent 
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-sm' 
+                            : 'text-slate-300 hover:bg-slate-900 bg-slate-900/60'
+                        }`}
+                      >
+                        <Award className="w-3.5 h-3.5 text-amber-400" />
+                        <span>ABOUT UPRSA</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => setMobileAboutExpanded(!mobileAboutExpanded)}
+                        className="px-2.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-amber-400 text-xs font-bold flex items-center justify-center cursor-pointer"
+                        title="Toggle About Options"
+                      >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${mobileAboutExpanded ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
+
+                    {/* Sub-menu options for About */}
+                    {mobileAboutExpanded && (
+                      <div className="pl-3 pr-1 py-1.5 space-y-1 bg-slate-950/70 border border-amber-500/20 rounded-xl animate-in fade-in duration-150">
+                        <button
+                          onClick={() => {
+                            navigate('about');
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
+                        >
+                          <Shield className="w-3 h-3 text-amber-400" />
+                          <span>About Association Overview</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('about_executive');
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
+                        >
+                          <Users className="w-3 h-3 text-indigo-400" />
+                          <span>UPRSA Executive Council (कार्यकारिणी)</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('about_athletes');
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
+                        >
+                          <Trophy className="w-3 h-3 text-amber-400" />
+                          <span>Our Athletes (हमारे खिलाड़ी)</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('about_family');
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
+                        >
+                          <Heart className="w-3 h-3 text-rose-400" />
+                          <span>UPRSA Family (यूपीआरएसए परिवार)</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
 
               return (
                 <button

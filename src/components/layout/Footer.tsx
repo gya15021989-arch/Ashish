@@ -200,7 +200,9 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentView, onNavigate }) =>
               {[
                 { label: 'Official Home', view: 'home' },
                 { label: 'About Association', view: 'about' },
-                { label: 'Executive Committee', view: 'about' },
+                { label: 'Executive Council (कार्यकारिणी)', view: 'about_executive' },
+                { label: 'Our Athletes (खिलाड़ी)', view: 'about_athletes' },
+                { label: 'UPRSA Family (परिवार)', view: 'about_family' },
                 { label: 'Affiliated Districts (75)', view: 'districts' },
                 { label: 'Affiliated Clubs & Rinks', view: 'clubs' },
                 { label: 'Championship Calendar', view: 'tournaments' },

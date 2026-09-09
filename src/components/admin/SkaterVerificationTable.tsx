@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -23,7 +24,8 @@ import {
   Calendar,
   X,
   AlertTriangle,
-  UserX
+  UserX,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Skater, DisciplineType } from '../../types';
 import { api } from '../../services/api';
@@ -237,6 +239,73 @@ export const SkaterVerificationTable: React.FC = () => {
     return age > 0 ? `${age}y` : '—';
   };
 
+  const handleExportExcel = () => {
+    if (filteredSkaters.length === 0) {
+      setActionFeedback({ type: 'error', message: 'डाउनलोड करने के लिए कोई एथलीट रिकॉर्ड नहीं मिला।' });
+      return;
+    }
+
+    const rows = filteredSkaters.map((s, idx) => ({
+      'S.No': idx + 1,
+      'Registration No': s.registrationNumber || '',
+      'Application No': s.applicationNumber || '',
+      'State License No': s.licenseNumber || '',
+      'Full Name': `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+      'Father Name': s.fatherName || '',
+      'Mother Name': s.motherName || '',
+      'Date of Birth': s.dob || '',
+      'Age Category': s.ageCategory || '',
+      'Gender': s.gender || '',
+      'Blood Group': s.bloodGroup || '',
+      'Discipline': s.discipline || '',
+      'District': s.district || '',
+      'Mandal': s.mandal || '',
+      'Club / Academy / School': s.club || '',
+      'Coach Name': s.coachName || '',
+      'Phone (WhatsApp)': s.phone || '',
+      'Email': s.email || '',
+      'Address': s.address || '',
+      'Status': s.status ? s.status.toUpperCase() : 'PENDING',
+      'Payment Status': s.paymentStatus || '',
+      'Registered At': s.created_at ? s.created_at.split('T')[0] : ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Athletes_Roster');
+    worksheet['!cols'] = [
+      { wch: 6 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 14 },
+      { wch: 20 },
+      { wch: 10 },
+      { wch: 12 },
+      { wch: 24 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 26 },
+      { wch: 18 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 }
+    ];
+
+    const today = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `UPRSA_Athletes_Roster_${today}.xlsx`);
+    setActionFeedback({
+      type: 'success',
+      message: `एथलीट रोस्टर एक्सेल फ़ाइल (.xlsx) सफलतापूर्वक डाउनलोड हो गई (${filteredSkaters.length} एथलीट रिकॉर्ड्स)।`
+    });
+  };
+
   return (
     <div className="space-y-5">
       {/* Alert / Feedback Notification */}
@@ -285,7 +354,26 @@ export const SkaterVerificationTable: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <button
+              onClick={handleExportExcel}
+              disabled={loading || filteredSkaters.length === 0}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 disabled:opacity-50 transition-all cursor-pointer"
+              title="एक्सेल (.xlsx) फ़ाइल डाउनलोड करें (फ़िल्टर किए गए एथलीट)"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Export to Excel (.xlsx)</span>
+            </button>
+
+            <button
+              onClick={() => window.print()}
+              className="bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="रोस्टर प्रिंट करें"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Roster</span>
+            </button>
+
             <button
               onClick={() => setShowTrashOnly(!showTrashOnly)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all ${

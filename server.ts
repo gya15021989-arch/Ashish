@@ -9,6 +9,8 @@ import { generateRegistrationNumber, generateLicenseNumber, getDistrictCode } fr
 import { CURRENT_SEASON_CODE, CURRENT_SEASON_DISPLAY, OFFICIAL_SEASON_LABELS } from './src/config/season';
 import { calculate2026AgeCategory } from './src/data/uprsaKnowledge';
 import { ALL_14_OFFICIAL_DISCIPLINES } from './src/data/all14Disciplines';
+import { INITIAL_FEATURED_ATHLETES } from './src/data/athleteJourneysData';
+import { UPRSA_FAMILY_MEMBERS } from './src/data/uprsaFamilyData';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -101,6 +103,8 @@ interface DBState {
   aboutInfo: any;
   aboutSections: any[];
   aboutPolicies: any[];
+  aboutAthletes?: any[];
+  aboutFamilyMembers?: any[];
   disciplines: any[];
   customRankings?: any[];
 }
@@ -376,15 +380,18 @@ function getInitialDBState(): DBState {
         tournamentTitle: '36th Uttar Pradesh State Roller Skating Championship 2026',
         skaterId: 'skater-001',
         skaterName: 'Aarav Sharma',
+        fatherName: 'Rajesh Sharma',
+        dob: '2015-06-12',
+        chestNumber: '1',
         skaterRegNo: 'UPRSA/2026/LKO/00101',
         district: 'Lucknow',
-        club: 'Awadh Roller Sports Club',
-        ageCategory: 'Sub-Junior (12 to 15)',
+        club: 'Apex Skating Club',
+        ageCategory: '10-12 year',
         gender: 'Male',
-        discipline: 'Speed Skating (Inline)',
-        selectedEvents: ['ev-01', 'ev-02', 'ev-03'],
-        bibNumber: 'LKO-101',
-        totalFee: 1200,
+        discipline: 'Speed Inline',
+        selectedEvents: ['500m+D', '1000m Sprint'],
+        bibNumber: '1',
+        totalFee: 800,
         paymentStatus: 'verified',
         paymentUtr: 'UPI-20260201-998811',
         status: 'confirmed',
@@ -396,21 +403,96 @@ function getInitialDBState(): DBState {
         tournamentId: 'tour-2026-01',
         tournamentTitle: '36th Uttar Pradesh State Roller Skating Championship 2026',
         skaterId: 'skater-002',
-        skaterName: 'Ananya Saxena',
+        skaterName: 'Ananya Verma',
+        fatherName: 'Vikram Verma',
+        dob: '2012-11-20',
+        chestNumber: '2',
         skaterRegNo: 'UPRSA/2026/GBN/00102',
-        district: 'Gautam Buddha Nagar (Noida)',
-        club: 'Noida Roller Skating Academy',
-        ageCategory: 'Cadet (10 to 12)',
+        district: 'Noida',
+        club: 'Star Academy',
+        ageCategory: '12-15 year',
         gender: 'Female',
-        discipline: 'Inline Freestyle',
-        selectedEvents: ['ev-04', 'ev-05'],
-        bibNumber: 'GBN-204',
+        discipline: 'Toy Inline',
+        selectedEvents: ['500m+D', '1000m Sprint'],
+        bibNumber: '2',
         totalFee: 800,
         paymentStatus: 'verified',
         paymentUtr: 'UPI-20260202-441100',
         status: 'confirmed',
         remarks: 'Entry approved.',
         registered_at: '2026-02-02T14:15:00Z'
+      },
+      {
+        id: 'treg-003',
+        tournamentId: 'tour-2026-01',
+        tournamentTitle: '36th Uttar Pradesh State Roller Skating Championship 2026',
+        skaterId: 'skater-003',
+        skaterName: 'Karan Patel',
+        fatherName: 'Suresh Patel',
+        dob: '2008-03-08',
+        chestNumber: '3',
+        skaterRegNo: 'UPRSA/2026/KNP/00103',
+        district: 'Kanpur',
+        club: 'Speed Skating Club',
+        ageCategory: 'Ab-18',
+        gender: 'Male',
+        discipline: 'Speed Quad',
+        selectedEvents: ['500m+D', '1000m Sprint'],
+        bibNumber: '3',
+        totalFee: 800,
+        paymentStatus: 'verified',
+        paymentUtr: 'UPI-20260203-552233',
+        status: 'confirmed',
+        remarks: 'Confirmed and ready for race draw.',
+        registered_at: '2026-02-03T09:30:00Z'
+      },
+      {
+        id: 'treg-004',
+        tournamentId: 'tour-2026-01',
+        tournamentTitle: '36th Uttar Pradesh State Roller Skating Championship 2026',
+        skaterId: 'skater-004',
+        skaterName: 'Rohan Chaudhary',
+        fatherName: 'Manoj Chaudhary',
+        dob: '2014-04-15',
+        chestNumber: '4',
+        skaterRegNo: 'UPRSA/2026/GZB/00104',
+        district: 'Ghaziabad',
+        club: 'NCR Speed Skaters',
+        ageCategory: '10-12 year',
+        gender: 'Male',
+        discipline: 'Speed Inline',
+        selectedEvents: ['500m+D', '1000m Sprint', '1 Lap Road'],
+        bibNumber: '4',
+        totalFee: 800,
+        paymentStatus: 'verified',
+        paymentUtr: 'UPI-20260203-774411',
+        status: 'confirmed',
+        remarks: 'Entry verified.',
+        registered_at: '2026-02-03T10:45:00Z'
+      },
+      {
+        id: 'treg-005',
+        tournamentId: 'tour-2026-01',
+        tournamentTitle: '36th Uttar Pradesh State Roller Skating Championship 2026',
+        skaterId: 'skater-005',
+        skaterName: 'Ishaan Gupta',
+        fatherName: 'Sunil Gupta',
+        dob: '2011-09-25',
+        chestNumber: '5',
+        skaterRegNo: 'UPRSA/2026/VNS/00105',
+        district: 'Varanasi',
+        club: 'Kashi Roller Skating Club',
+        ageCategory: '12-15 year',
+        gender: 'Male',
+        discipline: 'Speed Quad',
+        selectedEvents: ['500m+D', '1000m Sprint'],
+        bibNumber: '5',
+        totalFee: 800,
+        paymentStatus: 'verified',
+        paymentUtr: 'UPI-20260204-118822',
+        status: 'confirmed',
+        remarks: 'Confirmed.',
+        registered_at: '2026-02-04T12:00:00Z'
       }
     ],
     races: [
@@ -1439,6 +1521,8 @@ function getInitialDBState(): DBState {
         order: 4
       }
     ],
+    aboutAthletes: JSON.parse(JSON.stringify(INITIAL_FEATURED_ATHLETES)),
+    aboutFamilyMembers: JSON.parse(JSON.stringify(UPRSA_FAMILY_MEMBERS)),
     disciplines: JSON.parse(JSON.stringify(ALL_14_OFFICIAL_DISCIPLINES)),
     customRankings: []
   };
@@ -3194,7 +3278,15 @@ app.post('/api/tournaments/delete', (req, res) => {
 // Tournament Registrations
 app.get('/api/registrations', (req, res) => {
   const { tournamentId, skaterId, status } = req.query;
-  let list = [...db.tournamentRegistrations];
+  let list = db.tournamentRegistrations.map(r => {
+    const skater = db.skaters.find(s => s.id === r.skaterId || (s.registrationNumber && s.registrationNumber === r.skaterRegNo));
+    return {
+      ...r,
+      fatherName: r.fatherName || skater?.fatherName || '',
+      dob: r.dob || skater?.dob || skater?.dateOfBirth || '',
+      chestNumber: r.chestNumber || r.bibNumber || ''
+    };
+  });
   if (tournamentId) list = list.filter(r => r.tournamentId === tournamentId);
   if (skaterId) list = list.filter(r => r.skaterId === skaterId);
   if (status) list = list.filter(r => r.status === status);
@@ -4257,6 +4349,16 @@ app.get('/api/content/about', (req, res) => {
     db.aboutInfo = init.aboutInfo;
     db.aboutSections = init.aboutSections;
     db.aboutPolicies = init.aboutPolicies;
+    db.aboutAthletes = init.aboutAthletes;
+    db.aboutFamilyMembers = init.aboutFamilyMembers;
+    saveDB(db);
+  }
+  if (!db.aboutAthletes || db.aboutAthletes.length === 0) {
+    db.aboutAthletes = JSON.parse(JSON.stringify(INITIAL_FEATURED_ATHLETES));
+    saveDB(db);
+  }
+  if (!db.aboutFamilyMembers || db.aboutFamilyMembers.length === 0) {
+    db.aboutFamilyMembers = JSON.parse(JSON.stringify(UPRSA_FAMILY_MEMBERS));
     saveDB(db);
   }
   res.json({
@@ -4264,7 +4366,9 @@ app.get('/api/content/about', (req, res) => {
     data: {
       info: db.aboutInfo,
       sections: (db.aboutSections || []).sort((a, b) => (a.order || 0) - (b.order || 0)),
-      policies: (db.aboutPolicies || []).sort((a, b) => (a.order || 0) - (b.order || 0))
+      policies: (db.aboutPolicies || []).sort((a, b) => (a.order || 0) - (b.order || 0)),
+      athletes: (db.aboutAthletes || []).sort((a, b) => (a.order || 0) - (b.order || 0)),
+      familyMembers: (db.aboutFamilyMembers || []).sort((a, b) => (a.order || 0) - (b.order || 0))
     }
   });
 });
@@ -4330,6 +4434,105 @@ app.delete('/api/content/about/policies/:id', (req, res) => {
   db.aboutPolicies = db.aboutPolicies.filter(p => p.id !== req.params.id);
   saveDB(db);
   res.json({ success: true, message: 'Policy deleted successfully' });
+});
+
+// Athletes CMS (Full CRUD)
+app.get('/api/content/about/athletes', (req, res) => {
+  if (!db.aboutAthletes || db.aboutAthletes.length === 0) {
+    db.aboutAthletes = JSON.parse(JSON.stringify(INITIAL_FEATURED_ATHLETES));
+    saveDB(db);
+  }
+  res.json({ success: true, data: (db.aboutAthletes || []).sort((a, b) => (a.order || 0) - (b.order || 0)) });
+});
+
+app.post('/api/content/about/athletes', (req, res) => {
+  if (!db.aboutAthletes) db.aboutAthletes = [];
+  const newAthlete = {
+    ...req.body,
+    id: req.body.id || 'ath-' + Date.now(),
+    order: req.body.order !== undefined ? Number(req.body.order) : db.aboutAthletes.length + 1,
+    status: req.body.status || 'Active',
+    careerMilestones: req.body.careerMilestones || [],
+    galleryPhotos: req.body.galleryPhotos || [],
+    stats: req.body.stats || { stateMedals: 0, nationalMedals: 0, racesWon: 0, personalBest: '' }
+  };
+  db.aboutAthletes.push(newAthlete);
+  saveDB(db);
+  res.status(201).json({ success: true, data: newAthlete, message: 'Athlete profile added successfully' });
+});
+
+app.put('/api/content/about/athletes/:id', (req, res) => {
+  if (!db.aboutAthletes) db.aboutAthletes = [];
+  const idx = db.aboutAthletes.findIndex(a => a.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, message: 'Athlete not found' });
+  db.aboutAthletes[idx] = { ...db.aboutAthletes[idx], ...req.body };
+  saveDB(db);
+  res.json({ success: true, data: db.aboutAthletes[idx], message: 'Athlete profile updated successfully' });
+});
+
+app.delete('/api/content/about/athletes/:id', (req, res) => {
+  if (!db.aboutAthletes) db.aboutAthletes = [];
+  db.aboutAthletes = db.aboutAthletes.filter(a => a.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true, message: 'Athlete profile deleted successfully' });
+});
+
+app.post('/api/content/about/athletes/reset', (req, res) => {
+  db.aboutAthletes = JSON.parse(JSON.stringify(INITIAL_FEATURED_ATHLETES));
+  saveDB(db);
+  res.json({ success: true, data: db.aboutAthletes, message: 'Athlete profiles reset to default successfully' });
+});
+
+// UPRSA Family Members CMS (Full CRUD)
+app.get('/api/content/about/family', (req, res) => {
+  if (!db.aboutFamilyMembers || db.aboutFamilyMembers.length === 0) {
+    db.aboutFamilyMembers = JSON.parse(JSON.stringify(UPRSA_FAMILY_MEMBERS));
+    saveDB(db);
+  }
+  res.json({ success: true, data: (db.aboutFamilyMembers || []).sort((a, b) => (a.order || 0) - (b.order || 0)) });
+});
+
+app.post('/api/content/about/family', (req, res) => {
+  if (!db.aboutFamilyMembers) db.aboutFamilyMembers = [];
+  const newMember = {
+    ...req.body,
+    id: req.body.id || 'fam-' + Date.now(),
+    order: req.body.order !== undefined ? Number(req.body.order) : db.aboutFamilyMembers.length + 1,
+    status: req.body.status || 'Active',
+    fullBio: req.body.fullBio || {
+      originAndEarlyLife: '',
+      skatingContribution: '',
+      careerJourney: '',
+      philosophyAndMessage: '',
+      specialHonors: [],
+      galleryMoments: []
+    }
+  };
+  db.aboutFamilyMembers.push(newMember);
+  saveDB(db);
+  res.status(201).json({ success: true, data: newMember, message: 'UPRSA Family member added successfully' });
+});
+
+app.put('/api/content/about/family/:id', (req, res) => {
+  if (!db.aboutFamilyMembers) db.aboutFamilyMembers = [];
+  const idx = db.aboutFamilyMembers.findIndex(f => f.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, message: 'Family member not found' });
+  db.aboutFamilyMembers[idx] = { ...db.aboutFamilyMembers[idx], ...req.body };
+  saveDB(db);
+  res.json({ success: true, data: db.aboutFamilyMembers[idx], message: 'UPRSA Family member updated successfully' });
+});
+
+app.delete('/api/content/about/family/:id', (req, res) => {
+  if (!db.aboutFamilyMembers) db.aboutFamilyMembers = [];
+  db.aboutFamilyMembers = db.aboutFamilyMembers.filter(f => f.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true, message: 'Family member removed successfully' });
+});
+
+app.post('/api/content/about/family/reset', (req, res) => {
+  db.aboutFamilyMembers = JSON.parse(JSON.stringify(UPRSA_FAMILY_MEMBERS));
+  saveDB(db);
+  res.json({ success: true, data: db.aboutFamilyMembers, message: 'UPRSA Family directory reset to default successfully' });
 });
 
 // ==========================================

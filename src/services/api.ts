@@ -26,7 +26,9 @@ import {
   AboutSection,
   AboutPolicy,
   DisciplineItem,
-  CustomRankingRecord
+  CustomRankingRecord,
+  AthleteJourneyData,
+  FamilyMemberData
 } from '../types';
 
 const API_BASE = '/api';
@@ -992,6 +994,78 @@ export const api = {
 
   async deleteAboutPolicy(id: string): Promise<{ success: boolean; message?: string }> {
     const res = await fetch(`${API_BASE}/content/about/policies/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+
+  // About Athletes CMS (Full CRUD)
+  async getAboutAthletes(): Promise<{ success: boolean; data: AthleteJourneyData[] }> {
+    const res = await fetch(`${API_BASE}/content/about/athletes`);
+    return res.json();
+  },
+
+  async createAboutAthlete(athlete: Partial<AthleteJourneyData>): Promise<{ success: boolean; data?: AthleteJourneyData; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/athletes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(athlete)
+    });
+    return res.json();
+  },
+
+  async updateAboutAthlete(id: string, updates: Partial<AthleteJourneyData>): Promise<{ success: boolean; data?: AthleteJourneyData; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/athletes/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteAboutAthlete(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/athletes/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
+
+  async resetAboutAthletes(): Promise<{ success: boolean; data?: AthleteJourneyData[]; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/athletes/reset`, { method: 'POST' });
+    return res.json();
+  },
+
+  // About UPRSA Family Members CMS (Full CRUD)
+  async getAboutFamilyMembers(): Promise<{ success: boolean; data: FamilyMemberData[] }> {
+    const res = await fetch(`${API_BASE}/content/about/family`);
+    return res.json();
+  },
+
+  async createAboutFamilyMember(member: Partial<FamilyMemberData>): Promise<{ success: boolean; data?: FamilyMemberData; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/family`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(member)
+    });
+    return res.json();
+  },
+
+  async updateAboutFamilyMember(id: string, updates: Partial<FamilyMemberData>): Promise<{ success: boolean; data?: FamilyMemberData; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/family/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteAboutFamilyMember(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/family/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
+
+  async resetAboutFamilyMembers(): Promise<{ success: boolean; data?: FamilyMemberData[]; message?: string }> {
+    const res = await fetch(`${API_BASE}/content/about/family/reset`, { method: 'POST' });
     return res.json();
   },
 

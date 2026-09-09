@@ -98,7 +98,20 @@ const MainApp: React.FC = () => {
           />
         )}
 
-        {currentPage === 'about' && <About />}
+        {(currentPage === 'about' || currentPage === 'about_executive' || currentPage === 'about_athletes' || currentPage === 'about_family') && (
+          <About 
+            initialTab={
+              currentPage === 'about_executive' 
+                ? 'executive' 
+                : currentPage === 'about_athletes' 
+                ? 'athletes' 
+                : currentPage === 'about_family' 
+                ? 'family' 
+                : 'overview'
+            }
+            onNavigate={(page) => setCurrentPage(page)}
+          />
+        )}
 
         {currentPage === 'activities' && (
           <Activities 

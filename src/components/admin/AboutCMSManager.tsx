@@ -17,14 +17,20 @@ import {
   ShieldCheck,
   Save,
   Image as ImageIcon,
-  ArrowUpDown
+  ArrowUpDown,
+  Trophy,
+  Heart
 } from 'lucide-react';
-import { AboutContent, AboutSection, AboutPolicy, AboutInfo } from '../../types';
+import { AboutContent, AboutSection, AboutPolicy, AboutInfo, AthleteJourneyData, FamilyMemberData } from '../../types';
 import { api } from '../../services/api';
+import { AthletesCMSManager } from './AthletesCMSManager';
+import { FamilyCMSManager } from './FamilyCMSManager';
 
 export const AboutCMSManager: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'sections' | 'policies' | 'info'>('sections');
+  const [activeSubTab, setActiveSubTab] = useState<'sections' | 'policies' | 'info' | 'athletes' | 'family'>('sections');
   const [aboutData, setAboutData] = useState<AboutContent | null>(null);
+  const [athletesList, setAthletesList] = useState<AthleteJourneyData[]>([]);
+  const [familyList, setFamilyList] = useState<FamilyMemberData[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
@@ -79,12 +85,35 @@ export const AboutCMSManager: React.FC = () => {
   const loadAboutContent = async () => {
     try {
       setLoading(true);
-      const res = await api.getAboutContent();
+      const [res, athRes, famRes] = await Promise.all([
+        api.getAboutContent(),
+        api.getAboutAthletes(),
+        api.getAboutFamilyMembers()
+      ]);
+
       if (res.success && res.data) {
         setAboutData(res.data);
         if (res.data.info) {
-          setInfoForm(res.data.info);
+          setInfoForm(prev => ({
+            ...prev,
+            ...res.data.info,
+            establishedText: res.data.info.establishedText || prev.establishedText || '',
+            title: res.data.info.title || prev.title || '',
+            tagline: res.data.info.tagline || prev.tagline || '',
+            headOfficeAddress: res.data.info.headOfficeAddress || '',
+            phone: res.data.info.phone || '',
+            email: res.data.info.email || '',
+            constitutionTitle: res.data.info.constitutionTitle || prev.constitutionTitle || '',
+            statRegisteredAthletesText: res.data.info.statRegisteredAthletesText || '',
+            statAffiliatedUnitsText: res.data.info.statAffiliatedUnitsText || ''
+          }));
         }
+      }
+      if (athRes.success && athRes.data) {
+        setAthletesList(athRes.data);
+      }
+      if (famRes.success && famRes.data) {
+        setFamilyList(famRes.data);
       }
     } catch (err) {
       showToast('Failed to load About page data', 'error');
@@ -345,11 +374,11 @@ export const AboutCMSManager: React.FC = () => {
         </div>
 
         {/* Sub-tabs */}
-        <div className="flex border-b border-slate-800 mt-6 -mb-6">
+        <div className="flex border-b border-slate-800 mt-6 -mb-6 overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveSubTab('sections')}
-            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'sections'
                 ? 'border-amber-400 text-amber-400 bg-amber-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -361,8 +390,34 @@ export const AboutCMSManager: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setActiveSubTab('athletes')}
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'athletes'
+                ? 'border-amber-400 text-amber-400 bg-amber-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Trophy className="w-4 h-4 text-amber-400" />
+            <span>Our Athletes & Champions ({athletesList.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('family')}
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'family'
+                ? 'border-rose-400 text-rose-400 bg-rose-500/5'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Heart className="w-4 h-4 text-rose-400" />
+            <span>UPRSA Family Directory ({familyList.length})</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveSubTab('policies')}
-            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'policies'
                 ? 'border-amber-400 text-amber-400 bg-amber-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -375,7 +430,7 @@ export const AboutCMSManager: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveSubTab('info')}
-            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'info'
                 ? 'border-amber-400 text-amber-400 bg-amber-500/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -620,7 +675,7 @@ export const AboutCMSManager: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={infoForm.establishedText}
+                      value={infoForm.establishedText || ''}
                       onChange={(e) => setInfoForm({ ...infoForm, establishedText: e.target.value })}
                       placeholder="ESTABLISHED 1988 • REG. NO. UP/S/294"
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
@@ -633,7 +688,7 @@ export const AboutCMSManager: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={infoForm.title}
+                      value={infoForm.title || ''}
                       onChange={(e) => setInfoForm({ ...infoForm, title: e.target.value })}
                       placeholder="About Uttar Pradesh Roller Sports Association"
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -647,7 +702,7 @@ export const AboutCMSManager: React.FC = () => {
                   </label>
                   <textarea
                     rows={3}
-                    value={infoForm.tagline}
+                    value={infoForm.tagline || ''}
                     onChange={(e) => setInfoForm({ ...infoForm, tagline: e.target.value })}
                     placeholder="The supreme state governing and promotional body for Roller, Speed, Inline Freestyle..."
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-amber-500 outline-none leading-relaxed"
@@ -694,7 +749,7 @@ export const AboutCMSManager: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={infoForm.headOfficeAddress}
+                        value={infoForm.headOfficeAddress || ''}
                         onChange={(e) => setInfoForm({ ...infoForm, headOfficeAddress: e.target.value })}
                         placeholder="UP Roller Sports Arena, Sector-G, LDA Colony, Kanpur Road, Lucknow, UP - 226012"
                         className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -708,7 +763,7 @@ export const AboutCMSManager: React.FC = () => {
                         </label>
                         <input
                           type="text"
-                          value={infoForm.phone}
+                          value={infoForm.phone || ''}
                           onChange={(e) => setInfoForm({ ...infoForm, phone: e.target.value })}
                           placeholder="+91 522 2439812, +91 94150 21989"
                           className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
@@ -721,7 +776,7 @@ export const AboutCMSManager: React.FC = () => {
                         </label>
                         <input
                           type="email"
-                          value={infoForm.email}
+                          value={infoForm.email || ''}
                           onChange={(e) => setInfoForm({ ...infoForm, email: e.target.value })}
                           placeholder="uprsa.official@gmail.com"
                           className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
@@ -743,6 +798,24 @@ export const AboutCMSManager: React.FC = () => {
                 </div>
               </form>
             </div>
+          )}
+
+          {/* TAB 4: OUR ATHLETES & CHAMPIONS CMS */}
+          {activeSubTab === 'athletes' && (
+            <AthletesCMSManager
+              athletes={athletesList}
+              onRefresh={loadAboutContent}
+              showToast={showToast}
+            />
+          )}
+
+          {/* TAB 5: UPRSA FAMILY DIRECTORY CMS */}
+          {activeSubTab === 'family' && (
+            <FamilyCMSManager
+              familyMembers={familyList}
+              onRefresh={loadAboutContent}
+              showToast={showToast}
+            />
           )}
         </>
       )}
@@ -781,7 +854,7 @@ export const AboutCMSManager: React.FC = () => {
                   <input
                     type="text"
                     required
-                    value={sectionForm.title}
+                    value={sectionForm.title || ''}
                     onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })}
                     placeholder="e.g. Synthetic Banked Tracks"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -792,7 +865,7 @@ export const AboutCMSManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Badge Label</label>
                   <input
                     type="text"
-                    value={sectionForm.badge}
+                    value={sectionForm.badge || ''}
                     onChange={(e) => setSectionForm({ ...sectionForm, badge: e.target.value })}
                     placeholder="e.g. State Mission, Apex Body"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -846,7 +919,7 @@ export const AboutCMSManager: React.FC = () => {
                 <textarea
                   rows={4}
                   required
-                  value={sectionForm.description}
+                  value={sectionForm.description || ''}
                   onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })}
                   placeholder="Describe the initiative, achievements, historical context, or state federation goals..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-amber-500 outline-none leading-relaxed"
@@ -857,7 +930,7 @@ export const AboutCMSManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Footer Tag / Key Highlight</label>
                 <input
                   type="text"
-                  value={sectionForm.footerTag}
+                  value={sectionForm.footerTag || ''}
                   onChange={(e) => setSectionForm({ ...sectionForm, footerTag: e.target.value })}
                   placeholder="e.g. Infrastructure & Excellence"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -879,7 +952,7 @@ export const AboutCMSManager: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="text"
-                    value={sectionForm.imageUrl}
+                    value={sectionForm.imageUrl || ''}
                     onChange={(e) => setSectionForm({ ...sectionForm, imageUrl: e.target.value })}
                     placeholder="https://... or /storage/... or upload a JPG file"
                     className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"
@@ -978,7 +1051,7 @@ export const AboutCMSManager: React.FC = () => {
                 <input
                   type="text"
                   required
-                  value={policyForm.title}
+                  value={policyForm.title || ''}
                   onChange={(e) => setPolicyForm({ ...policyForm, title: e.target.value })}
                   placeholder="e.g. RSFI Technical Regulations 2026 for Speed & Inline"
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none"
@@ -989,7 +1062,7 @@ export const AboutCMSManager: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 mb-1">Description / Key Highlights</label>
                 <textarea
                   rows={3}
-                  value={policyForm.description}
+                  value={policyForm.description || ''}
                   onChange={(e) => setPolicyForm({ ...policyForm, description: e.target.value })}
                   placeholder="Brief synopsis of what this regulation mandates..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-amber-500 outline-none leading-relaxed"
@@ -1001,7 +1074,7 @@ export const AboutCMSManager: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-300 mb-1">Reference URL (Optional)</label>
                   <input
                     type="text"
-                    value={policyForm.linkUrl}
+                    value={policyForm.linkUrl || ''}
                     onChange={(e) => setPolicyForm({ ...policyForm, linkUrl: e.target.value })}
                     placeholder="https://uprsa.org/docs/... or document link"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-500 outline-none font-mono"

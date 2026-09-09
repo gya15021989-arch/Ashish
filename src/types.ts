@@ -192,6 +192,9 @@ export interface TournamentRegistration {
   tournamentTitle: string;
   skaterId: string;
   skaterName: string;
+  fatherName?: string;
+  dob?: string;
+  chestNumber?: string;
   skaterRegNo: string;
   district: string;
   club: string;
@@ -854,6 +857,102 @@ export interface AboutContent {
   info: AboutInfo;
   sections: AboutSection[];
   policies: AboutPolicy[];
+  athletes?: AthleteJourneyData[];
+  familyMembers?: FamilyMemberData[];
+}
+
+export interface AthleteMilestone {
+  year: string;
+  event: string;
+  level: 'District' | 'State' | 'National' | 'International';
+  result: string;
+  timingOrScore?: string;
+  highlight: string;
+}
+
+export interface AthleteGalleryPhoto {
+  url: string;
+  caption: string;
+}
+
+export interface AthleteStats {
+  stateMedals: number;
+  nationalMedals: number;
+  racesWon: number;
+  personalBest: string;
+}
+
+export interface AthleteJourneyData {
+  id: string;
+  name: string;
+  hindiName?: string;
+  district: string;
+  discipline: string;
+  category: string;
+  achievement: string;
+  record: string;
+  medals: string;
+  photo: string;
+  tag: string;
+  regNo: string;
+  dob: string;
+  age: number;
+  clubName: string;
+  coachName: string;
+  startedYear: number;
+  bioSummary: string;
+  personalStory: string;
+  specialty: string;
+  trainingRegime: string;
+  gearSetup: string;
+  quote: string;
+  careerMilestones: AthleteMilestone[];
+  galleryPhotos: AthleteGalleryPhoto[];
+  stats: AthleteStats;
+  order?: number;
+  status?: 'Active' | 'Inactive';
+}
+
+export interface FamilyMemberBio {
+  originAndEarlyLife: string;
+  skatingContribution: string;
+  careerJourney: string;
+  philosophyAndMessage: string;
+  specialHonors: string[];
+  galleryMoments?: {
+    url: string;
+    caption: string;
+  }[];
+}
+
+export type FamilyRoleCategory = 
+  | 'Patron & Mentor' 
+  | 'District President / Secretary' 
+  | 'Chief Coach / NIS' 
+  | 'Senior Official / Referee' 
+  | 'Sports Doctor & Physiotherapist' 
+  | 'Veteran Skater & Pioneer'
+  | 'Club & Academy Lead'
+  | 'Parent & Volunteer Lead';
+
+export interface FamilyMemberData {
+  id: string;
+  name: string;
+  hindiName?: string;
+  photo: string;
+  roleCategory: FamilyRoleCategory;
+  designation: string;
+  organizationUnit: string;
+  nativePlace: string;
+  currentLocation: string;
+  experienceYears: number;
+  badge: string;
+  phone?: string;
+  email?: string;
+  shortSummary: string;
+  fullBio: FamilyMemberBio;
+  order?: number;
+  status?: 'Active' | 'Inactive';
 }
 
 export interface DisciplineRules {

@@ -455,7 +455,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   type="text"
                   required
                   placeholder="e.g. Aarav Sharma"
-                  value={formData.fullName}
+                  value={formData.fullName || ''}
                   onChange={(e) => handleFullNameChange(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                 />
@@ -474,7 +474,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     type="text"
                     required
                     placeholder="e.g. Rajesh Sharma"
-                    value={formData.fatherName}
+                    value={formData.fatherName || ''}
                     onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -488,7 +488,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     type="text"
                     required
                     placeholder="e.g. Sunita Sharma"
-                    value={formData.motherName}
+                    value={formData.motherName || ''}
                     onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -506,7 +506,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     <input
                       type="date"
                       required
-                      value={formData.dateOfBirth}
+                      value={formData.dateOfBirth || ''}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                     />
@@ -556,7 +556,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     5. जेंडर (Gender) *
                   </label>
                   <select
-                    value={formData.gender}
+                    value={formData.gender || 'Male'}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   >
@@ -571,7 +571,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     6. ब्लड ग्रुप (Blood Group) *
                   </label>
                   <select
-                    value={formData.bloodGroup}
+                    value={formData.bloodGroup || 'A+'}
                     onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   >
@@ -599,7 +599,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     required
                     maxLength={10}
                     placeholder="e.g. 9415021989"
-                    value={formData.phone}
+                    value={formData.phone || ''}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^0-9]/g, '') })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors font-mono"
                   />
@@ -617,7 +617,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     type="email"
                     required
                     placeholder="e.g. athlete.skater@gmail.com"
-                    value={formData.email}
+                    value={formData.email || ''}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -640,7 +640,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     required
                     minLength={6}
                     placeholder="पोर्टल लॉगिन के लिए नया पासवर्ड बनाएं (कम से कम 6 अक्षर)"
-                    value={formData.password}
+                    value={formData.password || ''}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 pr-11 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -713,7 +713,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   required
                   rows={2}
                   placeholder="मकान नंबर, गली, मोहल्ला, शहर एवं पिन कोड (e.g. 42/B Gomti Nagar Extension, Lucknow - 226010)"
-                  value={formData.address}
+                  value={formData.address || ''}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                 />
@@ -728,7 +728,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       <span>11. रिप्रेजेंटिंग दृष्टिकोण (Representing District - All 75 Districts) *</span>
                     </label>
                     <select
-                      value={formData.district}
+                      value={formData.district || 'Lucknow'}
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                     >
@@ -751,7 +751,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     </label>
                     <div className="w-full bg-slate-900 border border-emerald-500/40 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs sm:text-sm">
                       <span className="font-extrabold text-emerald-400 text-xs sm:text-sm">
-                        {formData.mandal} मंडल (Division)
+                        {formData.mandal || ''} मंडल (Division)
                       </span>
                       <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
                         ऑटो सेलेक्ट
@@ -771,7 +771,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <span>12. डिसिप्लिन (Discipline - Select from All Official Disciplines) *</span>
                 </label>
                 <select
-                  value={formData.discipline}
+                  value={formData.discipline || 'Speed Skating (Inline)'}
                   onChange={(e) => setFormData({ ...formData, discipline: e.target.value as DisciplineType })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                 >
@@ -796,7 +796,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     type="text"
                     required
                     placeholder="बच्चा खुद भरें (e.g. DPS School / Lucknow Skating Academy / Independent)"
-                    value={formData.club}
+                    value={formData.club || ''}
                     onChange={(e) => setFormData({ ...formData, club: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -812,7 +812,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <input
                     type="text"
                     placeholder="e.g. Coach Vikram Singh (वैकल्पिक)"
-                    value={formData.coachName}
+                    value={formData.coachName || ''}
                     onChange={(e) => setFormData({ ...formData, coachName: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 transition-colors"
                   />

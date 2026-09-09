@@ -346,6 +346,8 @@ export const SkaterTournamentRegistration: React.FC<SkaterTournamentRegistration
         tournamentTitle: selectedTournament.title,
         skaterId: currentSkater?.id || ('skater-' + Date.now()),
         skaterName: skaterName.trim(),
+        fatherName: currentSkater?.fatherName || '',
+        dob: currentSkater?.dob || (currentSkater as any)?.dateOfBirth || '',
         skaterRegNo: skaterRegNo.trim(),
         district: district,
         club: club,

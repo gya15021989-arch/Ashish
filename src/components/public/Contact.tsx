@@ -191,7 +191,7 @@ export const Contact: React.FC = () => {
                       type="text"
                       required
                       placeholder="e.g. Ramesh Kumar"
-                      value={formData.name}
+                      value={formData.name || ''}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                     />
@@ -205,7 +205,7 @@ export const Contact: React.FC = () => {
                       type="tel"
                       required
                       placeholder="e.g. +91 98765 43210"
-                      value={formData.phone}
+                      value={formData.phone || ''}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                     />
@@ -220,7 +220,7 @@ export const Contact: React.FC = () => {
                     <input
                       type="email"
                       placeholder="e.g. skater@gmail.com"
-                      value={formData.email}
+                      value={formData.email || ''}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                     />
@@ -231,7 +231,7 @@ export const Contact: React.FC = () => {
                       Subject / Topic
                     </label>
                     <select
-                      value={formData.subject}
+                      value={formData.subject || 'Skater Registration Query'}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
                     >
@@ -253,7 +253,7 @@ export const Contact: React.FC = () => {
                     rows={4}
                     required
                     placeholder="Describe your inquiry, registration number if applicable, and questions..."
-                    value={formData.message}
+                    value={formData.message || ''}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                   />

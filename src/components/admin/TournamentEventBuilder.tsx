@@ -34,11 +34,14 @@ import {
   List,
   Coins,
   CheckSquare,
-  Square
+  Square,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Tournament, TournamentEvent, TournamentStatus } from '../../types';
 import { api } from '../../services/api';
 import { DISCIPLINES, AGE_CATEGORIES_2026 } from '../../data/uprsaKnowledge';
+import { TournamentEntriesModal } from './TournamentEntriesModal';
 
 const UP_DISTRICTS_LIST = [
   'Agra', 'Aligarh', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Ayodhya', 'Azamgarh',
@@ -124,6 +127,10 @@ export const TournamentEventBuilder: React.FC = () => {
 
   // Poster file input ref
   const posterFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Tournament Entries / Skater Roster Modal
+  const [isEntriesModalOpen, setIsEntriesModalOpen] = useState(false);
+  const [selectedEntriesTour, setSelectedEntriesTour] = useState<Tournament | null>(null);
 
   // Form State
   const [formData, setFormData] = useState<{
@@ -628,6 +635,19 @@ export const TournamentEventBuilder: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
             type="button"
+            onClick={() => {
+              setSelectedEntriesTour(null);
+              setIsEntriesModalOpen(true);
+            }}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer"
+            title="टूर्नामेंट फॉर्म भरने वाले सभी छात्रों/एथलीटों का विवरण व CSV/Excel डाउनलोड करें"
+          >
+            <Download className="w-4 h-4 text-white" />
+            <span>Download Entries (CSV / Excel)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={loadTournaments}
             disabled={loading}
             className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
@@ -915,8 +935,21 @@ export const TournamentEventBuilder: React.FC = () => {
                       </select>
                     </div>
 
-                    {/* Action Buttons: Edit, Delete, View Events */}
-                    <div className="flex items-center gap-2">
+                    {/* Action Buttons: Entries List, Edit, Delete, View Events */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedEntriesTour(t);
+                          setIsEntriesModalOpen(true);
+                        }}
+                        className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        title="इस टूर्नामेंट के सभी भरे गए फॉर्म व एथलीट सूची (CSV / Excel) देखें व डाउनलोड करें"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Entries List & CSV ({t.totalRegisteredSkaters || 0})</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => setExpandedEventsTourId(isEventsExpanded ? null : t.id)}
@@ -934,7 +967,7 @@ export const TournamentEventBuilder: React.FC = () => {
                         title="टूर्नामेंट पूरा एडिट करें (Full Edit Tournament)"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit (संपादित करें)</span>
+                        <span>Edit</span>
                       </button>
 
                       <button
@@ -944,7 +977,7 @@ export const TournamentEventBuilder: React.FC = () => {
                         title="टूर्नामेंट हटाएं (Delete Tournament)"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete (हटाएं)</span>
+                        <span>Delete</span>
                       </button>
                     </div>
                   </div>
@@ -1099,6 +1132,17 @@ export const TournamentEventBuilder: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedEntriesTour(t);
+                            setIsEntriesModalOpen(true);
+                          }}
+                          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 p-1.5 rounded-lg cursor-pointer"
+                          title="पंजीकृत एथलीटों की लिस्ट व CSV डाउनलोड करें"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(t)}
@@ -1915,6 +1959,13 @@ export const TournamentEventBuilder: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Tournament Entries Roster Modal (Download CSV / Excel in exact requested format) */}
+      <TournamentEntriesModal
+        isOpen={isEntriesModalOpen}
+        onClose={() => setIsEntriesModalOpen(false)}
+        tournament={selectedEntriesTour}
+        allTournaments={tournaments}
+      />
     </div>
   );
 };
